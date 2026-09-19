@@ -204,6 +204,7 @@ let selectedGmu = null;
 let selectedYear = 2024;
 let deckOverlay = null;
 let hotspotsCache = {};
+let selFeatureId = null;
 
 const RAMP = [
   [0.00, [24, 28, 52]],
@@ -246,10 +247,104 @@ function unitValue(p) {
   return h ? h.success : 0;
 }
 
+function metricProp() {
+  if (metric === 'public_pct') return 'public_pct';
+  if (metric === 'habitat_score') return 'habitat_score';
+  if (metric === 'harvest_score' && selectedYear !== 2024) return 'success_' + selectedYear;
+  if (metric === 'harvest_score') return 'harvest_score';
+  return 'hunt_score';
+}
+
+function updateMaplibreDrape() {
+  // terrain mode: unit fill + outlines drawn as maplibre layers (drape on DEM)
+  const prop = metricProp();
+  const fillExpr = [
+    'interpolate', ['linear'], ['to-number', ['coalesce', ['get', prop], 0]],
+    0, 'rgba(24,28,52,0.78)',
+    30, 'rgba(14,116,144,0.78)',
+    55, 'rgba(34,197,94,0.78)',
+    75, 'rgba(250,204,21,0.78)',
+    88, 'rgba(239,68,68,0.78)',
+    100, 'rgba(190,18,60,0.78)',
+  ];
+  if (!map.getSource('gmu-src')) {
+    map.addSource('gmu-src', { type: 'geojson', data: UNITS, promoteId: 'gmuid' });
+  }
+  if (!map.getLayer('gmu-fill')) {
+    map.addLayer({
+      id: 'gmu-fill', type: 'fill', source: 'gmu-src',
+      paint: { 'fill-color': fillExpr, 'fill-opacity': 1 },
+    });
+    map.addLayer({
+      id: 'gmu-line', type: 'line', source: 'gmu-src',
+      paint: {
+        'line-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4', 'rgba(70,85,100,0.7)'],
+        'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 7, 1],
+      },
+    });
+    // hover/click handlers on the fill layer
+    map.on('click', 'gmu-fill', e => {
+      const uid = e.features[0].properties.gmuid;
+      if (selectedGmu === uid) deselectUnit(); else selectUnit(uid);
+    });
+    map.on('mouseenter', 'gmu-fill', () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', 'gmu-fill', () => map.getCanvas().style.cursor = '');
+  } else {
+    map.setPaintProperty('gmu-fill', 'fill-color', fillExpr);
+    map.setFilter('gmu-fill', minScore > 0 ? ['>=', ['to-number', ['coalesce', ['get', prop], 0]], minScore] : null);
+    map.setFilter('gmu-line', minScore > 0 ? ['>=', ['to-number', ['coalesce', ['get', prop], 0]], minScore] : null);
+  }
+  if (selectedGmu != null) {
+    if (selFeatureId != null) map.setFeatureState({ source: 'gmu-src', id: selFeatureId }, { selected: false });
+    selFeatureId = selectedGmu;
+    map.setFeatureState({ source: 'gmu-src', id: selFeatureId }, { selected: true });
+  } else if (selFeatureId != null) {
+    map.setFeatureState({ source: 'gmu-src', id: selFeatureId }, { selected: false });
+    selFeatureId = null;
+  }
+}
+
+function removeMaplibreDrape() {
+  if (map.getLayer('gmu-line')) map.removeLayer('gmu-line');
+  if (map.getLayer('gmu-fill')) map.removeLayer('gmu-fill');
+}
+
 function buildLayers() {
   if (!UNITS) return;
-  const layers = [];
-  layers.push(new deck.GeoJsonLayer({
+  if (terrainOn) {
+    // terrain mode: deck only carries hotspots; unit coloring via maplibre drape
+    removeMaplibreDrape(); // ensure clean state before re-adding
+    updateMaplibreDrape();
+    const layers = [];
+    if (selectedGmu && hotspotsCache[selectedGmu]) {
+      layers.push(new deck.ScatterplotLayer({
+        id: 'hotspots',
+        data: hotspotsCache[selectedGmu],
+        pickable: true,
+        getRadius: 320, radiusMinPixels: 3, radiusMaxPixels: 12,
+        getFillColor: d => hotColor((d.properties.s || 0) / 100).concat([220]),
+        stroked: false,
+      }));
+    }
+    if (habitatLayer !== 'none') {
+      layers.push(new deck.GeoJsonLayer({
+        id: 'habitat',
+        data: `/data/${habitatLayer}.geojson`,
+        stroked: false, getFillColor: [78, 205, 196, 42], pickable: false,
+      }));
+    }
+    if (layers.length) {
+      if (deckOverlay) deckOverlay.setProps({ layers });
+      else { deckOverlay = new deck.MapboxOverlay({ layers }); map.addControl(deckOverlay); }
+    } else if (deckOverlay) {
+      deckOverlay.setProps({ layers: [] });
+    }
+    renderUnitList();
+    return;
+  }
+  removeMaplibreDrape();
+  // ---- deck.gl 3D units mode (as before) ----
+  const polygonsLayer = new deck.GeoJsonLayer({
     id: 'gmu',
     data: UNITS,
     pickable: true,
@@ -258,6 +353,7 @@ function buildLayers() {
     getLineWidth: d => (d.properties.gmuid === selectedGmu ? 7 : 1),
     lineWidthMinPixels: 1,
     lineWidthMaxPixels: 7,
+    lineWidthUnits: 'pixels',
     extruded: units3dOn && extrudeAmt > 0,
     wireframe: units3dOn && extrudeAmt > 0,
     getElevation: d => unitValue(d.properties) * extrudeAmt * 120,
@@ -279,7 +375,8 @@ function buildLayers() {
       getLineWidth: [selectedGmu],
     },
     transitions: { getElevation: 300, getFillColor: 250, getLineWidth: 150 },
-  }));
+  });
+  const layers = [polygonsLayer];
   if (habitatLayer !== 'none') {
     layers.push(new deck.GeoJsonLayer({
       id: 'habitat',
@@ -289,12 +386,10 @@ function buildLayers() {
       pickable: false,
     }));
   }
-  // hotspot dots for selected unit
   if (selectedGmu && hotspotsCache[selectedGmu]) {
-    const hs = hotspotsCache[selectedGmu];
     layers.push(new deck.ScatterplotLayer({
       id: 'hotspots',
-      data: hs.features,
+      data: hotspotsCache[selectedGmu],
       pickable: true,
       radiusUnits: 'meters',
       getRadius: 320,
