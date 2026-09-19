@@ -17,7 +17,7 @@ from http import cookies as http_cookies
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB = os.environ.get('HUNTMAP_DB', os.path.join(ROOT, 'db', 'hunt.db'))
 AUTHDB = os.environ.get('HUNTMAP_AUTHDB', os.path.join(ROOT, 'db', 'auth.db'))
 WEB = os.path.join(ROOT, 'web')
@@ -205,7 +205,7 @@ VERIFY_EMAIL_TMPL = '''<div style="font-family:sans-serif;max-width:480px;margin
 # ---------- HTTP ----------
 
 class Handler(SimpleHTTPRequestHandler):
-    def __init__(self, *a, kw):
+    def __init__(self, *a, **kw):
         super().__init__(*a, directory=WEB, **kw)
 
     def log_message(self, fmt, *args):
