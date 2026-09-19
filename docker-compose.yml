@@ -1,0 +1,9 @@
+name: huntmap
+services:
+  huntmap:
+    image: ghcr.io/ellickjohnson/huntmap:latest
+    container_name: huntmap
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    networks: []
