@@ -680,5 +680,31 @@ map.on('load', async () => {
   }
 });
 </script>
+
+<!-- auth state chip -->
+<script>
+(async () => {
+  try {
+    const r = await fetch('/api/me');
+    const d = await r.json();
+    const chip = document.createElement('a');
+    chip.href = d.user ? '/admin.html' : '/login.html';
+    chip.style.cssText = 'position:fixed;top:12px;right:12px;z-index:9999;background:#0f766e;color:#fff;' +
+      'padding:8px 14px;border-radius:99px;font-size:13px;font-weight:600;text-decoration:none;' +
+      'box-shadow:0 2px 8px rgba(0,0,0,.4);font-family:system-ui,sans-serif';
+    chip.textContent = d.user ? ('⚙ ' + (d.user.role === 'admin' ? 'Admin' : d.user.name)) : '🔐 Sign in';
+    document.body.appendChild(chip);
+    if (d.user) {
+      const out = document.createElement('a');
+      out.href = '#';
+      out.style.cssText = 'position:fixed;top:12px;right:' + (chip.offsetWidth + 24) + 'px;z-index:9999;' +
+        'color:#94a3b8;font-size:13px;text-decoration:none;font-family:system-ui,sans-serif';
+      out.textContent = 'Sign out';
+      out.onclick = async (e) => { e.preventDefault(); await fetch('/api/logout', {method:'POST'}); location.reload(); };
+      document.body.appendChild(out);
+    }
+  } catch (e) { /* auth endpoints missing = old build, ignore */ }
+})();
+</script>
 </body>
 </html>

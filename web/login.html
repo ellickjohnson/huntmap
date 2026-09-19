@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HuntMap — Sign in</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: linear-gradient(160deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);
+    color: #e2e8f0; min-height: 100vh; margin: 0;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card {
+    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    padding: 32px; width: 100%; max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .logo { text-align: center; margin-bottom: 24px; }
+  .logo .icon { font-size: 44px; }
+  .logo h1 { margin: 8px 0 4px; font-size: 24px; color: #f1f5f9; }
+  .logo p { margin: 0; color: #94a3b8; font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #0f172a; border-radius: 10px; padding: 4px; }
+  .tabs button {
+    flex: 1; padding: 10px; border: 0; border-radius: 8px; background: transparent;
+    color: #94a3b8; font-size: 15px; cursor: pointer; transition: all .15s;
+  }
+  .tabs button.active { background: #0f766e; color: #fff; font-weight: 600; }
+  form { display: none; flex-direction: column; gap: 12px; }
+  form.active { display: flex; }
+  input {
+    background: #0f172a; border: 1px solid #334155; color: #f1f5f9;
+    padding: 12px 14px; border-radius: 8px; font-size: 15px; width: 100%;
+  }
+  input:focus { outline: 2px solid #0f766e; border-color: transparent; }
+  label { font-size: 13px; color: #94a3b8; margin-bottom: -6px; }
+  .btn {
+    background: #0f766e; color: #fff; border: 0; padding: 13px; border-radius: 8px;
+    font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px;
+  }
+  .btn:hover { background: #0d9488; }
+  .btn:disabled { opacity: .6; cursor: wait; }
+  .msg { padding: 12px; border-radius: 8px; font-size: 14px; display: none; line-height: 1.4; }
+  .msg.error { background: #7f1d1d33; color: #fca5a5; border: 1px solid #7f1d1d; }
+  .msg.ok { background: #14532d33; color: #86efac; border: 1px solid #14532d; }
+  .swap { text-align: center; font-size: 13px; color: #94a3b8; margin-top: 16px; }
+  .swap a { color: #5eead4; cursor: pointer; text-decoration: none; }
+  .fine { font-size: 12px; color: #64748b; text-align: center; margin-top: 20px; }
+  .fine a { color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="icon">🦌</div>
+    <h1>HuntMap</h1>
+    <p>Elk harvest intelligence for NW Colorado</p>
+  </div>
+
+  <div class="tabs">
+    <button id="tabLogin" class="active" type="button">Sign in</button>
+    <button id="tabSignup" type="button">Create account</button>
+  </div>
+
+  <div id="msg" class="msg"></div>
+
+  <form id="loginForm" class="active">
+    <label for="li_email">Email</label>
+    <input id="li_email" type="email" autocomplete="email" required>
+    <label for="li_pw">Password</label>
+    <input id="li_pw" type="password" autocomplete="current-password" required>
+    <button class="btn" type="submit" id="loginBtn">Sign in</button>
+  </form>
+
+  <form id="formSignup">
+    <label for="su_name">Name</label>
+    <input id="su_name" type="text" autocomplete="name" required>
+    <label for="su_email">Email</label>
+    <input id="su_email" type="email" autocomplete="email" required>
+    <label for="su_pw">Password (8+ characters)</label>
+    <input id="su_pw" type="password" autocomplete="new-password" minlength="8" required>
+    <button class="btn" type="submit" id="signupBtn">Create account</button>
+  </form>
+
+  <div class="swap" id="swapHint">
+    <span id="swapText">No account yet?</span> <a id="swapLink">Sign up</a>
+  </div>
+
+  <div class="fine">
+    <a href="/">← Back to map</a>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const msgEl = $('msg');
+function showMsg(text, kind) {
+  msgEl.textContent = text;
+  msgEl.className = 'msg ' + kind;
+  msgEl.style.display = 'block';
+}
+function hideMsg() { msgEl.style.display = 'none'; }
+
+function setTab(login) {
+  $('tabLogin').classList.toggle('active', login);
+  $('tabSignup').classList.toggle('active', !login);
+  $('formSignup').classList.toggle('active', !login);
+  $('li_email').closest('form').classList.toggle('active', login);
+  $('swapText').textContent = login ? 'No account yet?' : 'Already have an account?';
+  $('swapLink').textContent = login ? 'Sign up' : 'Sign in';
+  hideMsg();
+}
+$('tabLogin').onclick = () => setTab(true);
+$('tabSignup').onclick = () => setTab(false);
+// cleaner swap wiring
+$('swapHint').querySelector('a').onclick = () => {
+  setTab($('tabLogin').classList.contains('active'));
+};
+
+$('formSignup').addEventListener('submit', async e => {
+  e.preventDefault();
+  hideMsg();
+  const btn = $('signupBtn'); btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const r = await fetch('/api/signup', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: $('su_name').value.trim(), email: $('su_email').value.trim(), password: $('su_pw').value})
+    });
+    const d = await r.json();
+    if (!r.ok) { showMsg(d.error || 'Signup failed', 'error'); return; }
+    showMsg(d.message || 'Account created! Check your email to verify.', 'ok');
+    $('formSignup').reset();
+  } catch (err) {
+    showMsg('Network error — try again', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create account';
+  }
+});
+
+document.querySelector('#li_email').closest('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  hideMsg();
+  const btn = $('loginBtn'); btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: $('li_email').value.trim(), password: $('li_pw').value})
+    });
+    const d = await r.json();
+    if (!r.ok) { showMsg(d.error || 'Login failed', 'error'); return; }
+    sessionStorage.setItem('huntmap_user', JSON.stringify(d.user));
+    location.href = '/';
+  } catch (err) {
+    showMsg('Network error — try again', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+});
+
+// if already signed in, bounce to map
+fetch('/api/me').then(r => r.json()).then(d => { if (d.user) location.href = '/'; });
+</script>
+</body>
+</html>

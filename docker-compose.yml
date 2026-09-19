@@ -6,4 +6,17 @@ services:
     restart: unless-stopped
     ports:
       - "8086:8086"
+    environment:
+      HUNTMAP_BASE_URL: https://huntmap.ellickjohnson.net
+      HUNTMAP_AUTHDB: /app/db_auth/auth.db
+      HUNTMAP_ADMIN_EMAIL: ${HUNTMAP_ADMIN_EMAIL}
+      HUNTMAP_ADMIN_PASSWORD: ${HUNTMAP_ADMIN_PASSWORD}
+      HUNTMAP_SMTP_HOST: mx.ellickjohnson.net
+      HUNTMAP_SMTP_PORT: "587"
+      HUNTMAP_SMTP_USER: signups@autonode.co
+      HUNTMAP_SMTP_PASSWORD: ${HUNTMAP_SMTP_PASSWORD}
+      HUNTMAP_SMTP_TLS: starttls
+      HUNTMAP_FROM_ADDRESS: signups@autonode.co
+    volumes:
+      - ./auth:/app/db_auth
     networks: []
