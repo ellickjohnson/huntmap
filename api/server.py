@@ -17,7 +17,8 @@ from http import cookies as http_cookies
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.dirname(os.path.abspath(__file__))          # api/ (repo) or /app (container)
+ROOT = HERE if os.path.isdir(os.path.join(HERE, 'web')) else os.path.dirname(HERE)
 DB = os.environ.get('HUNTMAP_DB', os.path.join(ROOT, 'db', 'hunt.db'))
 AUTHDB = os.environ.get('HUNTMAP_AUTHDB', os.path.join(ROOT, 'db', 'auth.db'))
 WEB = os.path.join(ROOT, 'web')
