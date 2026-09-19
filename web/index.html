@@ -143,6 +143,8 @@
       <div class="toggles">
         <span class="chip" id="terrainChip">⛰️ 3D Terrain</span>
         <span class="chip on" id="hotspotChip">🔥 Hotspots</span>
+        <span class="chip" id="landChip">🗺️ Public land</span>
+        <span class="chip on" id="contourChip">📈 Contours</span>
         <span class="chip on" id="unitsChip">📏 ft · miles</span>
       </div>
       <div class="field">
@@ -162,9 +164,9 @@
         <input type="range" id="habitatOpacity" min="0" max="80" value="30"/>
         <span class="val" id="habitatOpacityVal">30</span>
       </div>
-      <div class="field">
-        <label>Markers</label>
-        <div style="flex:1">
+      <div class="field" style="align-items:flex-start">
+        <label id="markerSectionHead" style="cursor:pointer;user-select:none">Markers <span id="markerCollapseArrow" style="display:inline-block;transition:transform .15s">▼</span></label>
+        <div id="markerSection" style="flex:1">
           <div class="toggles" id="markerToggles" style="margin-bottom:6px">
             <span class="chip on" data-mk="camp">🏕️ Camp</span>
             <span class="chip on" data-mk="sighted">👁️ Saw elk</span>
@@ -177,6 +179,7 @@
           </div>
           <div style="display:flex;gap:6px;align-items:center">
             <button id="addMarkerBtn" style="flex:1;padding:6px;border-radius:6px;border:1px solid #33507a;background:#1b3a5c;color:#dbe7ff;cursor:pointer;font-size:12px">➕ Add marker (click map)</button>
+            <button id="gpxExportBtn" title="Download all waypoints as GPX (Garmin/onX compatible)" style="padding:6px 10px;border-radius:6px;border:1px solid #33507a;background:#1b3a5c;color:#dbe7ff;cursor:pointer;font-size:12px">GPX ⤓</button>
           </div>
           <div id="addMarkerBar" style="display:none;margin-top:6px;padding:8px;border:1px solid #33507a;border-radius:8px;background:#12213a">
             <div style="font-size:11px;color:#8fa3c8;margin-bottom:4px">Click the map to place, then:</div>
@@ -264,20 +267,52 @@ const HYBRID_STYLE = {
       type: 'raster',
       tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
       tileSize: 256, maxzoom: 19,
-      attribution: 'Esri, Maxar | Contours: AWS Terrain Tiles',
+      attribution: 'Esri, Maxar | Contours: TrailSplits | Labels © CARTO © OpenStreetMap',
     },
     hillshade: {
       type: 'raster-dem',
       tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
       tileSize: 256, maxzoom: 15, encoding: 'terrarium',
     },
+    contours: {
+      type: 'vector',
+      tiles: ['https://api.trailsplits.com/tiles/v1/contours/current/{z}/{x}/{y}.pbf'],
+      minzoom: 10, maxzoom: 12,
+      attribution: 'Contours: TrailSplits',
+    },
+    carto_labels: {
+      type: 'raster',
+      tiles: ['https://basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png'],
+      tileSize: 256, maxzoom: 19,
+      attribution: 'Labels © CARTO © OpenStreetMap',
+    },
   },
   layers: [
     { id: 'esri-imagery', type: 'raster', source: 'esri' },
     { id: 'hybrid-hillshade', type: 'hillshade', source: 'hillshade',
       paint: { 'hillshade-exaggeration': 0.35, 'hillshade-shadow-color': '#000000', 'hillshade-highlight-color': '#ffffff' } },
+    { id: 'contour-minor', type: 'line', source: 'contours', 'source-layer': 'contours',
+      minzoom: 10, maxzoom: 15,
+      paint: { 'line-color': 'rgba(230,170,90,0.75)', 'line-width': 0.7 } },
+    { id: 'contour-major', type: 'line', source: 'contours', 'source-layer': 'contours',
+      minzoom: 10, maxzoom: 15,
+      filter: ['>=', ['to-number', ['get', 'ele']], 2600],
+      paint: { 'line-color': 'rgba(255,140,50,0.9)', 'line-width': 1.4 } },
+    { id: 'carto-labels', type: 'raster', source: 'carto_labels' },
   ],
 };
+
+// contour toggle: contours are ON in hybrid by default now (no 'none' layout above);
+// the chip only matters on non-hybrid basemaps. Keep applyContours for style re-apply.
+
+// contour chip: contours default ON in hybrid; chip toggles them (and auto-switches to hybrid)
+let contoursOn = true;
+function applyContours() {
+  if (!map.isStyleLoaded()) { map.once('idle', applyContours); return; }
+  ['contour-minor', 'contour-major'].forEach(id => {
+    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', contoursOn ? 'visible' : 'none');
+  });
+}
 const BASEMAPS = { streets: STREETS_STYLE, satellite: SATELLITE_STYLE, topo: TOPO_STYLE, hybrid: HYBRID_STYLE };
 
 // ---------------- state ----------------
@@ -298,7 +333,7 @@ let clickWired = false;
 const map = new maplibregl.Map({
   container: 'map',
   style: STREETS_STYLE,
-  center: [-105.9, 39.6], zoom: 7.2, pitch: 0, attributionControl: true,
+  center: [-105.9, 39.6], zoom: 7.2, pitch: 0, maxPitch: 85, attributionControl: true,
 });
 map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
@@ -620,7 +655,19 @@ async function loadMarkers() {
 }
 
 function updateMarkerLayer() {
-  if (!map.isStyleLoaded()) return;
+  const paint = () => {
+    if (!map.getSource('markers-src')) return;
+    const visible = markers.filter(m => markerKindsOn.has(m.kind));
+    map.getSource('markers-src').setData({
+      type: 'FeatureCollection',
+      features: visible.map(m => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [m.lon, m.lat] },
+        properties: { id: m.id, name: m.name || '', notes: m.notes || '', emoji: MK_EMOJI[m.kind] || '📍' },
+      })),
+    });
+  };
+  if (!map.isStyleLoaded()) { map.once('idle', paint); return; }
   const visible = markers.filter(m => markerKindsOn.has(m.kind));
   const fc = {
     type: 'FeatureCollection',
@@ -669,6 +716,8 @@ async function deleteMarker(id) {
     body: JSON.stringify({ id }),
   });
   markers = markers.filter(m => m.id !== id);
+  // close any open popup (its Delete button would otherwise leave a ghost popup)
+  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   updateMarkerLayer();
   renderMarkerList();
 }
@@ -687,6 +736,14 @@ function renderMarkerList() {
 
 // placing flow
 let pendingKind = 'waypoint';
+// collapsible markers section
+document.getElementById('markerSectionHead').addEventListener('click', () => {
+  const sec = document.getElementById('markerSection');
+  const arrow = document.getElementById('markerCollapseArrow');
+  const open = sec.style.display !== 'none';
+  sec.style.display = open ? 'none' : 'block';
+  arrow.style.transform = open ? 'rotate(-90deg)' : '';
+});
 document.getElementById('addMarkerBtn').addEventListener('click', () => {
   placingMarker = null;
   document.getElementById('addMarkerBar').style.display = 'block';
@@ -708,6 +765,7 @@ document.getElementById('markerSave').addEventListener('click', async () => {
     body: JSON.stringify({
       action: 'add', kind: pendingKind, lat: placingMarker.lat, lon: placingMarker.lon,
       name: document.getElementById('markerName').value,
+      notes: placingMarker.elev ? `elev ~${Math.round(placingMarker.elev * 3.28084)} ft` : '',
     }),
   });
   if (r.ok) {
@@ -728,10 +786,18 @@ document.getElementById('markerToggles').addEventListener('click', e => {
   updateMarkerLayer();
 });
 
+// GPX export
+document.getElementById('gpxExportBtn').addEventListener('click', exportGPX);
+
 // map click while placing
 map.on('click', e => {
   if (!placingMarker && document.getElementById('addMarkerBar').style.display !== 'block') return;
   placingMarker = { lat: e.lngLat.lat, lon: e.lngLat.lng };
+  // grab elevation from the DEM (if terrain loaded) for the save payload
+  try {
+    const elevM = map.queryTerrainElevation([placingMarker.lon, placingMarker.lat]);
+    if (elevM != null) placingMarker.elev = elevM;
+  } catch (err) { /* terrain off */ }
   // show a temp pin
   const el = document.getElementById('placingPin');
   if (el) el.remove();
@@ -742,6 +808,22 @@ map.on('click', e => {
   new maplibregl.Marker({ element: div, offset: [0, -11] })
     .setLngLat([placingMarker.lon, placingMarker.lat]).addTo(map);
 });
+
+// ---------------- GPX export ----------------
+function exportGPX() {
+  const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const wpts = markers.map(m => {
+    const ele = m.elev ? `<ele>${m.elev}</ele>` : '';
+    return `  <wpt lat="${m.lat}" lon="${m.lon}">${ele}<name>${esc(m.name || m.kind)}</name><sym>Flag, Blue</sym><type>${esc(m.kind)}</type></wpt>`;
+  }).join('\n');
+  const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="HuntMap" xmlns="http://www.topografix.com/GPX/1/1">\n${wpts}\n</gpx>`;
+  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'huntmap-waypoints.gpx';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 // ---------------- unit list ----------------
 function visibleUnits() {
@@ -878,6 +960,60 @@ const UNITS_FMT = {
   elev: m => unitsImperial ? `${Math.round(m * 3.28084).toLocaleString()} ft` : `${Math.round(m).toLocaleString()} m`,
   dens: v => unitsImperial ? v.toFixed(2) + ' /mi²' : (v / 0.386102).toFixed(2) + ' /km²',
 };
+
+// contour + public-land chips
+const contourChip = document.getElementById('contourChip');
+contourChip.addEventListener('click', () => {
+  contoursOn = !contoursOn;
+  contourChip.classList.toggle('on', contoursOn);
+  if (contoursOn && !map.getSource('contours')) {
+    map.setStyle(HYBRID_STYLE);
+    document.querySelectorAll('#baseSeg button').forEach(x => x.classList.toggle('active', x.dataset.b === 'hybrid'));
+    map.once('idle', () => { updateHotspotLayer(); updateMarkerLayer(); ensureLandLayer(); applyContours(); });
+  } else {
+    applyContours();
+  }
+});
+
+let landOn = false;
+function ensureLandLayer() {
+  if (!map.isStyleLoaded()) { map.once('idle', ensureLandLayer); return; }
+  if (map.getLayer('land-fill')) return;
+  map.addSource('land-src', { type: 'geojson', data: '/data/land_public.geojson', tolerance: 0.5 });
+  map.addLayer({
+    id: 'land-fill', type: 'fill', source: 'land-src',
+    paint: {
+      'fill-color': ['match', ['get', 'm'], 'BLM', '#f4a460', '#7fb069'],
+      'fill-opacity': 0.45,
+    },
+    layout: { visibility: landOn ? 'visible' : 'none' },
+  });
+  map.addLayer({
+    id: 'land-line', type: 'line', source: 'land-src',
+    paint: { 'line-color': 'rgba(0,0,0,0.35)', 'line-width': 0.7 },
+    layout: { visibility: landOn ? 'visible' : 'none' },
+  });
+  if (!window._landClickWired) {
+    window._landClickWired = true;
+    map.on('click', 'land-fill', e => {
+      const p = e.features[0].properties;
+      new maplibregl.Popup({ offset: 8 })
+        .setLngLat(e.lngLat)
+        .setHTML(`<strong>${p.n || 'Public land'}</strong><br><span style="font-size:12px">${p.o || p.m || ''}</span>`)
+        .addTo(map);
+    });
+  }
+}
+const landChip = document.getElementById('landChip');
+landChip.addEventListener('click', () => {
+  landOn = !landOn;
+  landChip.classList.toggle('on', landOn);
+  if (landOn && !map.getSource('land-src')) ensureLandLayer();
+  if (map.isStyleLoaded() && map.getLayer('land-fill')) {
+    map.setLayoutProperty('land-fill', 'visibility', landOn ? 'visible' : 'none');
+    map.setLayoutProperty('land-line', 'visibility', landOn ? 'visible' : 'none');
+  }
+});
 
 // ---------------- search (OSM Nominatim, free) ----------------
 const searchBox = document.getElementById('searchBox');
