@@ -167,8 +167,21 @@ const maplibregl = window.maplibregl;
 // ---------- basemaps ----------
 const BASEMAPS = {
   dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-  satellite: 'https://basemaps.cartocdn.com/gl/global-satellite-gl-style/style.json',
+  satellite: null, // raster composition built in switchBasemap()
   topo: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+};
+const SATELLITE_STYLE = {
+  version: 8,
+  sources: {
+    esri: {
+      type: 'raster',
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize: 256,
+      attribution: 'Esri, Maxar, Earthstar Geographics',
+      maxzoom: 19,
+    },
+  },
+  layers: [{ id: 'esri-imagery', type: 'raster', source: 'esri' }],
 };
 let terrainOn = false;
 let units3dOn = true;
@@ -181,16 +194,26 @@ const map = new maplibregl.Map({
 map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
 // terrain source (Amazon AWS Terrain Tiles via maplibre demo terrarium endpoint)
-const TERRAIN_DEM = 'https://demotiles.maplibre.org/terrain-tiles/tiles.json';
+const TERRAIN_DEM = {
+  type: 'raster-dem',
+  tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+  encoding: 'terrarium',
+  tileSize: 256,
+  maxzoom: 15,
+};
 
-async function setTerrain(on) {
-  if (on) {
-    if (!map.getSource('terrain-dem')) {
-      map.addSource('terrain-dem', { type: 'raster-dem', url: TERRAIN_DEM, tileSize: 256 });
+function setTerrain(on) {
+  try {
+    if (on) {
+      if (!map.getSource('terrain-dem')) {
+        map.addSource('terrain-dem', TERRAIN_DEM);
+      }
+      map.setTerrain({ source: 'terrain-dem', exaggeration: 1.35 });
+    } else {
+      map.setTerrain(null);
     }
-    map.setTerrain({ source: 'terrain-dem', exaggeration: 1.2 });
-  } else {
-    map.setTerrain(null);
+  } catch (err) {
+    console.error('terrain error:', err);
   }
 }
 
@@ -204,6 +227,10 @@ let selectedGmu = null;
 let selectedYear = 2024;
 let deckOverlay = null;
 let hotspotsCache = {};
+function switchBasemap(key) {
+  const target = key === 'satellite' ? SATELLITE_STYLE : BASEMAPS[key];
+  map.setStyle(target);
+}
 let selFeatureId = null;
 
 const RAMP = [
@@ -305,6 +332,7 @@ function updateMaplibreDrape() {
 }
 
 function removeMaplibreDrape() {
+  if (map.getLayer('gmu-hotspots')) map.removeLayer('gmu-hotspots');
   if (map.getLayer('gmu-line')) map.removeLayer('gmu-line');
   if (map.getLayer('gmu-fill')) map.removeLayer('gmu-fill');
 }
@@ -321,9 +349,14 @@ function buildLayers() {
         id: 'hotspots',
         data: hotspotsCache[selectedGmu],
         pickable: true,
-        getRadius: 320, radiusMinPixels: 3, radiusMaxPixels: 12,
-        getFillColor: d => hotColor((d.properties.s || 0) / 100).concat([220]),
-        stroked: false,
+        radiusUnits: 'pixels',
+        getRadius: 6,
+        getFillColor: d => hotColor((d.properties.s || 0) / 100).concat([235]),
+        getLineColor: [0, 0, 0, 160],
+        stroked: true,
+        lineWidthUnits: 'pixels',
+        getLineWidth: 1,
+        updateTriggers: { getFillColor: [selectedGmu] },
       }));
     }
     if (habitatLayer !== 'none') {
@@ -422,11 +455,12 @@ function selectUnit(uid) {
   scoreEl.style.color = `rgb(${heatColor((unitValue(p) || 0) / 100).join(',')})`;
   document.getElementById('dScoreLabel').textContent =
     (metric === 'harvest_score' && selectedYear !== 2024) ? `${selectedYear} SUCCESS %` : 'HUNT SCORE';
+  const hy = (HISTORY && HISTORY[selectedGmu]) ? HISTORY[selectedGmu][String(selectedYear)] : null;
   const rows = [
-    ['2024 success', `${p.success_pct ?? '—'}%`],
-    ['Hunters (all seasons)', (p.hunters || 0).toLocaleString()],
-    ['Elk harvested', (p.total_harvest || 0).toLocaleString()],
-    ['Harvest / mi²', (p.harvest_density || 0).toFixed(2)],
+    [`${selectedYear} success`, hy ? `${hy.success}%` : (p.success_pct != null ? `${p.success_pct}%` : '—')],
+    [`${selectedYear} hunters`, hy ? hy.hunters.toLocaleString() : (p.hunters || 0).toLocaleString()],
+    [`${selectedYear} elk harvested`, hy ? hy.total.toLocaleString() : (p.total_harvest || 0).toLocaleString()],
+    ['Harvest / mi² (6yr avg)', (p.harvest_density || 0).toFixed(2)],
     ['Public land', `${p.public_pct ?? '—'}%`],
     ['Habitat score', p.habitat_score ?? '—'],
   ];
@@ -549,7 +583,7 @@ document.getElementById('detailClose').addEventListener('click', deselectUnit);
 document.getElementById('baseSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   document.querySelectorAll('#baseSeg button').forEach(x => x.classList.toggle('active', x === b));
-  map.setStyle(BASEMAPS[b.dataset.b]);
+  switchBasemap(b.dataset.b);
 });
 const unit3dChip = document.getElementById('unit3dChip');
 unit3dChip.addEventListener('click', () => {
