@@ -300,7 +300,10 @@ function updateMaplibreDrape() {
   if (!map.getLayer('gmu-fill')) {
     map.addLayer({
       id: 'gmu-fill', type: 'fill', source: 'gmu-src',
-      paint: { 'fill-color': fillExpr, 'fill-opacity': 1 },
+      paint: {
+        'fill-color': fillExpr,
+        'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.0, 0.78],
+      },
     });
     map.addLayer({
       id: 'gmu-line', type: 'line', source: 'gmu-src',
@@ -331,6 +334,30 @@ function updateMaplibreDrape() {
   }
 }
 
+
+function updateHotspotLayer() {
+  if (map.getLayer('gmu-hotspots')) map.removeLayer('gmu-hotspots');
+  if (!(selectedGmu && hotspotsCache[selectedGmu])) return;
+  const fc = { type: 'FeatureCollection', features: hotspotsCache[selectedGmu] };
+  if (!map.getSource('hotspot-src')) {
+    map.addSource('hotspot-src', { type: 'geojson', data: fc });
+  } else {
+    map.getSource('hotspot-src').setData(fc);
+  }
+  map.addLayer({
+    id: 'gmu-hotspots', type: 'circle', source: 'hotspot-src',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        7, 3, 9, 5, 11, 7, 14, 10],
+      'circle-color': ['interpolate', ['linear'], ['to-number', ['get', 's']],
+        0, '#0e7490', 50, '#facc15', 100, '#ff5032'],
+      'circle-stroke-color': 'rgba(0,0,0,0.6)',
+      'circle-stroke-width': 1,
+      'circle-opacity': 0.92,
+    },
+  });
+}
+
 function removeMaplibreDrape() {
   if (map.getLayer('gmu-hotspots')) map.removeLayer('gmu-hotspots');
   if (map.getLayer('gmu-line')) map.removeLayer('gmu-line');
@@ -344,21 +371,6 @@ function buildLayers() {
     removeMaplibreDrape(); // ensure clean state before re-adding
     updateMaplibreDrape();
     const layers = [];
-    if (selectedGmu && hotspotsCache[selectedGmu]) {
-      layers.push(new deck.ScatterplotLayer({
-        id: 'hotspots',
-        data: hotspotsCache[selectedGmu],
-        pickable: true,
-        radiusUnits: 'pixels',
-        getRadius: 6,
-        getFillColor: d => hotColor((d.properties.s || 0) / 100).concat([235]),
-        getLineColor: [0, 0, 0, 160],
-        stroked: true,
-        lineWidthUnits: 'pixels',
-        getLineWidth: 1,
-        updateTriggers: { getFillColor: [selectedGmu] },
-      }));
-    }
     if (habitatLayer !== 'none') {
       layers.push(new deck.GeoJsonLayer({
         id: 'habitat',
@@ -372,6 +384,7 @@ function buildLayers() {
     } else if (deckOverlay) {
       deckOverlay.setProps({ layers: [] });
     }
+    updateHotspotLayer();
     renderUnitList();
     return;
   }
@@ -391,6 +404,7 @@ function buildLayers() {
     wireframe: units3dOn && extrudeAmt > 0,
     getElevation: d => unitValue(d.properties) * extrudeAmt * 120,
     getFillColor: d => {
+      if (d.properties.gmuid === selectedGmu) return [0, 0, 0, 0];
       const v = unitValue(d.properties);
       if (minScore > 0 && v < minScore) return [30, 36, 44, 90];
       return heatColor(v / 100).concat([200]);
@@ -402,7 +416,7 @@ function buildLayers() {
       else selectUnit(uid);
     },
     updateTriggers: {
-      getFillColor: [metric, minScore, selectedYear],
+      getFillColor: [metric, minScore, selectedYear, selectedGmu],
       getElevation: [metric, extrudeAmt, selectedYear, units3dOn],
       getLineColor: [selectedGmu],
       getLineWidth: [selectedGmu],
@@ -419,26 +433,12 @@ function buildLayers() {
       pickable: false,
     }));
   }
-  if (selectedGmu && hotspotsCache[selectedGmu]) {
-    layers.push(new deck.ScatterplotLayer({
-      id: 'hotspots',
-      data: hotspotsCache[selectedGmu],
-      pickable: true,
-      radiusUnits: 'meters',
-      getRadius: 320,
-      radiusMinPixels: 3,
-      radiusMaxPixels: 12,
-      getFillColor: d => hotColor((d.properties.s || 0) / 100).concat([220]),
-      getLineColor: [0, 0, 0, 120],
-      stroked: false,
-      updateTriggers: { getFillColor: [selectedGmu] },
-    }));
-  }
   if (deckOverlay) { deckOverlay.setProps({ layers }); }
   else {
     deckOverlay = new deck.MapboxOverlay({ layers });
     map.addControl(deckOverlay);
   }
+  updateHotspotLayer();
   renderUnitList();
 }
 
