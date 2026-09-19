@@ -59,7 +59,7 @@
   .detail { position: absolute; right: 12px; top: 12px; z-index: 10; width: 300px;
     background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(8px);
     border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
-    padding: 16px; display: none; }
+    padding: 16px; display: none; max-height: calc(100vh - 24px); overflow-y: auto; }
   .detail.show { display: block; }
   .detail .detail-head { display: flex; align-items: flex-start; }
   .detail h2 { font-size: 20px; flex: 1; }
@@ -74,6 +74,15 @@
   .bigscore { text-align: center; margin: 8px 0 14px; }
   .bigscore .n { font-size: 42px; font-weight: 800; line-height: 1; }
   .bigscore .l { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); }
+  .hist { margin: 10px 0 4px; }
+  .hist .hist-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--dim); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .hist .hist-title b { color: var(--accent2); cursor: pointer; }
+  .hist .bars { display: flex; align-items: flex-end; gap: 6px; height: 54px; }
+  .hist .bars .b { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+  .hist .bars .b i { display: block; width: 100%; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--accent2), #0e7490); opacity: .55; transition: opacity .15s; }
+  .hist .bars .b.on i, .hist .bars .b:hover i { opacity: 1; }
+  .hist .bars .b span { font-size: 9px; color: var(--dim); }
+  .hot-note { font-size: 10px; color: var(--dim); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); line-height: 1.5; }
   #legend { position: absolute; bottom: 18px; left: 12px; z-index: 10;
     background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid var(--line);
     border-radius: 10px; padding: 10px 14px; font-size: 11px; color: var(--dim); }
@@ -83,7 +92,7 @@
   .maplibregl-ctrl-attrib a { color: var(--dim) !important; }
   @media (max-width: 720px) {
     .panel { width: calc(100vw - 24px); max-height: 48vh; }
-    .detail { width: calc(100vw - 24px); top: auto; bottom: 12px; max-height: 42vh; overflow-y: auto; }
+    .detail { width: calc(100vw - 24px); top: auto; bottom: 12px; max-height: 42vh; }
     #legend { display: none; }
   }
 </style>
@@ -104,11 +113,23 @@
         <button data-m="public_pct">Public Land</button>
       </div>
       <div class="field">
+        <label>Basemap</label>
+        <div class="seg" id="baseSeg" style="flex:1">
+          <button data-b="dark" class="active">Dark</button>
+          <button data-b="satellite">Satellite</button>
+          <button data-b="topo">Topo/Roads</button>
+        </div>
+      </div>
+      <div class="toggles">
+        <span class="chip" id="terrainChip" data-t="terrain">⛰️ 3D Terrain</span>
+        <span class="chip on" id="unit3dChip" data-t="units3d">3D Units</span>
+      </div>
+      <div class="field">
         <label>Min score</label>
         <input type="range" id="minScore" min="0" max="100" value="0"/>
         <span class="val" id="minScoreVal">0</span>
       </div>
-      <div class="field">
+      <div class="field" id="extrudeField">
         <label>3D height</label>
         <input type="range" id="extrude" min="0" max="100" value="35"/>
         <span class="val" id="extrudeVal">35</span>
@@ -128,8 +149,10 @@
 <div class="detail" id="detail">
   <div class="detail-head"><h2 id="dTitle"></h2><button class="close-btn" id="detailClose">✕</button></div>
   <div class="county" id="dCounty"></div>
-  <div class="bigscore"><div class="n" id="dScore"></div><div class="l">HUNT SCORE</div></div>
+  <div class="bigscore"><div class="n" id="dScore"></div><div class="l" id="dScoreLabel">HUNT SCORE</div></div>
   <div id="dStats"></div>
+  <div class="hist" id="dHist"></div>
+  <div class="hot-note" id="dHot"></div>
 </div>
 <div id="legend">
   <div id="legendLabel">Hunt score</div>
@@ -141,22 +164,47 @@
 const deck = window.deck;
 const maplibregl = window.maplibregl;
 
+// ---------- basemaps ----------
+const BASEMAPS = {
+  dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  satellite: 'https://basemaps.cartocdn.com/gl/global-satellite-gl-style/style.json',
+  topo: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+};
+let terrainOn = false;
+let units3dOn = true;
+
 const map = new maplibregl.Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  style: BASEMAPS.dark,
   center: [-105.9, 39.6], zoom: 7.2, pitch: 0, attributionControl: true
 });
 map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
+// terrain source (Amazon AWS Terrain Tiles via maplibre demo terrarium endpoint)
+const TERRAIN_DEM = 'https://demotiles.maplibre.org/terrain-tiles/tiles.json';
+
+async function setTerrain(on) {
+  if (on) {
+    if (!map.getSource('terrain-dem')) {
+      map.addSource('terrain-dem', { type: 'raster-dem', url: TERRAIN_DEM, tileSize: 256 });
+    }
+    map.setTerrain({ source: 'terrain-dem', exaggeration: 1.2 });
+  } else {
+    map.setTerrain(null);
+  }
+}
+
 let UNITS = null;
+let HISTORY = null;
 let metric = 'hunt_score';
 let minScore = 0;
 let extrudeAmt = 0.35;
 let habitatLayer = 'none';
 let selectedGmu = null;
+let selectedYear = 2024;
 let deckOverlay = null;
+let hotspotsCache = {};
 
-// ---- distinct color ramp: dark (low) -> teal -> green -> yellow -> red (high)
 const RAMP = [
   [0.00, [24, 28, 52]],
   [0.30, [14, 116, 144]],
@@ -176,6 +224,12 @@ function heatColor(t) {
   }
   return RAMP[RAMP.length - 1][1];
 }
+const hotColor = t => {
+  t = Math.max(0, Math.min(1, t));
+  // hotspots: teal (low) -> yellow -> red-hot (high)
+  if (t < 0.5) { const a = t / 0.5; return [14 + (250 - 14) * a, 116 + (204 - 116) * a, 144 + (21 - 144) * a]; }
+  const a = (t - 0.5) / 0.5; return [250 + (255 - 250) * a, 204 + (80 - 204) * a, 21 + (30 - 21) * a];
+};
 
 function centroidOf(f) {
   const rings = f.geometry.type === 'Polygon' ? [f.geometry.coordinates[0]]
@@ -185,9 +239,17 @@ function centroidOf(f) {
   return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
 }
 
+function unitValue(p) {
+  // metric value, possibly overridden by historical year selection
+  if (metric !== 'harvest_score' || selectedYear === 2024 || !HISTORY) return p[metric] || 0;
+  const h = (HISTORY[p.gmuid] || {})[String(selectedYear)];
+  return h ? h.success : 0;
+}
+
 function buildLayers() {
   if (!UNITS) return;
-  const polygonsLayer = new deck.GeoJsonLayer({
+  const layers = [];
+  layers.push(new deck.GeoJsonLayer({
     id: 'gmu',
     data: UNITS,
     pickable: true,
@@ -196,14 +258,11 @@ function buildLayers() {
     getLineWidth: d => (d.properties.gmuid === selectedGmu ? 7 : 1),
     lineWidthMinPixels: 1,
     lineWidthMaxPixels: 7,
-    lineWidthUnits: 'pixels',
-    extruded: extrudeAmt > 0,
-    wireframe: true,
-    getElevation: d => (metric !== 'public_pct'
-      ? (d.properties[metric] || 0) * extrudeAmt * 120
-      : (d.properties[metric] || 0) * extrudeAmt * 40),
+    extruded: units3dOn && extrudeAmt > 0,
+    wireframe: units3dOn && extrudeAmt > 0,
+    getElevation: d => unitValue(d.properties) * extrudeAmt * 120,
     getFillColor: d => {
-      const v = d.properties[metric] || 0;
+      const v = unitValue(d.properties);
       if (minScore > 0 && v < minScore) return [30, 36, 44, 90];
       return heatColor(v / 100).concat([200]);
     },
@@ -214,14 +273,13 @@ function buildLayers() {
       else selectUnit(uid);
     },
     updateTriggers: {
-      getFillColor: [metric, minScore],
-      getElevation: [metric, extrudeAmt],
+      getFillColor: [metric, minScore, selectedYear],
+      getElevation: [metric, extrudeAmt, selectedYear, units3dOn],
       getLineColor: [selectedGmu],
       getLineWidth: [selectedGmu],
     },
     transitions: { getElevation: 300, getFillColor: 250, getLineWidth: 150 },
-  });
-  const layers = [polygonsLayer];
+  }));
   if (habitatLayer !== 'none') {
     layers.push(new deck.GeoJsonLayer({
       id: 'habitat',
@@ -229,6 +287,23 @@ function buildLayers() {
       stroked: false,
       getFillColor: [78, 205, 196, 42],
       pickable: false,
+    }));
+  }
+  // hotspot dots for selected unit
+  if (selectedGmu && hotspotsCache[selectedGmu]) {
+    const hs = hotspotsCache[selectedGmu];
+    layers.push(new deck.ScatterplotLayer({
+      id: 'hotspots',
+      data: hs.features,
+      pickable: true,
+      radiusUnits: 'meters',
+      getRadius: 320,
+      radiusMinPixels: 3,
+      radiusMaxPixels: 12,
+      getFillColor: d => hotColor((d.properties.s || 0) / 100).concat([220]),
+      getLineColor: [0, 0, 0, 120],
+      stroked: false,
+      updateTriggers: { getFillColor: [selectedGmu] },
     }));
   }
   if (deckOverlay) { deckOverlay.setProps({ layers }); }
@@ -248,8 +323,10 @@ function selectUnit(uid) {
   document.getElementById('dCounty').textContent =
     `${p.county || ''} · herd ${p.elk_dau || '—'} · ${Math.round(p.sq_miles)} mi²`;
   const scoreEl = document.getElementById('dScore');
-  scoreEl.textContent = p.hunt_score ?? '—';
-  scoreEl.style.color = `rgb(${heatColor((p.hunt_score || 0) / 100).join(',')})`;
+  scoreEl.textContent = Math.round(unitValue(p));
+  scoreEl.style.color = `rgb(${heatColor((unitValue(p) || 0) / 100).join(',')})`;
+  document.getElementById('dScoreLabel').textContent =
+    (metric === 'harvest_score' && selectedYear !== 2024) ? `${selectedYear} SUCCESS %` : 'HUNT SCORE';
   const rows = [
     ['2024 success', `${p.success_pct ?? '—'}%`],
     ['Hunters (all seasons)', (p.hunters || 0).toLocaleString()],
@@ -257,14 +334,61 @@ function selectUnit(uid) {
     ['Harvest / mi²', (p.harvest_density || 0).toFixed(2)],
     ['Public land', `${p.public_pct ?? '—'}%`],
     ['Habitat score', p.habitat_score ?? '—'],
-    ['Harvest score', p.harvest_score ?? '—'],
   ];
   document.getElementById('dStats').innerHTML = rows.map(([k, v]) =>
     `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  renderHistory(p);
   document.getElementById('detail').classList.add('show');
   buildLayers();
+  loadHotspots(uid);
   const c = centroidOf(u);
   map.flyTo({ center: c, zoom: Math.max(map.getZoom(), 8.5), pitch: Math.max(map.getPitch(), 45), duration: 900 });
+}
+
+function renderHistory() {
+  const el = document.getElementById('dHist');
+  if (!HISTORY || !selectedGmu || !HISTORY[selectedGmu]) { el.innerHTML = ''; return; }
+  const years = Object.keys(HISTORY[selectedGmu]).sort();
+  const maxTotal = Math.max(...years.map(y => HISTORY[selectedGmu][y].total), 1);
+  const bars = years.map(y => {
+    const h = HISTORY[selectedGmu][y];
+    const on = (y === String(selectedYear)) ? 'on' : '';
+    return `<div class="b ${on}" data-y="${y}" title="${y}: ${h.total} elk, ${h.success}% success, ${h.hunters} hunters">
+      <i style="height:${Math.round(h.total / maxTotal * 40) + 2}px"></i><span>${y.slice(2)}</span></div>`;
+  }).join('');
+  el.innerHTML = `<div class="hist-title"><span>Harvest history · tap a year</span><b id="histYear">${selectedYear}</b></div>
+    <div class="bars">${bars}</div>`;
+  el.querySelectorAll('.b').forEach(bEl => bEl.addEventListener('click', () => {
+    selectedYear = +bEl.dataset.y;
+    document.getElementById('histYear').textContent = selectedYear;
+    const h = (HISTORY[selectedGmu] || {})[String(selectedYear)];
+    if (h && metric === 'harvest_score') {
+      document.getElementById('dScore').textContent = h.success;
+    }
+    buildLayers();
+  }));
+  if (metric === 'harvest_score') {
+    document.querySelector('#dHist .hist-title span').textContent = 'Success by year · tap to color map';
+  }
+}
+
+function loadHotspots(uid) {
+  const note = document.getElementById('dHot');
+  if (hotspotsCache[uid]) { note.textContent = hotspotNoteText(); return; }
+  fetch(`/data/hotspots/${uid}.geojson`)
+    .then(r => { if (!r.ok) throw new Error('none'); return r.json(); })
+    .then(gj => {
+      hotspotsCache[uid] = gj.features;
+      note.textContent = hotspotNoteText();
+      buildLayers();
+    })
+    .catch(() => {
+      note.textContent = 'No hotspot grid for this unit (no significant elk habitat mapped).';
+    });
+}
+function hotspotNoteText() {
+  const n = hotspotsCache[selectedGmu]?.length || 0;
+  return `🔥 ${n} hotspot cells — modeled from CPW elk habitat layers × public land. Red-hot = highest habitat-weighted score, blue = moderate. Click a dot to see its score. Directional: hunt the red clusters, prioritize public-land cells (darker stroke).`;
 }
 
 function deselectUnit() {
@@ -287,8 +411,8 @@ function renderUnitList() {
   const vis = visibleUnits();
   const rows = vis
     .map(f => f.properties)
-    .filter(p => (p[metric] || 0) >= minScore)
-    .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
+    .filter(p => unitValue(p) >= minScore)
+    .sort((a, b) => unitValue(b) - unitValue(a))
     .slice(0, 50);
   document.getElementById('listMeta').textContent =
     `Top units in view · ${vis.length} on map · z${map.getZoom().toFixed(1)}`;
@@ -296,8 +420,8 @@ function renderUnitList() {
   list.innerHTML = rows.map(p => `
     <div class="unit-row ${p.gmuid === selectedGmu ? 'sel' : ''}" data-gmu="${p.gmuid}">
       <div class="gmu">${p.gmuid}</div>
-      <div class="bar"><i style="width:${p[metric] || 0}%"></i></div>
-      <div class="score">${Math.round(p[metric] || 0)}</div>
+      <div class="bar"><i style="width:${Math.min(unitValue(p), 100)}%"></i></div>
+      <div class="score">${Math.round(unitValue(p))}</div>
     </div>`).join('');
   list.querySelectorAll('.unit-row').forEach(el =>
     el.addEventListener('click', () => {
@@ -306,7 +430,6 @@ function renderUnitList() {
     }));
 }
 
-// re-render list as the viewport changes (throttled)
 let listTimer = null;
 function scheduleListRender() {
   if (listTimer) return;
@@ -316,19 +439,43 @@ map.on('moveend', scheduleListRender);
 map.on('zoomend', scheduleListRender);
 
 // ---- UI wiring ----
-// collapsible panel
 const panelToggle = document.getElementById('panelToggle');
 panelToggle.addEventListener('click', () => {
   const p = document.getElementById('sidePanel');
   const collapsed = p.classList.toggle('collapsed');
   panelToggle.textContent = collapsed ? '▶' : '◀';
 });
-// start collapsed on small screens so the map shows first
 if (window.innerWidth < 720) {
   document.getElementById('sidePanel').classList.add('collapsed');
   panelToggle.textContent = '▶';
 }
 document.getElementById('detailClose').addEventListener('click', deselectUnit);
+
+document.getElementById('baseSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#baseSeg button').forEach(x => x.classList.toggle('active', x === b));
+  map.setStyle(BASEMAPS[b.dataset.b]);
+});
+const unit3dChip = document.getElementById('unit3dChip');
+unit3dChip.addEventListener('click', () => {
+  units3dOn = !units3dOn;
+  unit3dChip.classList.toggle('on', units3dOn);
+  if (units3dOn) terrainOn = false;
+  document.getElementById('terrainChip').classList.toggle('on', terrainOn);
+  document.getElementById('extrudeField').style.display = units3dOn ? 'flex' : 'none';
+  setTerrain(terrainOn);
+  buildLayers();
+});
+const terrainChip = document.getElementById('terrainChip');
+terrainChip.addEventListener('click', () => {
+  terrainOn = !terrainOn;
+  terrainChip.classList.toggle('on', terrainOn);
+  if (terrainOn) units3dOn = false;
+  unit3dChip.classList.toggle('on', units3dOn);
+  document.getElementById('extrudeField').style.display = units3dOn ? 'flex' : 'none';
+  setTerrain(terrainOn);
+  buildLayers();
+});
 
 document.getElementById('metricSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
@@ -356,11 +503,23 @@ document.getElementById('layerToggles').addEventListener('click', e => {
   buildLayers();
 });
 
+map.on('style.load', () => {
+  // re-apply terrain after basemap switch
+  if (terrainOn) setTerrain(true);
+  // deck overlay survives setStyle via mapbox overlay control, but re-add if needed
+  if (deckOverlay && !map.hasControl(deckOverlay)) map.addControl(deckOverlay);
+  buildLayers();
+});
+
 map.on('load', async () => {
   try {
-    const res = await fetch('/data/units.geojson');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    UNITS = await res.json();
+    const [uRes, hRes] = await Promise.all([
+      fetch('/data/units.geojson'),
+      fetch('/data/harvest_history.json'),
+    ]);
+    if (!uRes.ok) throw new Error('HTTP ' + uRes.status);
+    UNITS = await uRes.json();
+    HISTORY = hRes.ok ? await hRes.json() : null;
     UNITS.features.forEach(f => { f.properties._c = centroidOf(f); });
     buildLayers();
   } catch (err) {
