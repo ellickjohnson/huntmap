@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from email.utils import formataddr
 from http import cookies as http_cookies
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))          # api/ (repo) or /app (container)
 ROOT = HERE if os.path.isdir(os.path.join(HERE, 'web')) else os.path.dirname(HERE)
@@ -86,6 +86,18 @@ def init_authdb():
         if not have:
             con.execute('INSERT INTO users (email,name,password,role,verified,created_at) VALUES (?,?,?,?,1,?)',
                         (admin_email, 'Admin', hash_pw(admin_pw), 'admin', int(time.time())))
+    # ensure designated admins (env, comma-separated) exist + are admin/verified
+    for e in (os.environ.get('HUNTMAP_ADMINS') or '').split(','):
+        e = e.strip().lower()
+        if not e:
+            continue
+        row = con.execute('SELECT id FROM users WHERE email=?', (e,)).fetchone()
+        if row:
+            con.execute("UPDATE users SET role='admin', verified=1 WHERE email=?", (e,))
+        else:
+            # placeholder until they sign up / set a password; admin can set pw in panel
+            con.execute('INSERT INTO users (email,name,password,role,verified,created_at) VALUES (?,?,?,?,1,?)',
+                        (e, 'Admin', hash_pw(secrets.token_urlsafe(24)), 'admin', int(time.time())))
     con.commit()
     con.close()
 
@@ -248,6 +260,11 @@ class Handler(SimpleHTTPRequestHandler):
         return u
 
     # routing -------------------------------------------------------------
+    # PUBLIC paths: login page, signup/login APIs, verify link/page, me/logout, admin page.
+    # Everything else (the map, units API, static data) requires a signed-in session.
+    PUBLIC_GET = {'/login.html', '/admin.html', '/favicon.ico'}
+    PUBLIC_API = {'/api/signup', '/api/login', '/api/logout', '/api/me', '/api/verify'}
+
     def do_GET(self):
         u = urlparse(self.path)
         if u.path.startswith('/api/'):
@@ -256,6 +273,15 @@ class Handler(SimpleHTTPRequestHandler):
             qs = parse_qs(u.query)
             code = (qs.get('code') or [''])[0]
             return self.do_verify(code)
+        if u.path in self.PUBLIC_GET or u.path.startswith('/login') or u.path.startswith('/admin'):
+            return super().do_GET()
+        # everything else requires login
+        if not self.me():
+            self.send_response(302)
+            self.send_header('Location', '/login.html?next=' + quote(self.path, safe=''))
+            self.send_header('Content-Length', '0')
+            self.end_headers()
+            return
         return super().do_GET()
 
     def do_POST(self):
@@ -266,6 +292,9 @@ class Handler(SimpleHTTPRequestHandler):
 
     def route_api(self, path, query, body):
         body = body if body is not None else self.json_body()
+        # data APIs require login too
+        if path not in self.PUBLIC_API and not self.me():
+            return self.send_json({'error': 'Not signed in'}, 401)
         m = {
             '/api/units.json': lambda: self.serve_units(),
             '/api/signup': lambda: self.api_signup(body),
