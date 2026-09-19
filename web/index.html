@@ -54,10 +54,13 @@
   .detail { position: absolute; right: 12px; top: 12px; z-index: 10; width: 300px;
     background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(8px);
     border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
-    padding: 16px; display: none; max-height: calc(100vh - 24px); overflow-y: auto; }
+    padding: 0; display: none; max-height: calc(100vh - 24px); overflow-y: auto; }
   .detail.show { display: block; }
-  .detail-head { display: flex; align-items: flex-start; }
-  .detail h2 { font-size: 20px; flex: 1; }
+  .detail-head { display: flex; align-items: flex-start; padding: 16px 16px 0; cursor: grab; }
+  .detail-body { padding: 0 16px 16px; }
+  .detail.min .detail-body { display: none; }
+  .detail-head h2 { font-size: 20px; flex: 1; }
+  .detail-head .db-btns { display: flex; gap: 5px; }
   .close-btn { background: var(--panel2); border: 1px solid var(--line); color: var(--dim);
     border-radius: 6px; width: 26px; height: 26px; font-size: 13px; cursor: pointer; }
   .close-btn:hover { color: var(--txt); border-color: var(--accent); }
@@ -120,6 +123,13 @@
           <button data-b="topo">Topo</button>
         </div>
       </div>
+      <div class="field">
+        <label>Unit style</label>
+        <div class="seg" id="fillSeg" style="flex:1">
+          <button data-f="fill" class="active">Fill</button>
+          <button data-f="outline">Outline</button>
+        </div>
+      </div>
       <div class="toggles">
         <span class="chip" id="terrainChip">⛰️ 3D Terrain</span>
         <span class="chip on" id="hotspotChip">🔥 Hotspots</span>
@@ -142,12 +152,20 @@
   </div>
 </div>
 <div class="detail" id="detail">
-  <div class="detail-head"><h2 id="dTitle"></h2><button class="close-btn" id="detailClose">✕</button></div>
-  <div class="county" id="dCounty"></div>
-  <div class="bigscore"><div class="n" id="dScore"></div><div class="l" id="dScoreLabel">HUNT SCORE</div></div>
-  <div id="dStats"></div>
-  <div class="hist" id="dHist"></div>
-  <div class="hot-note" id="dHot"></div>
+  <div class="detail-head" id="detailDrag">
+    <h2 id="dTitle"></h2>
+    <div class="db-btns">
+      <button class="close-btn" id="detailMin" title="Collapse">—</button>
+      <button class="close-btn" id="detailClose" title="Close">✕</button>
+    </div>
+  </div>
+  <div class="detail-body" id="detailBody">
+    <div class="county" id="dCounty"></div>
+    <div class="bigscore"><div class="n" id="dScore"></div><div class="l" id="dScoreLabel">HUNT SCORE</div></div>
+    <div id="dStats"></div>
+    <div class="hist" id="dHist"></div>
+    <div class="hot-note" id="dHot"></div>
+  </div>
 </div>
 <div id="legend">
   <div id="legendLabel">Hunt score</div>
@@ -195,6 +213,7 @@ let metric = 'hunt_score';
 let minScore = 0;
 let terrainOn = false;
 let hotspotsOn = true;
+let fillMode = 'fill';
 let habitatLayer = 'none';
 let selectedGmu = null;
 let selectedYear = 2024;
@@ -264,11 +283,15 @@ function ensureUnitLayers() {
       id: 'gmu-fill', type: 'fill', source: 'gmu-src',
       paint: {
         'fill-color': fillExpr(),
-        'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.0, 0.80],
+        'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.0,
+          fillMode === 'fill' ? 0.80 : 0.0],
       },
     });
   } else {
     map.setPaintProperty('gmu-fill', 'fill-color', fillExpr());
+    map.setPaintProperty('gmu-fill', 'fill-opacity', [
+      'case', ['boolean', ['feature-state', 'selected'], false], 0.0,
+      fillMode === 'fill' ? 0.80 : 0.0]);
   }
   map.setFilter('gmu-fill', minScore > 0
     ? ['>=', ['to-number', ['coalesce', ['get', metricProp()], 0]], minScore] : null);
@@ -277,13 +300,17 @@ function ensureUnitLayers() {
     map.addLayer({
       id: 'gmu-outline', type: 'line', source: 'gmu-src',
       paint: {
-        'line-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4', 'rgba(90,105,120,0.75)'],
-        'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 6, 1],
+        'line-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4',
+          fillMode === 'outline' ? 'rgba(120,135,150,0.95)' : 'rgba(90,105,120,0.75)'],
+        'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 6, fillMode === 'outline' ? 1.6 : 1],
       },
     });
   } else {
     map.setPaintProperty('gmu-outline', 'line-color',
-      ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4', 'rgba(90,105,120,0.75)']);
+      ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4',
+        fillMode === 'outline' ? 'rgba(120,135,150,0.95)' : 'rgba(90,105,120,0.75)']);
+    map.setPaintProperty('gmu-outline', 'line-width',
+      ['case', ['boolean', ['feature-state', 'selected'], false], 6, fillMode === 'outline' ? 1.6 : 1]);
   }
 
   // selection state
@@ -307,7 +334,7 @@ function ensureUnitLayers() {
     map.removeSource('habitat-src');
   }
 
-  updateHotspotLayers();
+  updateHotspotLayer();
   renderUnitList();
 }
 
@@ -523,10 +550,56 @@ panelToggle.addEventListener('click', () => {
   const collapsed = document.getElementById('sidePanel').classList.toggle('collapsed');
   panelToggle.textContent = collapsed ? '▶' : '◀';
 });
+// draggable side panel (desktop): drag by its header
+(function () {
+  const panel = document.getElementById('sidePanel');
+  const head = panel.querySelector('.panel-header');
+  let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  head.addEventListener('pointerdown', e => {
+    if (e.target.closest('.collapse-btn')) return;
+    if (window.innerWidth < 720) return;
+    dragging = true; sx = e.clientX; sy = e.clientY;
+    const r = panel.getBoundingClientRect();
+    ox = r.left; oy = r.top;
+    panel.style.left = ox + 'px'; panel.style.top = oy + 'px';
+    head.setPointerCapture(e.pointerId);
+  });
+  head.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    panel.style.left = Math.max(0, Math.min(window.innerWidth - 120, ox + e.clientX - sx)) + 'px';
+    panel.style.top = Math.max(0, Math.min(window.innerHeight - 40, oy + e.clientY - sy)) + 'px';
+  });
+  head.addEventListener('pointerup', () => { dragging = false; });
+})();
 if (window.innerWidth < 720) {
   document.getElementById('sidePanel').classList.add('collapsed');
   panelToggle.textContent = '▶';
 }
+// collapse + drag for the detail box (selection persists)
+const detailEl = document.getElementById('detail');
+document.getElementById('detailMin').addEventListener('click', () => detailEl.classList.toggle('min'));
+// draggable detail (desktop): drag by header
+(function () {
+  const head = document.getElementById('detailDrag');
+  let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  head.addEventListener('pointerdown', e => {
+    if (e.target.closest('.close-btn')) return;
+    if (window.innerWidth < 720) return; // fixed position on mobile
+    dragging = true; sx = e.clientX; sy = e.clientY;
+    const r = detailEl.getBoundingClientRect();
+    ox = r.left; oy = r.top;
+    detailEl.style.left = ox + 'px'; detailEl.style.top = oy + 'px';
+    detailEl.style.right = 'auto';
+    head.setPointerCapture(e.pointerId);
+  });
+  head.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    detailEl.style.left = Math.max(0, Math.min(window.innerWidth - 80, ox + e.clientX - sx)) + 'px';
+    detailEl.style.top = Math.max(0, Math.min(window.innerHeight - 40, oy + e.clientY - sy)) + 'px';
+  });
+  head.addEventListener('pointerup', () => { dragging = false; });
+})();
+
 document.getElementById('detailClose').addEventListener('click', () => {
   if (selectedGmu != null && map.getSource('gmu-src')) {
     map.setFeatureState({ source: 'gmu-src', id: selectedGmu }, { selected: false });
@@ -565,6 +638,12 @@ const minScoreEl = document.getElementById('minScore');
 minScoreEl.addEventListener('input', () => {
   minScore = +minScoreEl.value;
   document.getElementById('minScoreVal').textContent = minScore;
+  ensureUnitLayers();
+});
+document.getElementById('fillSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#fillSeg button').forEach(x => x.classList.toggle('active', x === b));
+  fillMode = b.dataset.f;
   ensureUnitLayers();
 });
 document.getElementById('layerToggles').addEventListener('click', e => {
