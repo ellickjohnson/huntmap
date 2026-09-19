@@ -6,7 +6,6 @@
 <title>HuntMap — Colorado Elk Units</title>
 <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet"/>
 <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/deck.gl@9.1.12/dist.min.js"></script>
 <style>
   :root {
     --bg: #0f1419; --panel: #1a222b; --panel2: #232d38; --line: #2e3a46;
@@ -18,42 +17,38 @@
   .panel { position: absolute; top: 12px; left: 12px; z-index: 10; width: 340px;
     background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(8px);
     border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
-    max-height: calc(100vh - 24px); display: flex; flex-direction: column;
-    transition: width .25s ease; }
+    max-height: calc(100vh - 24px); display: flex; flex-direction: column; }
   .panel.collapsed { width: auto; }
   .panel-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--line);
     display: flex; align-items: center; gap: 10px; }
   .panel.collapsed .panel-header { border-bottom: 0; }
-  .panel-header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; flex: 1; }
+  .panel-header h1 { font-size: 17px; font-weight: 700; flex: 1; }
   .panel-header h1 span { color: var(--accent); }
   .collapse-btn { background: var(--panel2); border: 1px solid var(--line); color: var(--dim);
-    border-radius: 8px; width: 30px; height: 30px; font-size: 14px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    border-radius: 8px; width: 30px; height: 30px; font-size: 14px; cursor: pointer; }
   .collapse-btn:hover { color: var(--txt); border-color: var(--accent2); }
   .panel-body { display: flex; flex-direction: column; overflow: hidden; }
   .panel.collapsed .panel-body { display: none; }
-  .panel-header .sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
   .controls { padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
   .seg { display: flex; background: var(--panel2); border-radius: 8px; padding: 3px; gap: 3px; }
   .seg button { flex: 1; padding: 7px 0; border: 0; background: transparent; color: var(--dim);
     border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
   .seg button.active { background: var(--accent); color: #fff; }
-  .seg button:hover:not(.active) { color: var(--txt); }
   .field { display: flex; align-items: center; gap: 8px; font-size: 12px; }
   .field label { color: var(--dim); width: 86px; flex-shrink: 0; }
   .field input[type=range] { flex: 1; accent-color: var(--accent); }
-  .field .val { width: 34px; text-align: right; color: var(--txt); font-variant-numeric: tabular-nums; }
+  .field .val { width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
   .toggles { display: flex; flex-wrap: wrap; gap: 5px; }
   .chip { font-size: 10.5px; padding: 4px 9px; border-radius: 20px; border: 1px solid var(--line);
     background: var(--panel2); color: var(--dim); cursor: pointer; user-select: none; transition: all .15s; }
   .chip.on { border-color: var(--accent2); color: var(--accent2); background: rgba(78,205,196,.08); }
   .list-meta { padding: 8px 14px 0; font-size: 10.5px; color: var(--dim); text-transform: uppercase; letter-spacing: .8px; }
   .unit-list { overflow-y: auto; flex: 1; padding: 6px 8px 12px; min-height: 120px; }
-  .unit-row { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; cursor: pointer; transition: background .12s; }
+  .unit-row { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
   .unit-row:hover, .unit-row.sel { background: var(--panel2); }
   .unit-row .gmu { font-weight: 700; font-size: 14px; width: 44px; }
   .unit-row .bar { flex: 1; height: 7px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
-  .unit-row .bar i { display: block; height: 100%; border-radius: 4px;
+  .unit-row .bar i { display: block; height: 100%;
     background: linear-gradient(90deg, #0e7490, #22c55e, #facc15, #ef4444); }
   .unit-row .score { width: 36px; text-align: right; font-size: 13px; font-weight: 700; color: var(--accent2); }
   .detail { position: absolute; right: 12px; top: 12px; z-index: 10; width: 300px;
@@ -61,12 +56,12 @@
     border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
     padding: 16px; display: none; max-height: calc(100vh - 24px); overflow-y: auto; }
   .detail.show { display: block; }
-  .detail .detail-head { display: flex; align-items: flex-start; }
+  .detail-head { display: flex; align-items: flex-start; }
   .detail h2 { font-size: 20px; flex: 1; }
-  .detail .close-btn { background: var(--panel2); border: 1px solid var(--line); color: var(--dim);
-    border-radius: 6px; width: 26px; height: 26px; font-size: 13px; cursor: pointer; line-height: 1; }
-  .detail .close-btn:hover { color: var(--txt); border-color: var(--accent); }
-  .detail .county { color: var(--dim); font-size: 12px; margin-bottom: 12px; }
+  .close-btn { background: var(--panel2); border: 1px solid var(--line); color: var(--dim);
+    border-radius: 6px; width: 26px; height: 26px; font-size: 13px; cursor: pointer; }
+  .close-btn:hover { color: var(--txt); border-color: var(--accent); }
+  .county { color: var(--dim); font-size: 12px; margin-bottom: 12px; }
   .stat { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
   .stat:last-child { border-bottom: 0; }
   .stat .k { color: var(--dim); }
@@ -75,13 +70,18 @@
   .bigscore .n { font-size: 42px; font-weight: 800; line-height: 1; }
   .bigscore .l { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); }
   .hist { margin: 10px 0 4px; }
-  .hist .hist-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--dim); margin-bottom: 6px; display: flex; justify-content: space-between; }
-  .hist .hist-title b { color: var(--accent2); cursor: pointer; }
-  .hist .bars { display: flex; align-items: flex-end; gap: 6px; height: 54px; }
-  .hist .bars .b { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
-  .hist .bars .b i { display: block; width: 100%; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--accent2), #0e7490); opacity: .55; transition: opacity .15s; }
+  .hist .hist-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--dim); margin-bottom: 6px; }
+  .hist .bars { display: flex; align-items: flex-end; gap: 6px; height: 46px; margin-bottom: 4px; }
+  .hist .bars.hunters { height: 34px; opacity: .8; }
+  .hist .bars .b { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+  .hist .bars .b i { display: block; width: 100%; border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, var(--accent2), #0e7490); opacity: .45; transition: opacity .15s; }
+  .hist .bars.hunters .b i { background: linear-gradient(180deg, #b0894e, #6b5637); }
   .hist .bars .b.on i, .hist .bars .b:hover i { opacity: 1; }
   .hist .bars .b span { font-size: 9px; color: var(--dim); }
+  .hist .legend2 { display: flex; gap: 14px; font-size: 9.5px; color: var(--dim); margin-bottom: 6px; }
+  .hist .legend2 b { color: var(--accent2); font-weight: 600; }
+  .hist .legend2 i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
   .hot-note { font-size: 10px; color: var(--dim); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); line-height: 1.5; }
   #legend { position: absolute; bottom: 18px; left: 12px; z-index: 10;
     background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid var(--line);
@@ -115,31 +115,26 @@
       <div class="field">
         <label>Basemap</label>
         <div class="seg" id="baseSeg" style="flex:1">
-          <button data-b="dark" class="active">Dark</button>
+          <button data-b="streets" class="active">Streets</button>
           <button data-b="satellite">Satellite</button>
-          <button data-b="topo">Topo/Roads</button>
+          <button data-b="topo">Topo</button>
         </div>
       </div>
       <div class="toggles">
-        <span class="chip" id="terrainChip" data-t="terrain">⛰️ 3D Terrain</span>
-        <span class="chip on" id="unit3dChip" data-t="units3d">3D Units</span>
+        <span class="chip" id="terrainChip">⛰️ 3D Terrain</span>
+        <span class="chip on" id="hotspotChip">🔥 Hotspots</span>
       </div>
       <div class="field">
         <label>Min score</label>
         <input type="range" id="minScore" min="0" max="100" value="0"/>
         <span class="val" id="minScoreVal">0</span>
       </div>
-      <div class="field" id="extrudeField">
-        <label>3D height</label>
-        <input type="range" id="extrude" min="0" max="100" value="35"/>
-        <span class="val" id="extrudeVal">35</span>
-      </div>
       <div class="toggles" id="layerToggles">
-        <span class="chip on" data-l="none">Heatmap only</span>
-        <span class="chip" data-l="elk_summer_concentration">Summer concentration</span>
-        <span class="chip" data-l="elk_resident_population">Resident population</span>
-        <span class="chip" data-l="elk_winter_concentration">Winter concentration</span>
-        <span class="chip" data-l="elk_migration_corridors">Migration corridors</span>
+        <span class="chip on" data-l="none">Habitat: none</span>
+        <span class="chip" data-l="elk_summer_concentration">Summer conc.</span>
+        <span class="chip" data-l="elk_resident_population">Resident pop.</span>
+        <span class="chip" data-l="elk_winter_concentration">Winter conc.</span>
+        <span class="chip" data-l="elk_migration_corridors">Migration</span>
       </div>
     </div>
     <div class="list-meta" id="listMeta"></div>
@@ -161,117 +156,75 @@
 </div>
 
 <script type="module">
-const deck = window.deck;
 const maplibregl = window.maplibregl;
 
-// ---------- basemaps ----------
-const BASEMAPS = {
-  dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-  satellite: null, // raster composition built in switchBasemap()
-  topo: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-};
+// ---------------- basemaps ----------------
+const STREETS_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 const SATELLITE_STYLE = {
   version: 8,
   sources: {
     esri: {
       type: 'raster',
       tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-      tileSize: 256,
+      tileSize: 256, maxzoom: 19,
       attribution: 'Esri, Maxar, Earthstar Geographics',
-      maxzoom: 19,
     },
   },
   layers: [{ id: 'esri-imagery', type: 'raster', source: 'esri' }],
 };
-let terrainOn = false;
-let units3dOn = true;
-
-const map = new maplibregl.Map({
-  container: 'map',
-  style: BASEMAPS.dark,
-  center: [-105.9, 39.6], zoom: 7.2, pitch: 0, attributionControl: true
-});
-map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
-
-// terrain source (Amazon AWS Terrain Tiles via maplibre demo terrarium endpoint)
-const TERRAIN_DEM = {
-  type: 'raster-dem',
-  tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-  encoding: 'terrarium',
-  tileSize: 256,
-  maxzoom: 15,
+const TOPO_STYLE = {
+  version: 8,
+  sources: {
+    opentopo: {
+      type: 'raster',
+      tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+              'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
+              'https://c.tile.opentopomap.org/{z}/{x}/{y}.png'],
+      tileSize: 256, maxzoom: 17,
+      attribution: '© OpenTopoMap (CC-BY-SA), © OpenStreetMap',
+    },
+  },
+  layers: [{ id: 'opentopo', type: 'raster', source: 'opentopo' }],
 };
+const BASEMAPS = { streets: STREETS_STYLE, satellite: SATELLITE_STYLE, topo: TOPO_STYLE };
 
-function setTerrain(on) {
-  try {
-    if (on) {
-      if (!map.getSource('terrain-dem')) {
-        map.addSource('terrain-dem', TERRAIN_DEM);
-      }
-      map.setTerrain({ source: 'terrain-dem', exaggeration: 1.35 });
-    } else {
-      map.setTerrain(null);
-    }
-  } catch (err) {
-    console.error('terrain error:', err);
-  }
-}
-
+// ---------------- state ----------------
 let UNITS = null;
 let HISTORY = null;
 let metric = 'hunt_score';
 let minScore = 0;
-let extrudeAmt = 0.35;
+let terrainOn = false;
+let hotspotsOn = true;
 let habitatLayer = 'none';
 let selectedGmu = null;
 let selectedYear = 2024;
-let deckOverlay = null;
 let hotspotsCache = {};
-function switchBasemap(key) {
-  const target = key === 'satellite' ? SATELLITE_STYLE : BASEMAPS[key];
-  map.setStyle(target);
-}
-let selFeatureId = null;
+let clickWired = false;
 
-const RAMP = [
-  [0.00, [24, 28, 52]],
-  [0.30, [14, 116, 144]],
-  [0.55, [34, 197, 94]],
-  [0.75, [250, 204, 21]],
-  [0.88, [239, 68, 68]],
-  [1.00, [190, 18, 60]],
+const map = new maplibregl.Map({
+  container: 'map',
+  style: STREETS_STYLE,
+  center: [-105.9, 39.6], zoom: 7.2, pitch: 0, attributionControl: true,
+});
+map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+
+// ---------------- color ramps ----------------
+const FILL_STOPS = [
+  [0, 'rgba(24,28,52,0.80)'], [30, 'rgba(14,116,144,0.80)'],
+  [55, 'rgba(34,197,94,0.80)'], [75, 'rgba(250,204,21,0.80)'],
+  [88, 'rgba(239,68,68,0.80)'], [100, 'rgba(190,18,60,0.80)'],
 ];
+const RAMP = [[0,[24,28,52]],[0.30,[14,116,144]],[0.55,[34,197,94]],[0.75,[250,204,21]],[0.88,[239,68,68]],[1,[190,18,60]]];
 function heatColor(t) {
   t = Math.max(0, Math.min(1, t));
   for (let i = 0; i < RAMP.length - 1; i++) {
     const [t0, c0] = RAMP[i], [t1, c1] = RAMP[i + 1];
     if (t >= t0 && t <= t1) {
       const a = (t - t0) / (t1 - t0);
-      return c0.map((v, k) => Math.round(v + (c1[k] - v) * a));
+      return `rgb(${c0.map((v, k) => Math.round(v + (c1[k] - v) * a)).join(',')})`;
     }
   }
-  return RAMP[RAMP.length - 1][1];
-}
-const hotColor = t => {
-  t = Math.max(0, Math.min(1, t));
-  // hotspots: teal (low) -> yellow -> red-hot (high)
-  if (t < 0.5) { const a = t / 0.5; return [14 + (250 - 14) * a, 116 + (204 - 116) * a, 144 + (21 - 144) * a]; }
-  const a = (t - 0.5) / 0.5; return [250 + (255 - 250) * a, 204 + (80 - 204) * a, 21 + (30 - 21) * a];
-};
-
-function centroidOf(f) {
-  const rings = f.geometry.type === 'Polygon' ? [f.geometry.coordinates[0]]
-    : f.geometry.coordinates.map(p => p[0]);
-  let xs = [], ys = [];
-  rings.forEach(r => r.forEach(pt => { xs.push(pt[0]); ys.push(pt[1]); }));
-  return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
-}
-
-function unitValue(p) {
-  // metric value, possibly overridden by historical year selection
-  if (metric !== 'harvest_score' || selectedYear === 2024 || !HISTORY) return p[metric] || 0;
-  const h = (HISTORY[p.gmuid] || {})[String(selectedYear)];
-  return h ? h.success : 0;
+  return 'rgb(190,18,60)';
 }
 
 function metricProp() {
@@ -281,19 +234,28 @@ function metricProp() {
   if (metric === 'harvest_score') return 'harvest_score';
   return 'hunt_score';
 }
+function unitValue(p) {
+  if (metric !== 'harvest_score' || selectedYear === 2024 || !HISTORY) return p[metric] || 0;
+  const h = (HISTORY[p.gmuid] || {})[String(selectedYear)];
+  return h ? h.success : 0;
+}
+function centroidOf(f) {
+  const rings = f.geometry.type === 'Polygon' ? [f.geometry.coordinates[0]] : f.geometry.coordinates.map(p => p[0]);
+  const xs = [], ys = [];
+  rings.forEach(r => r.forEach(pt => { xs.push(pt[0]); ys.push(pt[1]); }));
+  return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
+}
 
-function updateMaplibreDrape() {
-  // terrain mode: unit fill + outlines drawn as maplibre layers (drape on DEM)
+// ---------------- maplibre layers (single rendering path, drapes on terrain) ----------------
+function fillExpr() {
   const prop = metricProp();
-  const fillExpr = [
-    'interpolate', ['linear'], ['to-number', ['coalesce', ['get', prop], 0]],
-    0, 'rgba(24,28,52,0.78)',
-    30, 'rgba(14,116,144,0.78)',
-    55, 'rgba(34,197,94,0.78)',
-    75, 'rgba(250,204,21,0.78)',
-    88, 'rgba(239,68,68,0.78)',
-    100, 'rgba(190,18,60,0.78)',
-  ];
+  const expr = ['interpolate', ['linear'], ['to-number', ['coalesce', ['get', prop], 0]]];
+  for (const [v, c] of FILL_STOPS) expr.push(v, c);
+  return expr;
+}
+
+function ensureUnitLayers() {
+  if (!UNITS || !map.isStyleLoaded()) return;
   if (!map.getSource('gmu-src')) {
     map.addSource('gmu-src', { type: 'geojson', data: UNITS, promoteId: 'gmuid' });
   }
@@ -301,147 +263,127 @@ function updateMaplibreDrape() {
     map.addLayer({
       id: 'gmu-fill', type: 'fill', source: 'gmu-src',
       paint: {
-        'fill-color': fillExpr,
-        'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.0, 0.78],
+        'fill-color': fillExpr(),
+        'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.0, 0.80],
       },
     });
-    map.addLayer({
-      id: 'gmu-line', type: 'line', source: 'gmu-src',
-      paint: {
-        'line-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4', 'rgba(70,85,100,0.7)'],
-        'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 7, 1],
-      },
-    });
-    // hover/click handlers on the fill layer
-    map.on('click', 'gmu-fill', e => {
-      const uid = e.features[0].properties.gmuid;
-      if (selectedGmu === uid) deselectUnit(); else selectUnit(uid);
-    });
-    map.on('mouseenter', 'gmu-fill', () => map.getCanvas().style.cursor = 'pointer');
-    map.on('mouseleave', 'gmu-fill', () => map.getCanvas().style.cursor = '');
   } else {
-    map.setPaintProperty('gmu-fill', 'fill-color', fillExpr);
-    map.setFilter('gmu-fill', minScore > 0 ? ['>=', ['to-number', ['coalesce', ['get', prop], 0]], minScore] : null);
-    map.setFilter('gmu-line', minScore > 0 ? ['>=', ['to-number', ['coalesce', ['get', prop], 0]], minScore] : null);
+    map.setPaintProperty('gmu-fill', 'fill-color', fillExpr());
   }
+  map.setFilter('gmu-fill', minScore > 0
+    ? ['>=', ['to-number', ['coalesce', ['get', metricProp()], 0]], minScore] : null);
+
+  if (!map.getLayer('gmu-outline')) {
+    map.addLayer({
+      id: 'gmu-outline', type: 'line', source: 'gmu-src',
+      paint: {
+        'line-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4', 'rgba(90,105,120,0.75)'],
+        'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 6, 1],
+      },
+    });
+  } else {
+    map.setPaintProperty('gmu-outline', 'line-color',
+      ['case', ['boolean', ['feature-state', 'selected'], false], '#4ecdc4', 'rgba(90,105,120,0.75)']);
+  }
+
+  // selection state
   if (selectedGmu != null) {
-    if (selFeatureId != null) map.setFeatureState({ source: 'gmu-src', id: selFeatureId }, { selected: false });
-    selFeatureId = selectedGmu;
-    map.setFeatureState({ source: 'gmu-src', id: selFeatureId }, { selected: true });
-  } else if (selFeatureId != null) {
-    map.setFeatureState({ source: 'gmu-src', id: selFeatureId }, { selected: false });
-    selFeatureId = null;
+    map.setFeatureState({ source: 'gmu-src', id: selectedGmu }, { selected: true });
   }
+
+  // habitat overlay
+  if (habitatLayer !== 'none') {
+    if (!map.getSource('habitat-src')) {
+      map.addSource('habitat-src', { type: 'geojson', data: `/data/${habitatLayer}.geojson` });
+    }
+    if (!map.getLayer('habitat-fill')) {
+      map.addLayer({
+        id: 'habitat-fill', type: 'fill', source: 'habitat-src',
+        paint: { 'fill-color': '#4ecdc4', 'fill-opacity': 0.16 },
+      });
+    }
+  } else if (map.getLayer('habitat-fill')) {
+    map.removeLayer('habitat-fill');
+    map.removeSource('habitat-src');
+  }
+
+  updateHotspotLayers();
+  renderUnitList();
 }
 
-
 function updateHotspotLayer() {
-  if (map.getLayer('gmu-hotspots')) map.removeLayer('gmu-hotspots');
-  if (!(selectedGmu && hotspotsCache[selectedGmu])) return;
+  if (!map.isStyleLoaded()) return;
+  ['gmu-heat', 'gmu-dots'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  if (!hotspotsOn || !selectedGmu || !hotspotsCache[selectedGmu]) return;
   const fc = { type: 'FeatureCollection', features: hotspotsCache[selectedGmu] };
   if (!map.getSource('hotspot-src')) {
     map.addSource('hotspot-src', { type: 'geojson', data: fc });
   } else {
     map.getSource('hotspot-src').setData(fc);
   }
+  // smooth blended heatmap
   map.addLayer({
-    id: 'gmu-hotspots', type: 'circle', source: 'hotspot-src',
+    id: 'gmu-heat', type: 'heatmap', source: 'hotspot-src',
     paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'],
-        7, 3, 9, 5, 11, 7, 14, 10],
+      'heatmap-weight': ['interpolate', ['linear'], ['to-number', ['get', 's']], 0, 0.2, 100, 1],
+      'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.8, 14, 2.2],
+      'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 14, 12, 32, 16, 50],
+      'heatmap-opacity': 0.75,
+      'heatmap-color': [
+        'interpolate', ['linear'], ['heatmap-density'],
+        0, 'rgba(0,0,0,0)',
+        0.2, 'rgba(14,116,144,0.55)',
+        0.45, 'rgba(34,197,94,0.65)',
+        0.7, 'rgba(250,204,21,0.8)',
+        0.9, 'rgba(255,80,50,0.9)',
+        1, 'rgba(255,25,25,1)',
+      ],
+    },
+  });
+  // individual cells at high zoom
+  map.addLayer({
+    id: 'gmu-dots', type: 'circle', source: 'hotspot-src',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 4, 15, 7],
       'circle-color': ['interpolate', ['linear'], ['to-number', ['get', 's']],
         0, '#0e7490', 50, '#facc15', 100, '#ff5032'],
-      'circle-stroke-color': 'rgba(0,0,0,0.6)',
-      'circle-stroke-width': 1,
-      'circle-opacity': 0.92,
+      'circle-stroke-color': 'rgba(0,0,0,0.6)', 'circle-stroke-width': 1,
+      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 12, 0.92],
     },
   });
 }
 
-function removeMaplibreDrape() {
-  if (map.getLayer('gmu-hotspots')) map.removeLayer('gmu-hotspots');
-  if (map.getLayer('gmu-line')) map.removeLayer('gmu-line');
-  if (map.getLayer('gmu-fill')) map.removeLayer('gmu-fill');
-}
-
-function buildLayers() {
-  if (!UNITS) return;
-  if (terrainOn) {
-    // terrain mode: deck only carries hotspots; unit coloring via maplibre drape
-    removeMaplibreDrape(); // ensure clean state before re-adding
-    updateMaplibreDrape();
-    const layers = [];
-    if (habitatLayer !== 'none') {
-      layers.push(new deck.GeoJsonLayer({
-        id: 'habitat',
-        data: `/data/${habitatLayer}.geojson`,
-        stroked: false, getFillColor: [78, 205, 196, 42], pickable: false,
-      }));
-    }
-    if (layers.length) {
-      if (deckOverlay) deckOverlay.setProps({ layers });
-      else { deckOverlay = new deck.MapboxOverlay({ layers }); map.addControl(deckOverlay); }
-    } else if (deckOverlay) {
-      deckOverlay.setProps({ layers: [] });
-    }
-    updateHotspotLayer();
-    renderUnitList();
-    return;
-  }
-  removeMaplibreDrape();
-  // ---- deck.gl 3D units mode (as before) ----
-  const polygonsLayer = new deck.GeoJsonLayer({
-    id: 'gmu',
-    data: UNITS,
-    pickable: true,
-    stroked: true,
-    getLineColor: d => (d.properties.gmuid === selectedGmu ? [78, 205, 196, 255] : [70, 85, 100, 180]),
-    getLineWidth: d => (d.properties.gmuid === selectedGmu ? 7 : 1),
-    lineWidthMinPixels: 1,
-    lineWidthMaxPixels: 7,
-    lineWidthUnits: 'pixels',
-    extruded: units3dOn && extrudeAmt > 0,
-    wireframe: units3dOn && extrudeAmt > 0,
-    getElevation: d => unitValue(d.properties) * extrudeAmt * 120,
-    getFillColor: d => {
-      if (d.properties.gmuid === selectedGmu) return [0, 0, 0, 0];
-      const v = unitValue(d.properties);
-      if (minScore > 0 && v < minScore) return [30, 36, 44, 90];
-      return heatColor(v / 100).concat([200]);
-    },
-    onClick: info => {
-      if (!info.object) return;
-      const uid = info.object.properties.gmuid;
-      if (selectedGmu === uid) deselectUnit();
-      else selectUnit(uid);
-    },
-    updateTriggers: {
-      getFillColor: [metric, minScore, selectedYear, selectedGmu],
-      getElevation: [metric, extrudeAmt, selectedYear, units3dOn],
-      getLineColor: [selectedGmu],
-      getLineWidth: [selectedGmu],
-    },
-    transitions: { getElevation: 300, getFillColor: 250, getLineWidth: 150 },
+// click handler registered ONCE (maplibre delegation survives style switches)
+function wireClicks() {
+  if (clickWired) return;
+  clickWired = true;
+  map.on('click', 'gmu-fill', e => {
+    if (!e.features || !e.features.length) return;
+    const uid = e.features[0].properties.gmuid;
+    if (selectedGmu === uid) deselectUnit(); else selectUnit(uid);
   });
-  const layers = [polygonsLayer];
-  if (habitatLayer !== 'none') {
-    layers.push(new deck.GeoJsonLayer({
-      id: 'habitat',
-      data: `/data/${habitatLayer}.geojson`,
-      stroked: false,
-      getFillColor: [78, 205, 196, 42],
-      pickable: false,
-    }));
-  }
-  if (deckOverlay) { deckOverlay.setProps({ layers }); }
-  else {
-    deckOverlay = new deck.MapboxOverlay({ layers });
-    map.addControl(deckOverlay);
-  }
-  updateHotspotLayer();
-  renderUnitList();
+  map.on('mouseenter', 'gmu-fill', () => map.getCanvas().style.cursor = 'pointer');
+  map.on('mouseleave', 'gmu-fill', () => map.getCanvas().style.cursor = '');
 }
 
+// ---------------- terrain ----------------
+const TERRAIN_DEM = {
+  type: 'raster-dem',
+  tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+  encoding: 'terrarium', tileSize: 256, maxzoom: 15,
+};
+function setTerrain(on) {
+  try {
+    if (on) {
+      if (!map.getSource('terrain-dem')) map.addSource('terrain-dem', TERRAIN_DEM);
+      map.setTerrain({ source: 'terrain-dem', exaggeration: 1.35 });
+    } else {
+      map.setTerrain(null);
+    }
+  } catch (err) { console.error('terrain:', err); }
+}
+
+// ---------------- selection & detail ----------------
 function selectUnit(uid) {
   selectedGmu = uid;
   const u = UNITS.features.find(f => f.properties.gmuid === uid);
@@ -450,82 +392,96 @@ function selectUnit(uid) {
   document.getElementById('dTitle').textContent = `GMU ${p.gmuid}`;
   document.getElementById('dCounty').textContent =
     `${p.county || ''} · herd ${p.elk_dau || '—'} · ${Math.round(p.sq_miles)} mi²`;
-  const scoreEl = document.getElementById('dScore');
-  scoreEl.textContent = Math.round(unitValue(p));
-  scoreEl.style.color = `rgb(${heatColor((unitValue(p) || 0) / 100).join(',')})`;
-  document.getElementById('dScoreLabel').textContent =
-    (metric === 'harvest_score' && selectedYear !== 2024) ? `${selectedYear} SUCCESS %` : 'HUNT SCORE';
+  renderDetail(p);
+  document.getElementById('detail').classList.add('show');
+  ensureUnitLayers();
+  loadHotspots(uid);
+  const c = centroidOf(u);
+  map.flyTo({ center: c, zoom: Math.max(map.getZoom(), 8.5), pitch: 0, duration: 800 });
+}
+
+function renderDetail(p) {
   const hy = (HISTORY && HISTORY[selectedGmu]) ? HISTORY[selectedGmu][String(selectedYear)] : null;
+  const scoreEl = document.getElementById('dScore');
+  const val = unitValue(p);
+  scoreEl.textContent = Math.round(metric === 'harvest_score' && hy ? hy.success : (p.hunt_score ?? 0));
+  scoreEl.style.color = heatColor((parseFloat(scoreEl.textContent) || 0) / 100);
+  document.getElementById('dScoreLabel').textContent =
+    metric === 'harvest_score' && selectedYear !== 2024 ? `${selectedYear} SUCCESS %` : 'HUNT SCORE';
   const rows = [
     [`${selectedYear} success`, hy ? `${hy.success}%` : (p.success_pct != null ? `${p.success_pct}%` : '—')],
     [`${selectedYear} hunters`, hy ? hy.hunters.toLocaleString() : (p.hunters || 0).toLocaleString()],
     [`${selectedYear} elk harvested`, hy ? hy.total.toLocaleString() : (p.total_harvest || 0).toLocaleString()],
-    ['Harvest / mi² (6yr avg)', (p.harvest_density || 0).toFixed(2)],
+    ['Harvest / mi² (avg)', (p.harvest_density || 0).toFixed(2)],
     ['Public land', `${p.public_pct ?? '—'}%`],
     ['Habitat score', p.habitat_score ?? '—'],
   ];
   document.getElementById('dStats').innerHTML = rows.map(([k, v]) =>
     `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
-  renderHistory(p);
-  document.getElementById('detail').classList.add('show');
-  buildLayers();
-  loadHotspots(uid);
-  const c = centroidOf(u);
-  map.flyTo({ center: c, zoom: Math.max(map.getZoom(), 8.5), pitch: Math.max(map.getPitch(), 45), duration: 900 });
+  renderHistory();
 }
 
 function renderHistory() {
   const el = document.getElementById('dHist');
   if (!HISTORY || !selectedGmu || !HISTORY[selectedGmu]) { el.innerHTML = ''; return; }
-  const years = Object.keys(HISTORY[selectedGmu]).sort();
-  const maxTotal = Math.max(...years.map(y => HISTORY[selectedGmu][y].total), 1);
-  const bars = years.map(y => {
-    const h = HISTORY[selectedGmu][y];
-    const on = (y === String(selectedYear)) ? 'on' : '';
-    return `<div class="b ${on}" data-y="${y}" title="${y}: ${h.total} elk, ${h.success}% success, ${h.hunters} hunters">
-      <i style="height:${Math.round(h.total / maxTotal * 40) + 2}px"></i><span>${y.slice(2)}</span></div>`;
-  }).join('');
-  el.innerHTML = `<div class="hist-title"><span>Harvest history · tap a year</span><b id="histYear">${selectedYear}</b></div>
-    <div class="bars">${bars}</div>`;
+  const hist = HISTORY[selectedGmu];
+  const years = Object.keys(hist).sort();
+  const maxTotal = Math.max(...years.map(y => hist[y].total), 1);
+  const maxHunt = Math.max(...years.map(y => hist[y].hunters), 1);
+  const mkBars = (key, max, cls) => years.map(y =>
+    `<div class="b ${+y === selectedYear ? 'on' : ''}" data-y="${y}"
+       title="${y}: ${hist[y].total} elk · ${hist[y].hunters} hunters · ${hist[y].success}% success">
+       <i style="height:${Math.max(2, Math.round(hist[y][key] / max * 38))}px"></i>
+     </div>`).join('');
+  el.innerHTML = `
+    <div class="hist-title">Tap a year — updates detail + map</div>
+    <div class="legend2">
+      <span><i style="background:var(--accent2)"></i>Elk harvested</span>
+      <span><i style="background:#8a6d3f"></i>Hunters</span>
+    </div>
+    <div class="bars">${mkBars('total', maxTotal, '')}</div>
+    <div class="bars hunters">${mkBars('hunters', maxHunt, 'hunters')}</div>
+    <div style="display:flex; gap:6px" class="bars-labels">
+      ${years.map(y => `<span style="flex:1; text-align:center; font-size:9px; color:${+y === selectedYear ? 'var(--accent2)' : 'var(--dim)'}">${y.slice(2)}</span>`).join('')}
+    </div>`;
   el.querySelectorAll('.b').forEach(bEl => bEl.addEventListener('click', () => {
     selectedYear = +bEl.dataset.y;
-    document.getElementById('histYear').textContent = selectedYear;
-    const h = (HISTORY[selectedGmu] || {})[String(selectedYear)];
-    if (h && metric === 'harvest_score') {
-      document.getElementById('dScore').textContent = h.success;
-    }
-    buildLayers();
+    renderHistory();
+    const p = UNITS.features.find(f => f.properties.gmuid === selectedGmu)?.properties;
+    if (p) renderDetail(p);
+    ensureUnitLayers();
   }));
-  if (metric === 'harvest_score') {
-    document.querySelector('#dHist .hist-title span').textContent = 'Success by year · tap to color map';
-  }
 }
 
 function loadHotspots(uid) {
   const note = document.getElementById('dHot');
-  if (hotspotsCache[uid]) { note.textContent = hotspotNoteText(); return; }
+  if (hotspotsCache[uid]) { hotspotNote(); return; }
   fetch(`/data/hotspots/${uid}.geojson`)
     .then(r => { if (!r.ok) throw new Error('none'); return r.json(); })
     .then(gj => {
       hotspotsCache[uid] = gj.features;
-      note.textContent = hotspotNoteText();
-      buildLayers();
+      hotspotNote();
+      updateHotspotLayer();
     })
-    .catch(() => {
-      note.textContent = 'No hotspot grid for this unit (no significant elk habitat mapped).';
-    });
+    .catch(() => { note.textContent = 'No hotspot grid for this unit (no significant mapped elk habitat).'; });
 }
-function hotspotNoteText() {
+function hotspotNote() {
   const n = hotspotsCache[selectedGmu]?.length || 0;
-  return `🔥 ${n} hotspot cells — modeled from CPW elk habitat layers × public land. Red-hot = highest habitat-weighted score, blue = moderate. Click a dot to see its score. Directional: hunt the red clusters, prioritize public-land cells (darker stroke).`;
+  document.getElementById('dHot').textContent =
+    `🔥 ${n} hotspot cells (smooth heatmap; individual cells at high zoom) — modeled from CPW elk habitat layers × public land. Red = highest habitat-weighted score.`;
 }
 
 function deselectUnit() {
+  if (selectedGmu != null && map.getSource('gmu-src')) {
+    map.setFeatureState({ source: 'gmu-src', id: selectedGmu }, { selected: false });
+  }
   selectedGmu = null;
   document.getElementById('detail').classList.remove('show');
-  buildLayers();
+  ['gmu-heat', 'gmu-dots'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  ensureUnitLayers();
 }
 
+// ---------------- unit list ----------------
 function visibleUnits() {
   const b = map.getBounds();
   const w = b.getWest(), e = b.getEast(), s = b.getSouth(), n = b.getNorth();
@@ -534,15 +490,12 @@ function visibleUnits() {
     return x >= w && x <= e && y >= s && y <= n;
   });
 }
-
 function renderUnitList() {
   if (!UNITS) return;
   const vis = visibleUnits();
-  const rows = vis
-    .map(f => f.properties)
+  const rows = vis.map(f => f.properties)
     .filter(p => unitValue(p) >= minScore)
-    .sort((a, b) => unitValue(b) - unitValue(a))
-    .slice(0, 50);
+    .sort((a, b) => unitValue(b) - unitValue(a)).slice(0, 50);
   document.getElementById('listMeta').textContent =
     `Top units in view · ${vis.length} on map · z${map.getZoom().toFixed(1)}`;
   const list = document.getElementById('unitList');
@@ -558,52 +511,30 @@ function renderUnitList() {
       if (selectedGmu === uid) deselectUnit(); else selectUnit(uid);
     }));
 }
-
 let listTimer = null;
-function scheduleListRender() {
+map.on('moveend', () => {
   if (listTimer) return;
-  listTimer = setTimeout(() => { listTimer = null; if (UNITS) renderUnitList(); }, 150);
-}
-map.on('moveend', scheduleListRender);
-map.on('zoomend', scheduleListRender);
+  listTimer = setTimeout(() => { listTimer = null; renderUnitList(); }, 150);
+});
 
-// ---- UI wiring ----
+// ---------------- UI wiring ----------------
 const panelToggle = document.getElementById('panelToggle');
 panelToggle.addEventListener('click', () => {
-  const p = document.getElementById('sidePanel');
-  const collapsed = p.classList.toggle('collapsed');
+  const collapsed = document.getElementById('sidePanel').classList.toggle('collapsed');
   panelToggle.textContent = collapsed ? '▶' : '◀';
 });
 if (window.innerWidth < 720) {
   document.getElementById('sidePanel').classList.add('collapsed');
   panelToggle.textContent = '▶';
 }
-document.getElementById('detailClose').addEventListener('click', deselectUnit);
-
-document.getElementById('baseSeg').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  document.querySelectorAll('#baseSeg button').forEach(x => x.classList.toggle('active', x === b));
-  switchBasemap(b.dataset.b);
-});
-const unit3dChip = document.getElementById('unit3dChip');
-unit3dChip.addEventListener('click', () => {
-  units3dOn = !units3dOn;
-  unit3dChip.classList.toggle('on', units3dOn);
-  if (units3dOn) terrainOn = false;
-  document.getElementById('terrainChip').classList.toggle('on', terrainOn);
-  document.getElementById('extrudeField').style.display = units3dOn ? 'flex' : 'none';
-  setTerrain(terrainOn);
-  buildLayers();
-});
-const terrainChip = document.getElementById('terrainChip');
-terrainChip.addEventListener('click', () => {
-  terrainOn = !terrainOn;
-  terrainChip.classList.toggle('on', terrainOn);
-  if (terrainOn) units3dOn = false;
-  unit3dChip.classList.toggle('on', units3dOn);
-  document.getElementById('extrudeField').style.display = units3dOn ? 'flex' : 'none';
-  setTerrain(terrainOn);
-  buildLayers();
+document.getElementById('detailClose').addEventListener('click', () => {
+  if (selectedGmu != null && map.getSource('gmu-src')) {
+    map.setFeatureState({ source: 'gmu-src', id: selectedGmu }, { selected: false });
+  }
+  selectedGmu = null;
+  document.getElementById('detail').classList.remove('show');
+  ['gmu-heat', 'gmu-dots'].forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+  ensureUnitLayers();
 });
 
 document.getElementById('metricSeg').addEventListener('click', e => {
@@ -611,49 +542,62 @@ document.getElementById('metricSeg').addEventListener('click', e => {
   document.querySelectorAll('#metricSeg button').forEach(x => x.classList.toggle('active', x === b));
   metric = b.dataset.m;
   document.getElementById('legendLabel').textContent = b.textContent + ' score';
-  buildLayers();
+  ensureUnitLayers();
+});
+document.getElementById('baseSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#baseSeg button').forEach(x => x.classList.toggle('active', x === b));
+  map.setStyle(BASEMAPS[b.dataset.b]);
+});
+const terrainChip = document.getElementById('terrainChip');
+terrainChip.addEventListener('click', () => {
+  terrainOn = !terrainOn;
+  terrainChip.classList.toggle('on', terrainOn);
+  setTerrain(terrainOn);
+});
+const hotspotChip = document.getElementById('hotspotChip');
+hotspotChip.addEventListener('click', () => {
+  hotspotsOn = !hotspotsOn;
+  hotspotChip.classList.toggle('on', hotspotsOn);
+  updateHotspotLayer();
 });
 const minScoreEl = document.getElementById('minScore');
 minScoreEl.addEventListener('input', () => {
   minScore = +minScoreEl.value;
   document.getElementById('minScoreVal').textContent = minScore;
-  buildLayers();
-});
-const extrudeEl = document.getElementById('extrude');
-extrudeEl.addEventListener('input', () => {
-  extrudeAmt = +extrudeEl.value / 100;
-  document.getElementById('extrudeVal').textContent = extrudeEl.value;
-  buildLayers();
+  ensureUnitLayers();
 });
 document.getElementById('layerToggles').addEventListener('click', e => {
   const chip = e.target.closest('.chip'); if (!chip) return;
   document.querySelectorAll('#layerToggles .chip').forEach(c => c.classList.toggle('on', c === chip));
   habitatLayer = chip.dataset.l;
-  buildLayers();
+  ensureUnitLayers();
 });
 
+// ---------------- lifecycle ----------------
 map.on('style.load', () => {
-  // re-apply terrain after basemap switch
+  // style switch wipes sources/layers/terrain — rebuild all
   if (terrainOn) setTerrain(true);
-  // deck overlay survives setStyle via mapbox overlay control, but re-add if needed
-  if (deckOverlay && !map.hasControl(deckOverlay)) map.addControl(deckOverlay);
-  buildLayers();
+  ensureUnitLayers();
+  updateHotspotLayer();
 });
-
+map.on('idle', () => {
+  // safety net: if layers got dropped (style race), re-ensure
+  if (UNITS && !map.getLayer('gmu-fill') && map.isStyleLoaded()) ensureUnitLayers();
+});
 map.on('load', async () => {
   try {
     const [uRes, hRes] = await Promise.all([
-      fetch('/data/units.geojson'),
-      fetch('/data/harvest_history.json'),
-    ]);
+      fetch('/data/units.geojson'), fetch('/data/harvest_history.json')]);
     if (!uRes.ok) throw new Error('HTTP ' + uRes.status);
     UNITS = await uRes.json();
     HISTORY = hRes.ok ? await hRes.json() : null;
     UNITS.features.forEach(f => { f.properties._c = centroidOf(f); });
-    buildLayers();
+    wireClicks();
+    ensureUnitLayers();
   } catch (err) {
     document.querySelector('.unit-list').innerHTML =
-      `<div style="padding:12px;color:#ff6b35;font-size:12px">Failed to load unit data: ${err.message}<br>Retry in a moment.</div>`;
+      `<div style="padding:12px;color:#ff6b35;font-size:12px">Failed to load: ${err.message}</div>`;
   }
 });
 </script>
