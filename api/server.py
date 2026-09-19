@@ -1,6 +1,7 @@
 """HuntMap server: static + units API + full auth system.
 Users: signup (email verify link w/ code), login, admin (user mgmt + SMTP settings).
 Stdlib only."""
+import gzip
 import hashlib
 import hmac
 import json
@@ -77,7 +78,18 @@ def init_authdb():
     CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
-    );''')
+    );
+    CREATE TABLE IF NOT EXISTS markers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        kind TEXT NOT NULL,          -- camp | sighted | harvested | parked | waypoint | glassing | water | trailhead
+        name TEXT,
+        notes TEXT,
+        lat REAL NOT NULL,
+        lon REAL NOT NULL,
+        created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_markers_user ON markers(user_id);''')
     # bootstrap admin from env
     admin_email = os.environ.get('HUNTMAP_ADMIN_EMAIL')
     admin_pw = os.environ.get('HUNTMAP_ADMIN_PASSWORD')
@@ -224,6 +236,17 @@ class Handler(SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass
 
+    # --- speed: gzip + caching for big static data files -----------------
+    GZ_TYPES = ('.geojson', '.json')
+    CACHE_SECONDS = 3600  # data refreshes on rebuild; 1h client cache is safe
+
+    def end_headers(self):
+        # Called by super().send_* — add cache headers for large static data
+        if self.path and any(self.path.endswith(t) for t in self.GZ_TYPES):
+            self.send_header('Cache-Control', f'public, max-age={self.CACHE_SECONDS}')
+            self.send_header('Vary', 'Accept-Encoding')
+        super().end_headers()
+
     # helpers -------------------------------------------------------------
     def cookie(self, name):
         c = http_cookies.SimpleCookie(self.headers.get('Cookie', ''))
@@ -266,7 +289,29 @@ class Handler(SimpleHTTPRequestHandler):
     PUBLIC_API = {'/api/signup', '/api/login', '/api/logout', '/api/me', '/api/verify'}
 
     def do_GET(self):
+        # gzip fast-path for big static data (auth-checked first)
         u = urlparse(self.path)
+        if (u.path.endswith(self.GZ_TYPES)
+                and 'gzip' in (self.headers.get('Accept-Encoding') or '')):
+            if not self.me():
+                self.send_response(302)
+                self.send_header('Location', '/login.html?next=' + quote(self.path, safe=''))
+                self.send_header('Content-Length', '0')
+                self.end_headers()
+                return
+            try:
+                path = self.translate_path(u.path)
+                with open(path, 'rb') as f:
+                    body = gzip.compress(f.read(), 6)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Content-Encoding', 'gzip')
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            except Exception:
+                pass  # fall through to default handler
         if u.path.startswith('/api/'):
             return self.route_api(u.path, u.query, None)
         if u.path.startswith('/verify'):
@@ -306,6 +351,8 @@ class Handler(SimpleHTTPRequestHandler):
             '/api/users/delete': lambda: self.api_user_delete(body),
             '/api/users/update': lambda: self.api_user_update(body),
             '/api/admin/settings': lambda: self.api_admin_settings(body),
+            '/api/markers': lambda: self.api_markers(body),
+            '/api/markers/delete': lambda: self.api_marker_delete(body),
         }
         fn = m.get(path)
         if fn:
@@ -491,6 +538,52 @@ h1{{color:{color};font-size:20px}} p{{line-height:1.5}}
         vals.append(uid)
         con = sqlite3.connect(AUTHDB)
         con.execute(f"UPDATE users SET {', '.join(sets)} WHERE id=?", vals)
+        con.commit()
+        con.close()
+        self.send_json({'ok': True})
+
+    MARKER_KINDS = ('camp', 'sighted', 'harvested', 'parked', 'waypoint', 'glassing', 'water', 'trailhead')
+
+    def api_markers(self, body):
+        u = self.require_auth()
+        if not u:
+            return
+        con = sqlite3.connect(AUTHDB)
+        con.row_factory = sqlite3.Row
+        if body and body.get('action') == 'add':
+            kind = (body.get('kind') or '').strip().lower()
+            if kind not in self.MARKER_KINDS:
+                con.close()
+                return self.send_json({'error': f'kind must be one of {", ".join(self.MARKER_KINDS)}'}, 400)
+            try:
+                lat, lon = float(body['lat']), float(body['lon'])
+            except (KeyError, TypeError, ValueError):
+                con.close()
+                return self.send_json({'error': 'lat/lon required'}, 400)
+            cur = con.execute(
+                'INSERT INTO markers (user_id,kind,name,notes,lat,lon,created_at) VALUES (?,?,?,?,?,?,?)',
+                (u['id'], kind, (body.get('name') or '').strip()[:120],
+                 (body.get('notes') or '').strip()[:2000], lat, lon, int(time.time())))
+            con.commit()
+            mid = cur.lastrowid
+            con.close()
+            return self.send_json({'ok': True, 'id': mid})
+        # list all markers for this user
+        rows = [dict(r) for r in con.execute(
+            'SELECT id,kind,name,notes,lat,lon,created_at FROM markers WHERE user_id=? ORDER BY created_at DESC',
+            (u['id'],))]
+        con.close()
+        self.send_json({'markers': rows})
+
+    def api_marker_delete(self, body):
+        u = self.require_auth()
+        if not u:
+            return
+        mid = body.get('id')
+        if not mid:
+            return self.send_json({'error': 'id required'}, 400)
+        con = sqlite3.connect(AUTHDB)
+        con.execute('DELETE FROM markers WHERE id=? AND user_id=?', (mid, u['id']))
         con.commit()
         con.close()
         self.send_json({'ok': True})
