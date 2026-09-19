@@ -275,9 +275,15 @@ document.getElementById('layerToggles').addEventListener('click', e => {
 });
 
 map.on('load', async () => {
-  const res = await fetch('/data/units.geojson');
-  UNITS = await res.json();
-  buildLayers();
+  try {
+    const res = await fetch('/data/units.geojson');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    UNITS = await res.json();
+    buildLayers();
+  } catch (err) {
+    document.querySelector('.unit-list').innerHTML =
+      `<div style="padding:12px;color:#ff6b35;font-size:12px">Failed to load unit data: ${err.message}<br>Retry in a moment.</div>`;
+  }
 });
 </script>
 </body>
