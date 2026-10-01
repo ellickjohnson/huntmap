@@ -287,6 +287,13 @@ class Handler(SimpleHTTPRequestHandler):
     # Everything else (the map, units API, static data) requires a signed-in session.
     PUBLIC_GET = {'/login.html', '/admin.html', '/favicon.ico'}
     PUBLIC_API = {'/api/signup', '/api/login', '/api/logout', '/api/me', '/api/verify'}
+    # Static data files that the frontend needs before login
+    PUBLIC_DATA = {'/data/harvest_history.json', '/data/units.geojson',
+                   '/data/land_public.geojson',
+                   '/data/elk_summer_concentration.geojson',
+                   '/data/elk_winter_concentration.geojson',
+                   '/data/elk_resident_population.geojson',
+                   '/data/elk_migration_corridors.geojson'}
 
     def do_GET(self):
         # gzip fast-path for big static data (auth-checked first)
@@ -318,7 +325,7 @@ class Handler(SimpleHTTPRequestHandler):
             qs = parse_qs(u.query)
             code = (qs.get('code') or [''])[0]
             return self.do_verify(code)
-        if u.path in self.PUBLIC_GET or u.path.startswith('/login') or u.path.startswith('/admin'):
+        if u.path in self.PUBLIC_GET or u.path.startswith('/login') or u.path.startswith('/admin') or u.path in self.PUBLIC_DATA:
             return super().do_GET()
         # everything else requires login
         if not self.me():
