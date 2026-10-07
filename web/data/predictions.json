@@ -1,0 +1,7936 @@
+{
+ "1": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   90,
+   105,
+   81,
+   79,
+   106,
+   82,
+   107
+  ],
+  "success": [
+   40.0,
+   37.0,
+   9.0,
+   46.0,
+   38.0,
+   37.0,
+   28.0
+  ],
+  "est_2026": {
+   "hunters": 97,
+   "success": 32.6
+  },
+  "pred_2027": {
+   "hunters": 98,
+   "success": 32.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 49,
+  "hunters_trend_pct_per_yr": -1.2,
+  "success_trend_pp_per_yr": -0.25,
+  "confidence": 0.0,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 107,
+   "success": 28.0
+  }
+ },
+ "2": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   190,
+   196,
+   240,
+   184,
+   170,
+   168,
+   181
+  ],
+  "success": [
+   72.0,
+   60.0,
+   53.0,
+   85.0,
+   59.0,
+   64.0,
+   66.3
+  ],
+  "est_2026": {
+   "hunters": 168,
+   "success": 65.2
+  },
+  "pred_2027": {
+   "hunters": 163,
+   "success": 65.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 2.9,
+  "success_trend_pp_per_yr": -0.11,
+  "confidence": 0.0,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 181,
+   "success": 66.3
+  }
+ },
+ "3": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   4037,
+   3842,
+   3727,
+   3783,
+   1629,
+   1038,
+   4161
+  ],
+  "success": [
+   28.0,
+   19.0,
+   24.0,
+   27.0,
+   9.0,
+   16.0,
+   20.1
+  ],
+  "est_2026": {
+   "hunters": 2126,
+   "success": 14.1
+  },
+  "pred_2027": {
+   "hunters": 1864,
+   "success": 12.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 57,
+  "hunters_trend_pct_per_yr": 8.3,
+  "success_trend_pp_per_yr": -1.6,
+  "confidence": 0.2,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 4161,
+   "success": 20.1
+  }
+ },
+ "4": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   5276,
+   5358,
+   4950,
+   4724,
+   2235,
+   1541,
+   1149
+  ],
+  "success": [
+   26.0,
+   29.0,
+   25.0,
+   29.0,
+   21.0,
+   25.0,
+   29.2
+  ],
+  "est_2026": {
+   "hunters": 358,
+   "success": 26.0
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 25.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 67,
+  "hunters_trend_pct_per_yr": 22.5,
+  "success_trend_pp_per_yr": -0.09,
+  "confidence": 0.0,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 1149,
+   "success": 29.2
+  }
+ },
+ "5": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2205,
+   2166,
+   2162,
+   2159,
+   1014,
+   874,
+   102
+  ],
+  "success": [
+   36.0,
+   34.0,
+   34.0,
+   33.0,
+   32.0,
+   36.0,
+   10.8
+  ],
+  "est_2026": {
+   "hunters": 92,
+   "success": 20.3
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 17.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 83,
+  "hunters_trend_pct_per_yr": 23.5,
+  "success_trend_pp_per_yr": -2.63,
+  "confidence": 0.4,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 102,
+   "success": 10.8
+  }
+ },
+ "6": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   3475,
+   3022,
+   3564,
+   3131,
+   3169,
+   3161,
+   5704
+  ],
+  "success": [
+   10.0,
+   12.0,
+   11.0,
+   8.0,
+   9.0,
+   10.0,
+   12.0
+  ],
+  "est_2026": {
+   "hunters": 4542,
+   "success": 10.3
+  },
+  "pred_2027": {
+   "hunters": 4777,
+   "success": 10.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 45,
+  "hunters_trend_pct_per_yr": -6.5,
+  "success_trend_pp_per_yr": 0.0,
+  "confidence": 0.0,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 5704,
+   "success": 12.0
+  }
+ },
+ "7": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1933,
+   912,
+   1780,
+   2081,
+   1823,
+   1630,
+   4272
+  ],
+  "success": [
+   10.0,
+   21.0,
+   11.0,
+   8.0,
+   9.0,
+   9.0,
+   10.2
+  ],
+  "est_2026": {
+   "hunters": 3275,
+   "success": 7.5
+  },
+  "pred_2027": {
+   "hunters": 3579,
+   "success": 6.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 31,
+  "hunters_trend_pct_per_yr": -14.7,
+  "success_trend_pp_per_yr": -0.91,
+  "confidence": 0.19,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 4272,
+   "success": 10.2
+  }
+ },
+ "8": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   1703,
+   848,
+   1874,
+   1889,
+   1958,
+   2219
+  ],
+  "success": [
+   13.0,
+   18.0,
+   16.0,
+   12.0,
+   10.0,
+   9.0
+  ],
+  "est_2026": {
+   "hunters": 2510,
+   "success": 6.8
+  },
+  "pred_2027": {
+   "hunters": 2680,
+   "success": 5.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 30,
+  "hunters_trend_pct_per_yr": -9.7,
+  "success_trend_pp_per_yr": -1.37,
+  "confidence": 0.45,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 2219,
+   "success": 9.0
+  }
+ },
+ "9": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   235,
+   219,
+   217,
+   208,
+   185,
+   197,
+   198
+  ],
+  "success": [
+   27.0,
+   52.0,
+   35.0,
+   40.0,
+   31.0,
+   39.0,
+   29.8
+  ],
+  "est_2026": {
+   "hunters": 182,
+   "success": 33.2
+  },
+  "pred_2027": {
+   "hunters": 175,
+   "success": 32.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 3.2,
+  "success_trend_pp_per_yr": -0.77,
+  "confidence": 0.04,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 198,
+   "success": 29.8
+  }
+ },
+ "10": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   563,
+   562,
+   548,
+   570,
+   258,
+   274,
+   358
+  ],
+  "success": [
+   48.0,
+   54.0,
+   42.0,
+   57.0,
+   49.0,
+   58.0,
+   51.4
+  ],
+  "est_2026": {
+   "hunters": 236,
+   "success": 54.9
+  },
+  "pred_2027": {
+   "hunters": 183,
+   "success": 55.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 63,
+  "hunters_trend_pct_per_yr": 11.8,
+  "success_trend_pp_per_yr": 0.9,
+  "confidence": 0.12,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 358,
+   "success": 51.4
+  }
+ },
+ "11": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   5311,
+   5724,
+   5240,
+   5316,
+   2698,
+   2467,
+   10643
+  ],
+  "success": [
+   26.0,
+   20.0,
+   21.0,
+   29.0,
+   16.0,
+   25.0,
+   23.8
+  ],
+  "est_2026": {
+   "hunters": 6334,
+   "success": 22.7
+  },
+  "pred_2027": {
+   "hunters": 6582,
+   "success": 22.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 46,
+  "hunters_trend_pct_per_yr": -4.6,
+  "success_trend_pp_per_yr": -0.06,
+  "confidence": 0.0,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 10643,
+   "success": 23.8
+  }
+ },
+ "12": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   5582,
+   6689,
+   6298,
+   6197,
+   3017,
+   2634,
+   2406
+  ],
+  "success": [
+   29.0,
+   24.0,
+   20.0,
+   25.0,
+   22.0,
+   29.0,
+   17.0
+  ],
+  "est_2026": {
+   "hunters": 1701,
+   "success": 20.3
+  },
+  "pred_2027": {
+   "hunters": 953,
+   "success": 19.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 67,
+  "hunters_trend_pct_per_yr": 15.9,
+  "success_trend_pp_per_yr": -0.86,
+  "confidence": 0.17,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 2406,
+   "success": 17.0
+  }
+ },
+ "13": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2371,
+   1989,
+   1941,
+   1877,
+   1262,
+   1219,
+   47
+  ],
+  "success": [
+   36.0,
+   29.0,
+   34.0,
+   42.0,
+   27.0,
+   41.0,
+   38.3
+  ],
+  "est_2026": {
+   "hunters": 216,
+   "success": 38.7
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 39.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 72,
+  "hunters_trend_pct_per_yr": 21.5,
+  "success_trend_pp_per_yr": 0.85,
+  "confidence": 0.1,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 47,
+   "success": 38.3
+  }
+ },
+ "14": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   3130,
+   3184,
+   2575,
+   2791,
+   2038,
+   1293,
+   857
+  ],
+  "success": [
+   10.0,
+   10.0,
+   11.0,
+   12.0,
+   6.0,
+   12.0,
+   23.1
+  ],
+  "est_2026": {
+   "hunters": 676,
+   "success": 17.5
+  },
+  "pred_2027": {
+   "hunters": 278,
+   "success": 18.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 78,
+  "hunters_trend_pct_per_yr": 17.5,
+  "success_trend_pp_per_yr": 1.37,
+  "confidence": 0.31,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 857,
+   "success": 23.1
+  }
+ },
+ "15": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   4465,
+   4903,
+   4715,
+   4314,
+   4336,
+   3738,
+   1764
+  ],
+  "success": [
+   9.0,
+   10.0,
+   8.0,
+   10.0,
+   9.0,
+   11.0,
+   12.1
+  ],
+  "est_2026": {
+   "hunters": 2489,
+   "success": 11.6
+  },
+  "pred_2027": {
+   "hunters": 2103,
+   "success": 12.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 69,
+  "hunters_trend_pct_per_yr": 9.6,
+  "success_trend_pp_per_yr": 0.44,
+  "confidence": 0.48,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 1764,
+   "success": 12.1
+  }
+ },
+ "16": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2027,
+   2188,
+   2224,
+   2035,
+   1838,
+   1839,
+   277
+  ],
+  "success": [
+   16.0,
+   16.0,
+   11.0,
+   11.0,
+   12.0,
+   15.0,
+   9.7
+  ],
+  "est_2026": {
+   "hunters": 871,
+   "success": 10.1
+  },
+  "pred_2027": {
+   "hunters": 644,
+   "success": 9.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 68,
+  "hunters_trend_pct_per_yr": 12.7,
+  "success_trend_pp_per_yr": -0.71,
+  "confidence": 0.34,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 277,
+   "success": 9.7
+  }
+ },
+ "17": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2077,
+   2049,
+   2260,
+   2031,
+   2238,
+   1994,
+   579
+  ],
+  "success": [
+   14.0,
+   9.0,
+   12.0,
+   11.0,
+   7.0,
+   16.0,
+   8.3
+  ],
+  "est_2026": {
+   "hunters": 1229,
+   "success": 9.9
+  },
+  "pred_2027": {
+   "hunters": 1064,
+   "success": 9.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 57,
+  "hunters_trend_pct_per_yr": 8.7,
+  "success_trend_pp_per_yr": -0.29,
+  "confidence": 0.04,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 579,
+   "success": 8.3
+  }
+ },
+ "18": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   6371,
+   4055,
+   4683,
+   5335,
+   5500,
+   4997,
+   2978
+  ],
+  "success": [
+   7.0,
+   9.0,
+   10.0,
+   11.0,
+   10.0,
+   13.0,
+   11.3
+  ],
+  "est_2026": {
+   "hunters": 3777,
+   "success": 13.2
+  },
+  "pred_2027": {
+   "hunters": 3510,
+   "success": 13.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 59,
+  "hunters_trend_pct_per_yr": 5.5,
+  "success_trend_pp_per_yr": 0.75,
+  "confidence": 0.28,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 2978,
+   "success": 11.3
+  }
+ },
+ "19": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1311,
+   222,
+   1111,
+   1038,
+   988,
+   1140,
+   766
+  ],
+  "success": [
+   10.0,
+   8.0,
+   12.0,
+   8.0,
+   10.0,
+   10.0,
+   13.3
+  ],
+  "est_2026": {
+   "hunters": 951,
+   "success": 11.9
+  },
+  "pred_2027": {
+   "hunters": 953,
+   "success": 12.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 50,
+  "hunters_trend_pct_per_yr": -0.3,
+  "success_trend_pp_per_yr": 0.43,
+  "confidence": 0.0,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 766,
+   "success": 13.3
+  }
+ },
+ "20": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   975,
+   963,
+   942,
+   903,
+   822,
+   875,
+   828
+  ],
+  "success": [
+   41.0,
+   44.0,
+   39.0,
+   36.0,
+   49.0,
+   41.0,
+   51.6
+  ],
+  "est_2026": {
+   "hunters": 796,
+   "success": 48.2
+  },
+  "pred_2027": {
+   "hunters": 770,
+   "success": 49.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 56,
+  "hunters_trend_pct_per_yr": 2.9,
+  "success_trend_pp_per_yr": 1.28,
+  "confidence": 0.25,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 828,
+   "success": 51.6
+  }
+ },
+ "21": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2209,
+   2285,
+   2383,
+   2159,
+   1906,
+   1992,
+   2447
+  ],
+  "success": [
+   13.0,
+   18.0,
+   16.0,
+   19.0,
+   19.0,
+   16.0,
+   25.1
+  ],
+  "est_2026": {
+   "hunters": 2147,
+   "success": 23.1
+  },
+  "pred_2027": {
+   "hunters": 2135,
+   "success": 24.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 0.6,
+  "success_trend_pp_per_yr": 1.26,
+  "confidence": 0.02,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 2447,
+   "success": 25.1
+  }
+ },
+ "22": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2692,
+   2909,
+   2963,
+   3370,
+   2761,
+   2668,
+   317
+  ],
+  "success": [
+   22.0,
+   22.0,
+   22.0,
+   22.0,
+   18.0,
+   29.0,
+   49.8
+  ],
+  "est_2026": {
+   "hunters": 1410,
+   "success": 39.7
+  },
+  "pred_2027": {
+   "hunters": 1131,
+   "success": 43.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 74,
+  "hunters_trend_pct_per_yr": 11.0,
+  "success_trend_pp_per_yr": 3.34,
+  "confidence": 0.36,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 317,
+   "success": 49.8
+  }
+ },
+ "23": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   4328,
+   4303,
+   4481,
+   3883,
+   2436,
+   1870,
+   35
+  ],
+  "success": [
+   16.0,
+   18.0,
+   16.0,
+   19.0,
+   18.0,
+   23.0,
+   57.1
+  ],
+  "est_2026": {
+   "hunters": 221,
+   "success": 43.2
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 48.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 100,
+  "hunters_trend_pct_per_yr": 23.2,
+  "success_trend_pp_per_yr": 4.83,
+  "confidence": 0.49,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 35,
+   "success": 57.1
+  }
+ },
+ "24": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   3627,
+   4247,
+   4113,
+   3431,
+   2193,
+   1879
+  ],
+  "success": [
+   14.0,
+   14.0,
+   15.0,
+   15.0,
+   11.0,
+   14.0
+  ],
+  "est_2026": {
+   "hunters": 1245,
+   "success": 12.7
+  },
+  "pred_2027": {
+   "hunters": 799,
+   "success": 12.4
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 63,
+  "hunters_trend_pct_per_yr": 13.7,
+  "success_trend_pp_per_yr": -0.26,
+  "confidence": 0.11,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 1879,
+   "success": 14.0
+  }
+ },
+ "25": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1659,
+   1804,
+   1859,
+   1764,
+   1954,
+   1721,
+   1546
+  ],
+  "success": [
+   12.0,
+   12.0,
+   14.0,
+   16.0,
+   12.0,
+   13.0,
+   8.9
+  ],
+  "est_2026": {
+   "hunters": 1700,
+   "success": 11.2
+  },
+  "pred_2027": {
+   "hunters": 1685,
+   "success": 10.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 50,
+  "hunters_trend_pct_per_yr": 0.8,
+  "success_trend_pp_per_yr": -0.33,
+  "confidence": 0.06,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 1546,
+   "success": 8.9
+  }
+ },
+ "26": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1146,
+   1257,
+   1396,
+   1306,
+   1233,
+   1174,
+   50
+  ],
+  "success": [
+   11.0,
+   13.0,
+   12.0,
+   15.0,
+   7.0,
+   12.0,
+   4.0
+  ],
+  "est_2026": {
+   "hunters": 564,
+   "success": 6.6
+  },
+  "pred_2027": {
+   "hunters": 434,
+   "success": 5.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 66,
+  "hunters_trend_pct_per_yr": 12.0,
+  "success_trend_pp_per_yr": -1.0,
+  "confidence": 0.33,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 50,
+   "success": 4.0
+  }
+ },
+ "27": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1715,
+   1841,
+   1764,
+   1490,
+   1579,
+   1523,
+   313
+  ],
+  "success": [
+   12.0,
+   11.0,
+   8.0,
+   12.0,
+   10.0,
+   7.0,
+   8.0
+  ],
+  "est_2026": {
+   "hunters": 743,
+   "success": 7.1
+  },
+  "pred_2027": {
+   "hunters": 563,
+   "success": 6.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 70,
+  "hunters_trend_pct_per_yr": 12.3,
+  "success_trend_pp_per_yr": -0.64,
+  "confidence": 0.46,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 313,
+   "success": 8.0
+  }
+ },
+ "28": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   4628,
+   3876,
+   4759,
+   4040,
+   3871,
+   2871,
+   1837
+  ],
+  "success": [
+   11.0,
+   14.0,
+   7.0,
+   8.0,
+   5.0,
+   6.0,
+   10.0
+  ],
+  "est_2026": {
+   "hunters": 2087,
+   "success": 5.7
+  },
+  "pred_2027": {
+   "hunters": 1685,
+   "success": 5.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 63,
+  "hunters_trend_pct_per_yr": 10.9,
+  "success_trend_pp_per_yr": -0.75,
+  "confidence": 0.27,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 1837,
+   "success": 10.0
+  }
+ },
+ "29": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   218,
+   171,
+   223,
+   227,
+   261,
+   249,
+   244
+  ],
+  "success": [
+   28.0,
+   50.0,
+   26.0,
+   40.0,
+   28.0,
+   28.0,
+   27.0
+  ],
+  "est_2026": {
+   "hunters": 266,
+   "success": 26.0
+  },
+  "pred_2027": {
+   "hunters": 276,
+   "success": 24.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 43,
+  "hunters_trend_pct_per_yr": -4.3,
+  "success_trend_pp_per_yr": -1.61,
+  "confidence": 0.15,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 244,
+   "success": 27.0
+  }
+ },
+ "30": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1050,
+   1023,
+   1094,
+   1155,
+   1126,
+   994,
+   621
+  ],
+  "success": [
+   12.0,
+   21.0,
+   20.0,
+   20.0,
+   12.0,
+   25.0,
+   27.1
+  ],
+  "est_2026": {
+   "hunters": 821,
+   "success": 26.1
+  },
+  "pred_2027": {
+   "hunters": 775,
+   "success": 27.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 60,
+  "hunters_trend_pct_per_yr": 4.6,
+  "success_trend_pp_per_yr": 1.62,
+  "confidence": 0.32,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 621,
+   "success": 27.1
+  }
+ },
+ "31": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1663,
+   1532,
+   1774,
+   1742,
+   1566,
+   389
+  ],
+  "success": [
+   25.0,
+   25.0,
+   20.0,
+   27.0,
+   24.0,
+   28.0
+  ],
+  "est_2026": {
+   "hunters": 663,
+   "success": 27.2
+  },
+  "pred_2027": {
+   "hunters": 483,
+   "success": 27.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 65,
+  "hunters_trend_pct_per_yr": 12.5,
+  "success_trend_pp_per_yr": 0.54,
+  "confidence": 0.18,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 389,
+   "success": 28.0
+  }
+ },
+ "32": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   876,
+   861,
+   833,
+   807,
+   689
+  ],
+  "success": [
+   20.0,
+   19.0,
+   22.0,
+   18.0,
+   26.0
+  ],
+  "est_2026": {
+   "hunters": 599,
+   "success": 26.5
+  },
+  "pred_2027": {
+   "hunters": 556,
+   "success": 27.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 60,
+  "hunters_trend_pct_per_yr": 5.3,
+  "success_trend_pp_per_yr": 1.1,
+  "confidence": 0.3,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 689,
+   "success": 26.0
+  }
+ },
+ "33": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3199,
+   2930,
+   2694,
+   2697,
+   2351,
+   1537
+  ],
+  "success": [
+   9.0,
+   12.0,
+   11.0,
+   15.0,
+   11.0,
+   14.6
+  ],
+  "est_2026": {
+   "hunters": 1444,
+   "success": 15.3
+  },
+  "pred_2027": {
+   "hunters": 1184,
+   "success": 16.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 70,
+  "hunters_trend_pct_per_yr": 10.1,
+  "success_trend_pp_per_yr": 0.73,
+  "confidence": 0.46,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1537,
+   "success": 14.6
+  }
+ },
+ "34": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1049,
+   647,
+   1129,
+   1118,
+   952,
+   137
+  ],
+  "success": [
+   10.0,
+   13.0,
+   8.0,
+   10.0,
+   8.0,
+   10.2
+  ],
+  "est_2026": {
+   "hunters": 369,
+   "success": 8.8
+  },
+  "pred_2027": {
+   "hunters": 260,
+   "success": 8.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 62,
+  "hunters_trend_pct_per_yr": 12.9,
+  "success_trend_pp_per_yr": -0.24,
+  "confidence": 0.08,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 137,
+   "success": 10.2
+  }
+ },
+ "35": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1070,
+   1044,
+   1031,
+   954,
+   993,
+   1132
+  ],
+  "success": [
+   12.0,
+   11.0,
+   11.0,
+   14.0,
+   13.0,
+   17.0
+  ],
+  "est_2026": {
+   "hunters": 1062,
+   "success": 16.9
+  },
+  "pred_2027": {
+   "hunters": 1068,
+   "success": 17.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 51,
+  "hunters_trend_pct_per_yr": -0.6,
+  "success_trend_pp_per_yr": 0.9,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1132,
+   "success": 17.0
+  }
+ },
+ "36": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1353,
+   1501,
+   1481,
+   1381,
+   1349,
+   293
+  ],
+  "success": [
+   11.0,
+   13.0,
+   6.0,
+   11.0,
+   9.0,
+   10.2
+  ],
+  "est_2026": {
+   "hunters": 509,
+   "success": 9.0
+  },
+  "pred_2027": {
+   "hunters": 344,
+   "success": 8.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 61,
+  "hunters_trend_pct_per_yr": 13.5,
+  "success_trend_pp_per_yr": -0.23,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 293,
+   "success": 10.2
+  }
+ },
+ "37": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   2875,
+   3155,
+   2545,
+   2354,
+   2113
+  ],
+  "success": [
+   7.0,
+   10.0,
+   6.0,
+   12.0,
+   10.0
+  ],
+  "est_2026": {
+   "hunters": 1446,
+   "success": 13.0
+  },
+  "pred_2027": {
+   "hunters": 1213,
+   "success": 13.8
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 63,
+  "hunters_trend_pct_per_yr": 8.9,
+  "success_trend_pp_per_yr": 0.8,
+  "confidence": 0.27,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 2113,
+   "success": 10.0
+  }
+ },
+ "38": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1211,
+   1125,
+   1059,
+   1000,
+   1038,
+   298
+  ],
+  "success": [
+   9.0,
+   7.0,
+   7.0,
+   12.0,
+   10.0,
+   10.7
+  ],
+  "est_2026": {
+   "hunters": 380,
+   "success": 11.6
+  },
+  "pred_2027": {
+   "hunters": 247,
+   "success": 12.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 72,
+  "hunters_trend_pct_per_yr": 13.9,
+  "success_trend_pp_per_yr": 0.54,
+  "confidence": 0.34,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 298,
+   "success": 10.7
+  }
+ },
+ "39": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   461,
+   344,
+   396,
+   414,
+   425,
+   410
+  ],
+  "success": [
+   29.0,
+   28.0,
+   31.0,
+   33.0,
+   27.0,
+   32.2
+  ],
+  "est_2026": {
+   "hunters": 409,
+   "success": 31.8
+  },
+  "pred_2027": {
+   "hunters": 409,
+   "success": 32.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 50,
+  "hunters_trend_pct_per_yr": -0.0,
+  "success_trend_pp_per_yr": 0.41,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 410,
+   "success": 32.2
+  }
+ },
+ "40": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   482,
+   500,
+   465,
+   470,
+   507,
+   545
+  ],
+  "success": [
+   52.0,
+   56.0,
+   48.0,
+   53.0,
+   60.0,
+   55.4
+  ],
+  "est_2026": {
+   "hunters": 536,
+   "success": 57.5
+  },
+  "pred_2027": {
+   "hunters": 545,
+   "success": 58.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 49,
+  "hunters_trend_pct_per_yr": -1.9,
+  "success_trend_pp_per_yr": 0.79,
+  "confidence": 0.17,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 545,
+   "success": 55.4
+  }
+ },
+ "41": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1871,
+   1907,
+   1844,
+   1646,
+   1685,
+   4949
+  ],
+  "success": [
+   18.0,
+   13.0,
+   11.0,
+   17.0,
+   18.0,
+   19.1
+  ],
+  "est_2026": {
+   "hunters": 4155,
+   "success": 19.0
+  },
+  "pred_2027": {
+   "hunters": 4579,
+   "success": 19.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 28,
+  "hunters_trend_pct_per_yr": -18.3,
+  "success_trend_pp_per_yr": 0.7,
+  "confidence": 0.22,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 4949,
+   "success": 19.1
+  }
+ },
+ "42": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3507,
+   3047,
+   3091,
+   3237,
+   3179,
+   885
+  ],
+  "success": [
+   16.0,
+   18.0,
+   14.0,
+   22.0,
+   20.0,
+   20.0
+  ],
+  "est_2026": {
+   "hunters": 1297,
+   "success": 21.8
+  },
+  "pred_2027": {
+   "hunters": 945,
+   "success": 22.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 71,
+  "hunters_trend_pct_per_yr": 12.5,
+  "success_trend_pp_per_yr": 0.8,
+  "confidence": 0.34,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 885,
+   "success": 20.0
+  }
+ },
+ "43": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3129,
+   3199,
+   3389,
+   3247,
+   3044,
+   1562
+  ],
+  "success": [
+   12.0,
+   18.0,
+   14.0,
+   18.0,
+   11.0,
+   15.1
+  ],
+  "est_2026": {
+   "hunters": 1891,
+   "success": 14.6
+  },
+  "pred_2027": {
+   "hunters": 1651,
+   "success": 14.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 56,
+  "hunters_trend_pct_per_yr": 8.2,
+  "success_trend_pp_per_yr": -0.01,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1562,
+   "success": 15.1
+  }
+ },
+ "44": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   717,
+   937,
+   811,
+   842,
+   917,
+   1667
+  ],
+  "success": [
+   13.0,
+   13.0,
+   13.0,
+   18.0,
+   14.0,
+   18.4
+  ],
+  "est_2026": {
+   "hunters": 1547,
+   "success": 18.8
+  },
+  "pred_2027": {
+   "hunters": 1678,
+   "success": 19.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 26,
+  "hunters_trend_pct_per_yr": -13.3,
+  "success_trend_pp_per_yr": 0.9,
+  "confidence": 0.56,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1667,
+   "success": 18.4
+  }
+ },
+ "45": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   572,
+   711,
+   653,
+   629,
+   698,
+   232
+  ],
+  "success": [
+   13.0,
+   13.0,
+   9.0,
+   9.0,
+   15.0,
+   7.8
+  ],
+  "est_2026": {
+   "hunters": 354,
+   "success": 8.7
+  },
+  "pred_2027": {
+   "hunters": 301,
+   "success": 8.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 60,
+  "hunters_trend_pct_per_yr": 9.1,
+  "success_trend_pp_per_yr": -0.57,
+  "confidence": 0.18,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 232,
+   "success": 7.8
+  }
+ },
+ "46": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   262,
+   272,
+   265,
+   261,
+   277,
+   236
+  ],
+  "success": [
+   15.0,
+   18.0,
+   17.0,
+   13.0,
+   14.0,
+   19.1
+  ],
+  "est_2026": {
+   "hunters": 246,
+   "success": 17.0
+  },
+  "pred_2027": {
+   "hunters": 243,
+   "success": 17.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 51,
+  "hunters_trend_pct_per_yr": 1.4,
+  "success_trend_pp_per_yr": 0.23,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 236,
+   "success": 19.1
+  }
+ },
+ "47": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   458,
+   458,
+   480,
+   371,
+   440,
+   174
+  ],
+  "success": [
+   15.0,
+   18.0,
+   18.0,
+   20.0,
+   17.0,
+   10.3
+  ],
+  "est_2026": {
+   "hunters": 208,
+   "success": 13.0
+  },
+  "pred_2027": {
+   "hunters": 165,
+   "success": 12.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 63,
+  "hunters_trend_pct_per_yr": 11.0,
+  "success_trend_pp_per_yr": -0.79,
+  "confidence": 0.25,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 174,
+   "success": 10.3
+  }
+ },
+ "48": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   435,
+   366,
+   342,
+   348,
+   339,
+   354
+  ],
+  "success": [
+   28.0,
+   30.0,
+   25.0,
+   35.0,
+   29.0,
+   25.1
+  ],
+  "est_2026": {
+   "hunters": 318,
+   "success": 27.3
+  },
+  "pred_2027": {
+   "hunters": 307,
+   "success": 27.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 2.9,
+  "success_trend_pp_per_yr": -0.31,
+  "confidence": 0.03,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 354,
+   "success": 25.1
+  }
+ },
+ "49": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   899,
+   937,
+   852,
+   876,
+   961,
+   971
+  ],
+  "success": [
+   35.0,
+   38.0,
+   36.0,
+   38.0,
+   36.0,
+   37.7
+  ],
+  "est_2026": {
+   "hunters": 969,
+   "success": 37.8
+  },
+  "pred_2027": {
+   "hunters": 981,
+   "success": 38.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 49,
+  "hunters_trend_pct_per_yr": -1.3,
+  "success_trend_pp_per_yr": 0.24,
+  "confidence": 0.17,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 971,
+   "success": 37.7
+  }
+ },
+ "50": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   691,
+   652,
+   641,
+   642,
+   655,
+   824
+  ],
+  "success": [
+   24.0,
+   26.0,
+   20.0,
+   24.0,
+   29.0,
+   22.7
+  ],
+  "est_2026": {
+   "hunters": 773,
+   "success": 24.6
+  },
+  "pred_2027": {
+   "hunters": 793,
+   "success": 24.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 48,
+  "hunters_trend_pct_per_yr": -3.0,
+  "success_trend_pp_per_yr": 0.07,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 824,
+   "success": 22.7
+  }
+ },
+ "51": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   531,
+   506,
+   495,
+   524,
+   578,
+   623,
+   688
+  ],
+  "success": [
+   20.0,
+   23.0,
+   30.0,
+   34.0,
+   28.0,
+   30.0,
+   32.0
+  ],
+  "est_2026": {
+   "hunters": 676,
+   "success": 35.0
+  },
+  "pred_2027": {
+   "hunters": 704,
+   "success": 36.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 45,
+  "hunters_trend_pct_per_yr": -5.0,
+  "success_trend_pp_per_yr": 1.71,
+  "confidence": 0.55,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 688,
+   "success": 32.0
+  }
+ },
+ "52": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1652,
+   1604,
+   1448,
+   1484,
+   1452,
+   1423,
+   749
+  ],
+  "success": [
+   9.0,
+   9.0,
+   16.0,
+   12.0,
+   12.0,
+   18.0,
+   17.1
+  ],
+  "est_2026": {
+   "hunters": 964,
+   "success": 18.8
+  },
+  "pred_2027": {
+   "hunters": 854,
+   "success": 20.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 71,
+  "hunters_trend_pct_per_yr": 7.8,
+  "success_trend_pp_per_yr": 1.37,
+  "confidence": 0.62,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 749,
+   "success": 17.1
+  }
+ },
+ "53": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   2169,
+   2152,
+   2370,
+   2133,
+   2067,
+   1019
+  ],
+  "success": [
+   14.0,
+   12.0,
+   10.0,
+   14.0,
+   13.0,
+   25.8
+  ],
+  "est_2026": {
+   "hunters": 1226,
+   "success": 23.0
+  },
+  "pred_2027": {
+   "hunters": 1051,
+   "success": 24.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 72,
+  "hunters_trend_pct_per_yr": 8.8,
+  "success_trend_pp_per_yr": 1.89,
+  "confidence": 0.53,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1019,
+   "success": 25.8
+  }
+ },
+ "54": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   2225,
+   2047,
+   2205,
+   2266,
+   2299,
+   731
+  ],
+  "success": [
+   15.0,
+   24.0,
+   19.0,
+   25.0,
+   18.0,
+   30.1
+  ],
+  "est_2026": {
+   "hunters": 1116,
+   "success": 29.3
+  },
+  "pred_2027": {
+   "hunters": 920,
+   "success": 31.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 72,
+  "hunters_trend_pct_per_yr": 10.0,
+  "success_trend_pp_per_yr": 1.71,
+  "confidence": 0.45,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 731,
+   "success": 30.1
+  }
+ },
+ "55": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   2946,
+   2681,
+   2810,
+   2563,
+   2770,
+   1102
+  ],
+  "success": [
+   8.0,
+   16.0,
+   11.0,
+   18.0,
+   13.0,
+   20.4
+  ],
+  "est_2026": {
+   "hunters": 1369,
+   "success": 21.1
+  },
+  "pred_2027": {
+   "hunters": 1113,
+   "success": 22.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 74,
+  "hunters_trend_pct_per_yr": 10.3,
+  "success_trend_pp_per_yr": 1.54,
+  "confidence": 0.52,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1102,
+   "success": 20.4
+  }
+ },
+ "56": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   445,
+   447,
+   413,
+   409,
+   423,
+   424
+  ],
+  "success": [
+   23.0,
+   17.0,
+   18.0,
+   25.0,
+   21.0,
+   25.0
+  ],
+  "est_2026": {
+   "hunters": 410,
+   "success": 24.8
+  },
+  "pred_2027": {
+   "hunters": 406,
+   "success": 25.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 53,
+  "hunters_trend_pct_per_yr": 0.9,
+  "success_trend_pp_per_yr": 0.77,
+  "confidence": 0.23,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 424,
+   "success": 25.0
+  }
+ },
+ "57": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   714,
+   631,
+   601,
+   581,
+   584,
+   1367
+  ],
+  "success": [
+   17.0,
+   21.0,
+   25.0,
+   26.0,
+   31.0,
+   32.1
+  ],
+  "est_2026": {
+   "hunters": 1150,
+   "success": 36.5
+  },
+  "pred_2027": {
+   "hunters": 1243,
+   "success": 39.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 35,
+  "hunters_trend_pct_per_yr": -12.5,
+  "success_trend_pp_per_yr": 2.57,
+  "confidence": 0.43,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1367,
+   "success": 32.1
+  }
+ },
+ "58": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   646,
+   803,
+   756,
+   775,
+   836
+  ],
+  "success": [
+   26.0,
+   32.0,
+   30.0,
+   35.0,
+   25.0
+  ],
+  "est_2026": {
+   "hunters": 939,
+   "success": 30.1
+  },
+  "pred_2027": {
+   "hunters": 974,
+   "success": 30.2
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 47,
+  "hunters_trend_pct_per_yr": -4.6,
+  "success_trend_pp_per_yr": 0.1,
+  "confidence": 0.0,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 836,
+   "success": 25.0
+  }
+ },
+ "59": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   708,
+   738,
+   746,
+   697,
+   727,
+   858
+  ],
+  "success": [
+   14.0,
+   12.0,
+   11.0,
+   9.0,
+   8.0,
+   9.4
+  ],
+  "est_2026": {
+   "hunters": 829,
+   "success": 6.9
+  },
+  "pred_2027": {
+   "hunters": 848,
+   "success": 6.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 43,
+  "hunters_trend_pct_per_yr": -2.6,
+  "success_trend_pp_per_yr": -0.84,
+  "confidence": 0.51,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 858,
+   "success": 9.4
+  }
+ },
+ "60": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   414,
+   375,
+   422,
+   351,
+   461,
+   278
+  ],
+  "success": [
+   20.0,
+   23.0,
+   24.0,
+   30.0,
+   15.0,
+   21.9
+  ],
+  "est_2026": {
+   "hunters": 318,
+   "success": 21.4
+  },
+  "pred_2027": {
+   "hunters": 303,
+   "success": 21.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 53,
+  "hunters_trend_pct_per_yr": 3.9,
+  "success_trend_pp_per_yr": -0.2,
+  "confidence": 0.01,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 278,
+   "success": 21.9
+  }
+ },
+ "61": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1098,
+   1112,
+   1146,
+   1181,
+   1114,
+   1384
+  ],
+  "success": [
+   45.0,
+   59.0,
+   53.0,
+   53.0,
+   53.0,
+   50.3
+  ],
+  "est_2026": {
+   "hunters": 1348,
+   "success": 52.7
+  },
+  "pred_2027": {
+   "hunters": 1389,
+   "success": 52.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 47,
+  "hunters_trend_pct_per_yr": -3.5,
+  "success_trend_pp_per_yr": 0.1,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1384,
+   "success": 50.3
+  }
+ },
+ "62": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   4857,
+   4831,
+   4770,
+   4804,
+   5072,
+   2536
+  ],
+  "success": [
+   13.0,
+   16.0,
+   14.0,
+   15.0,
+   17.0,
+   25.0
+  ],
+  "est_2026": {
+   "hunters": 3110,
+   "success": 24.2
+  },
+  "pred_2027": {
+   "hunters": 2795,
+   "success": 25.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 68,
+  "hunters_trend_pct_per_yr": 7.0,
+  "success_trend_pp_per_yr": 1.73,
+  "confidence": 0.51,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 2536,
+   "success": 25.0
+  }
+ },
+ "63": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1426,
+   1574,
+   1481,
+   1480,
+   1502,
+   697
+  ],
+  "success": [
+   19.0,
+   20.0,
+   15.0,
+   19.0,
+   17.0,
+   21.4
+  ],
+  "est_2026": {
+   "hunters": 878,
+   "success": 19.7
+  },
+  "pred_2027": {
+   "hunters": 767,
+   "success": 20.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 58,
+  "hunters_trend_pct_per_yr": 8.2,
+  "success_trend_pp_per_yr": 0.27,
+  "confidence": 0.07,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 697,
+   "success": 21.4
+  }
+ },
+ "64": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1159,
+   1131,
+   1078,
+   1051,
+   1041,
+   2258
+  ],
+  "success": [
+   19.0,
+   20.0,
+   19.0,
+   23.0,
+   21.0,
+   26.0
+  ],
+  "est_2026": {
+   "hunters": 1949,
+   "success": 26.1
+  },
+  "pred_2027": {
+   "hunters": 2102,
+   "success": 27.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 31,
+  "hunters_trend_pct_per_yr": -11.9,
+  "success_trend_pp_per_yr": 1.1,
+  "confidence": 0.48,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 2258,
+   "success": 26.0
+  }
+ },
+ "65": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   3029,
+   3183,
+   3308,
+   3255,
+   3410
+  ],
+  "success": [
+   19.0,
+   19.0,
+   18.0,
+   20.0,
+   18.0
+  ],
+  "est_2026": {
+   "hunters": 3654,
+   "success": 18.3
+  },
+  "pred_2027": {
+   "hunters": 3737,
+   "success": 18.2
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 48,
+  "hunters_trend_pct_per_yr": -2.6,
+  "success_trend_pp_per_yr": -0.1,
+  "confidence": 0.04,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 3410,
+   "success": 18.0
+  }
+ },
+ "66": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1349,
+   1349,
+   1141,
+   1159,
+   1151,
+   1192
+  ],
+  "success": [
+   27.0,
+   46.0,
+   37.0,
+   42.0,
+   34.0,
+   40.8
+  ],
+  "est_2026": {
+   "hunters": 1091,
+   "success": 41.9
+  },
+  "pred_2027": {
+   "hunters": 1061,
+   "success": 42.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 54,
+  "hunters_trend_pct_per_yr": 2.5,
+  "success_trend_pp_per_yr": 0.94,
+  "confidence": 0.09,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1192,
+   "success": 40.8
+  }
+ },
+ "67": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1301,
+   1218,
+   989,
+   1038,
+   1032,
+   1059
+  ],
+  "success": [
+   17.0,
+   29.0,
+   27.0,
+   30.0,
+   24.0,
+   31.0
+  ],
+  "est_2026": {
+   "hunters": 938,
+   "success": 32.6
+  },
+  "pred_2027": {
+   "hunters": 899,
+   "success": 34.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 58,
+  "hunters_trend_pct_per_yr": 3.5,
+  "success_trend_pp_per_yr": 1.44,
+  "confidence": 0.36,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1059,
+   "success": 31.0
+  }
+ },
+ "68": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1899,
+   2139,
+   2294,
+   2339,
+   2308,
+   1209
+  ],
+  "success": [
+   7.0,
+   10.0,
+   6.0,
+   11.0,
+   8.0,
+   15.5
+  ],
+  "est_2026": {
+   "hunters": 1610,
+   "success": 14.5
+  },
+  "pred_2027": {
+   "hunters": 1512,
+   "success": 15.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 58,
+  "hunters_trend_pct_per_yr": 4.8,
+  "success_trend_pp_per_yr": 1.14,
+  "confidence": 0.23,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1209,
+   "success": 15.5
+  }
+ },
+ "69": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   413,
+   357,
+   237,
+   283,
+   335,
+   999
+  ],
+  "success": [
+   22.0,
+   30.0,
+   21.0,
+   24.0,
+   27.0,
+   30.1
+  ],
+  "est_2026": {
+   "hunters": 812,
+   "success": 29.7
+  },
+  "pred_2027": {
+   "hunters": 898,
+   "success": 30.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 25,
+  "hunters_trend_pct_per_yr": -19.8,
+  "success_trend_pp_per_yr": 0.93,
+  "confidence": 0.26,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 999,
+   "success": 30.1
+  }
+ },
+ "70": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3798,
+   3127,
+   3165,
+   3068,
+   3346,
+   2017
+  ],
+  "success": [
+   23.0,
+   26.0,
+   24.0,
+   32.0,
+   25.0,
+   36.8
+  ],
+  "est_2026": {
+   "hunters": 2113,
+   "success": 36.3
+  },
+  "pred_2027": {
+   "hunters": 1889,
+   "success": 38.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 71,
+  "hunters_trend_pct_per_yr": 7.3,
+  "success_trend_pp_per_yr": 1.97,
+  "confidence": 0.62,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 2017,
+   "success": 36.8
+  }
+ },
+ "71": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3330,
+   2826,
+   2560,
+   2462,
+   2439,
+   2216
+  ],
+  "success": [
+   9.0,
+   16.0,
+   13.0,
+   18.0,
+   17.0,
+   25.2
+  ],
+  "est_2026": {
+   "hunters": 1926,
+   "success": 26.3
+  },
+  "pred_2027": {
+   "hunters": 1762,
+   "success": 28.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 74,
+  "hunters_trend_pct_per_yr": 6.2,
+  "success_trend_pp_per_yr": 2.29,
+  "confidence": 0.82,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 2216,
+   "success": 25.2
+  }
+ },
+ "72": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   759,
+   482,
+   396,
+   407,
+   344,
+   108
+  ],
+  "success": [
+   12.0,
+   17.0,
+   5.0,
+   10.0,
+   14.0,
+   17.6
+  ],
+  "est_2026": {
+   "hunters": 19,
+   "success": 15.8
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 16.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 73,
+  "hunters_trend_pct_per_yr": 22.0,
+  "success_trend_pp_per_yr": 0.73,
+  "confidence": 0.11,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 108,
+   "success": 17.6
+  }
+ },
+ "73": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   852,
+   752,
+   782,
+   640,
+   605,
+   24
+  ],
+  "success": [
+   9.0,
+   12.0,
+   10.0,
+   15.0,
+   10.0,
+   33.3
+  ],
+  "est_2026": {
+   "hunters": 62,
+   "success": 29.5
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 32.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 100,
+  "hunters_trend_pct_per_yr": 20.7,
+  "success_trend_pp_per_yr": 3.37,
+  "confidence": 0.62,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 24,
+   "success": 33.3
+  }
+ },
+ "74": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   2222,
+   1675,
+   1833,
+   1559,
+   1635,
+   1079
+  ],
+  "success": [
+   13.0,
+   16.0,
+   15.0,
+   21.0,
+   17.0,
+   21.3
+  ],
+  "est_2026": {
+   "hunters": 991,
+   "success": 22.7
+  },
+  "pred_2027": {
+   "hunters": 835,
+   "success": 23.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 75,
+  "hunters_trend_pct_per_yr": 9.4,
+  "success_trend_pp_per_yr": 1.26,
+  "confidence": 0.67,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1079,
+   "success": 21.3
+  }
+ },
+ "75": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1735,
+   1632,
+   1493,
+   1351,
+   1469,
+   1337,
+   1058
+  ],
+  "success": [
+   12.0,
+   13.0,
+   14.0,
+   18.0,
+   14.0,
+   23.0,
+   22.4
+  ],
+  "est_2026": {
+   "hunters": 1061,
+   "success": 23.9
+  },
+  "pred_2027": {
+   "hunters": 967,
+   "success": 25.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 72,
+  "hunters_trend_pct_per_yr": 6.6,
+  "success_trend_pp_per_yr": 1.83,
+  "confidence": 0.75,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 1058,
+   "success": 22.4
+  }
+ },
+ "76": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1006,
+   968,
+   1009,
+   1091,
+   1118,
+   1162
+  ],
+  "success": [
+   37.0,
+   46.0,
+   33.0,
+   41.0,
+   32.0,
+   29.7
+  ],
+  "est_2026": {
+   "hunters": 1200,
+   "success": 28.7
+  },
+  "pred_2027": {
+   "hunters": 1232,
+   "success": 26.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 41,
+  "hunters_trend_pct_per_yr": -3.1,
+  "success_trend_pp_per_yr": -1.8,
+  "confidence": 0.4,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1162,
+   "success": 29.7
+  }
+ },
+ "77": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   3503,
+   3546,
+   3452,
+   3336,
+   3437,
+   3299,
+   2844
+  ],
+  "success": [
+   9.0,
+   17.0,
+   13.0,
+   17.0,
+   12.0,
+   21.0,
+   23.2
+  ],
+  "est_2026": {
+   "hunters": 2990,
+   "success": 23.1
+  },
+  "pred_2027": {
+   "hunters": 2901,
+   "success": 24.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 60,
+  "hunters_trend_pct_per_yr": 2.7,
+  "success_trend_pp_per_yr": 1.77,
+  "confidence": 0.57,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 2844,
+   "success": 23.2
+  }
+ },
+ "78": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   3393,
+   2921,
+   3116,
+   2955,
+   2879
+  ],
+  "success": [
+   16.0,
+   23.0,
+   17.0,
+   18.0,
+   14.0
+  ],
+  "est_2026": {
+   "hunters": 2556,
+   "success": 13.1
+  },
+  "pred_2027": {
+   "hunters": 2456,
+   "success": 12.2
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 3.3,
+  "success_trend_pp_per_yr": -0.9,
+  "confidence": 0.18,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 2879,
+   "success": 14.0
+  }
+ },
+ "79": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   951,
+   1124,
+   1089,
+   1159,
+   1136,
+   849
+  ],
+  "success": [
+   10.0,
+   8.0,
+   11.0,
+   12.0,
+   12.0,
+   9.9
+  ],
+  "est_2026": {
+   "hunters": 976,
+   "success": 11.5
+  },
+  "pred_2027": {
+   "hunters": 959,
+   "success": 11.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 1.6,
+  "success_trend_pp_per_yr": 0.24,
+  "confidence": 0.09,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 849,
+   "success": 9.9
+  }
+ },
+ "80": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3116,
+   3771,
+   3767,
+   2984,
+   3200,
+   2953
+  ],
+  "success": [
+   13.0,
+   14.0,
+   10.0,
+   17.0,
+   13.0,
+   20.3
+  ],
+  "est_2026": {
+   "hunters": 2927,
+   "success": 19.4
+  },
+  "pred_2027": {
+   "hunters": 2841,
+   "success": 20.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 55,
+  "hunters_trend_pct_per_yr": 2.6,
+  "success_trend_pp_per_yr": 1.11,
+  "confidence": 0.24,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 2953,
+   "success": 20.3
+  }
+ },
+ "81": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3785,
+   4554,
+   5074,
+   3462,
+   3780,
+   316
+  ],
+  "success": [
+   14.0,
+   14.0,
+   13.0,
+   18.0,
+   18.0,
+   30.1
+  ],
+  "est_2026": {
+   "hunters": 929,
+   "success": 29.2
+  },
+  "pred_2027": {
+   "hunters": 337,
+   "success": 31.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 92,
+  "hunters_trend_pct_per_yr": 16.9,
+  "success_trend_pp_per_yr": 2.61,
+  "confidence": 0.59,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 316,
+   "success": 30.1
+  }
+ },
+ "82": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   2313,
+   2553,
+   2551,
+   2565,
+   2588,
+   1005
+  ],
+  "success": [
+   22.0,
+   18.0,
+   21.0,
+   23.0,
+   22.0,
+   14.2
+  ],
+  "est_2026": {
+   "hunters": 1433,
+   "success": 16.6
+  },
+  "pred_2027": {
+   "hunters": 1241,
+   "success": 15.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 60,
+  "hunters_trend_pct_per_yr": 8.5,
+  "success_trend_pp_per_yr": -0.79,
+  "confidence": 0.26,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1005,
+   "success": 14.2
+  }
+ },
+ "83": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1402,
+   1373,
+   1120,
+   1029,
+   878,
+   722
+  ],
+  "success": [
+   18.0,
+   43.0,
+   25.0,
+   37.0,
+   26.0,
+   33.2
+  ],
+  "est_2026": {
+   "hunters": 557,
+   "success": 34.3
+  },
+  "pred_2027": {
+   "hunters": 435,
+   "success": 35.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 61,
+  "hunters_trend_pct_per_yr": 11.2,
+  "success_trend_pp_per_yr": 0.91,
+  "confidence": 0.05,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 722,
+   "success": 33.2
+  }
+ },
+ "84": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   763,
+   442,
+   536,
+   530,
+   667
+  ],
+  "success": [
+   33.0,
+   39.0,
+   37.0,
+   41.0,
+   44.0
+  ],
+  "est_2026": {
+   "hunters": 536,
+   "success": 50.8
+  },
+  "pred_2027": {
+   "hunters": 525,
+   "success": 53.2
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 54,
+  "hunters_trend_pct_per_yr": 1.8,
+  "success_trend_pp_per_yr": 2.4,
+  "confidence": 0.02,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 667,
+   "success": 44.0
+  }
+ },
+ "85": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3085,
+   3022,
+   3112,
+   3317,
+   2931,
+   1616
+  ],
+  "success": [
+   21.0,
+   18.0,
+   15.0,
+   18.0,
+   18.0,
+   29.6
+  ],
+  "est_2026": {
+   "hunters": 1930,
+   "success": 26.0
+  },
+  "pred_2027": {
+   "hunters": 1719,
+   "success": 27.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 64,
+  "hunters_trend_pct_per_yr": 7.4,
+  "success_trend_pp_per_yr": 1.4,
+  "confidence": 0.35,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1616,
+   "success": 29.6
+  }
+ },
+ "86": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1874,
+   2282,
+   2064,
+   1964,
+   2141,
+   1230
+  ],
+  "success": [
+   13.0,
+   15.0,
+   12.0,
+   12.0,
+   12.0,
+   22.3
+  ],
+  "est_2026": {
+   "hunters": 1449,
+   "success": 19.3
+  },
+  "pred_2027": {
+   "hunters": 1339,
+   "success": 20.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 61,
+  "hunters_trend_pct_per_yr": 5.7,
+  "success_trend_pp_per_yr": 1.14,
+  "confidence": 0.37,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 1230,
+   "success": 22.3
+  }
+ },
+ "87": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   161,
+   224,
+   167,
+   92,
+   94,
+   2013
+  ],
+  "success": [
+   32.0,
+   38.0,
+   24.0,
+   11.0,
+   28.0,
+   31.0
+  ],
+  "est_2026": {
+   "hunters": 1564,
+   "success": 23.6
+  },
+  "pred_2027": {
+   "hunters": 1819,
+   "success": 22.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 2,
+  "hunters_trend_pct_per_yr": -55.6,
+  "success_trend_pp_per_yr": -0.87,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 2013,
+   "success": 31.0
+  }
+ },
+ "88": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   18,
+   16,
+   9,
+   2,
+   8
+  ],
+  "success": [
+   17.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 0,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 0.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 100,
+  "hunters_trend_pct_per_yr": 32.1,
+  "success_trend_pp_per_yr": -3.4,
+  "confidence": 0.5,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 8,
+   "success": 0.0
+  }
+ },
+ "89": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   3,
+   15,
+   37,
+   5,
+   12
+  ],
+  "success": [
+   0.0,
+   27.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 18,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 19,
+   "success": 0.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 43,
+  "hunters_trend_pct_per_yr": -5.6,
+  "success_trend_pp_per_yr": -2.7,
+  "confidence": 0.01,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 12,
+   "success": 0.0
+  }
+ },
+ "93": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   8,
+   15,
+   15,
+   5,
+   11
+  ],
+  "success": [
+   0.0,
+   53.0,
+   0.0,
+   50.0,
+   25.0
+  ],
+  "est_2026": {
+   "hunters": 9,
+   "success": 49.1
+  },
+  "pred_2027": {
+   "hunters": 8,
+   "success": 53.8
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 58,
+  "hunters_trend_pct_per_yr": 3.7,
+  "success_trend_pp_per_yr": 4.7,
+  "confidence": 0.02,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 11,
+   "success": 25.0
+  }
+ },
+ "94": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   3,
+   18,
+   10,
+   12,
+   3
+  ],
+  "success": [
+   0.0,
+   17.0,
+   50.0,
+   58.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 6,
+   "success": 45.5
+  },
+  "pred_2027": {
+   "hunters": 6,
+   "success": 49.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 60,
+  "hunters_trend_pct_per_yr": 6.5,
+  "success_trend_pp_per_yr": 4.1,
+  "confidence": 0.02,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 3,
+   "success": 0.0
+  }
+ },
+ "96": {
+  "years": [
+   2019,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   3,
+   5,
+   10,
+   20
+  ],
+  "success": [
+   0.0,
+   0.0,
+   0.0,
+   29.0
+  ],
+  "est_2026": {
+   "hunters": 28,
+   "success": 34.8
+  },
+  "pred_2027": {
+   "hunters": 32,
+   "success": 40.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 0,
+  "hunters_trend_pct_per_yr": -41.5,
+  "success_trend_pp_per_yr": 5.8,
+  "confidence": 0.47,
+  "n_years": 4,
+  "last": {
+   "year": 2023,
+   "hunters": 20,
+   "success": 29.0
+  }
+ },
+ "98": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   25,
+   15,
+   48,
+   13,
+   25
+  ],
+  "success": [
+   0.0,
+   0.0,
+   21.0,
+   43.0,
+   11.0
+  ],
+  "est_2026": {
+   "hunters": 24,
+   "success": 47.5
+  },
+  "pred_2027": {
+   "hunters": 24,
+   "success": 54.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 57,
+  "hunters_trend_pct_per_yr": 0.8,
+  "success_trend_pp_per_yr": 6.5,
+  "confidence": 0.0,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 25,
+   "success": 11.0
+  }
+ },
+ "99": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   11,
+   15,
+   5,
+   5,
+   14
+  ],
+  "success": [
+   73.0,
+   0.0,
+   0.0,
+   0.0,
+   40.0
+  ],
+  "est_2026": {
+   "hunters": 8,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 8,
+   "success": 0.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 46,
+  "hunters_trend_pct_per_yr": 4.0,
+  "success_trend_pp_per_yr": -6.6,
+  "confidence": 0.02,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 14,
+   "success": 40.0
+  }
+ },
+ "101": {
+  "years": [
+   2019,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   6,
+   15,
+   12,
+   6
+  ],
+  "success": [
+   50.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 11,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 11,
+   "success": 0.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 35,
+  "hunters_trend_pct_per_yr": -2.6,
+  "success_trend_pp_per_yr": -12.86,
+  "confidence": 0.01,
+  "n_years": 4,
+  "last": {
+   "year": 2023,
+   "hunters": 6,
+   "success": 0.0
+  }
+ },
+ "102": {
+  "years": [
+   2019,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   5,
+   15,
+   21,
+   20
+  ],
+  "success": [
+   0.0,
+   0.0,
+   18.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 35,
+   "success": 11.8
+  },
+  "pred_2027": {
+   "hunters": 39,
+   "success": 13.4
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 27,
+  "hunters_trend_pct_per_yr": -26.8,
+  "success_trend_pp_per_yr": 1.54,
+  "confidence": 0.09,
+  "n_years": 4,
+  "last": {
+   "year": 2023,
+   "hunters": 20,
+   "success": 0.0
+  }
+ },
+ "104": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   200,
+   269,
+   331,
+   379,
+   416,
+   370
+  ],
+  "success": [
+   46.0,
+   41.0,
+   52.0,
+   49.0,
+   53.0,
+   38.4
+  ],
+  "est_2026": {
+   "hunters": 460,
+   "success": 44.6
+  },
+  "pred_2027": {
+   "hunters": 490,
+   "success": 44.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 42,
+  "hunters_trend_pct_per_yr": -9.3,
+  "success_trend_pp_per_yr": -0.46,
+  "confidence": 0.03,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 370,
+   "success": 38.4
+  }
+ },
+ "105": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   184,
+   223,
+   146,
+   199,
+   250
+  ],
+  "success": [
+   31.0,
+   48.0,
+   20.0,
+   31.0,
+   36.0
+  ],
+  "est_2026": {
+   "hunters": 254,
+   "success": 29.7
+  },
+  "pred_2027": {
+   "hunters": 265,
+   "success": 29.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 45,
+  "hunters_trend_pct_per_yr": -5.4,
+  "success_trend_pp_per_yr": -0.7,
+  "confidence": 0.01,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 250,
+   "success": 36.0
+  }
+ },
+ "106": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   25,
+   4,
+   10,
+   5,
+   17,
+   32
+  ],
+  "success": [
+   12.0,
+   0.0,
+   0.0,
+   0.0,
+   35.0,
+   42.0
+  ],
+  "est_2026": {
+   "hunters": 24,
+   "success": 47.6
+  },
+  "pred_2027": {
+   "hunters": 26,
+   "success": 54.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 47,
+  "hunters_trend_pct_per_yr": -12.7,
+  "success_trend_pp_per_yr": 7.29,
+  "confidence": 0.11,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 32,
+   "success": 42.0
+  }
+ },
+ "110": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   95,
+   102,
+   98,
+   139,
+   93,
+   161
+  ],
+  "success": [
+   35.0,
+   65.0,
+   55.0,
+   40.0,
+   30.0,
+   46.0
+  ],
+  "est_2026": {
+   "hunters": 159,
+   "success": 36.8
+  },
+  "pred_2027": {
+   "hunters": 169,
+   "success": 35.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 40,
+  "hunters_trend_pct_per_yr": -8.6,
+  "success_trend_pp_per_yr": -1.86,
+  "confidence": 0.07,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 161,
+   "success": 46.0
+  }
+ },
+ "111": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   24,
+   11,
+   5,
+   24,
+   14
+  ],
+  "success": [
+   25.0,
+   27.0,
+   0.0,
+   20.0,
+   20.0
+  ],
+  "est_2026": {
+   "hunters": 12,
+   "success": 9.9
+  },
+  "pred_2027": {
+   "hunters": 11,
+   "success": 8.2
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 4.5,
+  "success_trend_pp_per_yr": -1.7,
+  "confidence": 0.02,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 14,
+   "success": 20.0
+  }
+ },
+ "112": {
+  "years": [
+   2019,
+   2020,
+   2022,
+   2023
+  ],
+  "hunters": [
+   17,
+   8,
+   11,
+   15
+  ],
+  "success": [
+   18.0,
+   0.0,
+   35.0,
+   24.0
+  ],
+  "est_2026": {
+   "hunters": 12,
+   "success": 42.8
+  },
+  "pred_2027": {
+   "hunters": 12,
+   "success": 47.4
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 55,
+  "hunters_trend_pct_per_yr": 0.8,
+  "success_trend_pp_per_yr": 4.7,
+  "confidence": 0.0,
+  "n_years": 4,
+  "last": {
+   "year": 2023,
+   "hunters": 15,
+   "success": 24.0
+  }
+ },
+ "114": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   3,
+   15,
+   15,
+   13,
+   6,
+   11
+  ],
+  "success": [
+   0.0,
+   0.0,
+   33.0,
+   0.0,
+   0.0,
+   31.0
+  ],
+  "est_2026": {
+   "hunters": 12,
+   "success": 26.4
+  },
+  "pred_2027": {
+   "hunters": 12,
+   "success": 29.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 51,
+  "hunters_trend_pct_per_yr": -3.0,
+  "success_trend_pp_per_yr": 3.49,
+  "confidence": 0.01,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 11,
+   "success": 31.0
+  }
+ },
+ "115": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   5,
+   4,
+   5,
+   5,
+   6,
+   3
+  ],
+  "success": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   50.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 4,
+   "success": 27.6
+  },
+  "pred_2027": {
+   "hunters": 4,
+   "success": 31.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 57,
+  "hunters_trend_pct_per_yr": 2.4,
+  "success_trend_pp_per_yr": 4.29,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 3,
+   "success": 0.0
+  }
+ },
+ "116": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   15,
+   8,
+   4,
+   10,
+   17,
+   9
+  ],
+  "success": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   32.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 11,
+   "success": 17.7
+  },
+  "pred_2027": {
+   "hunters": 11,
+   "success": 20.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": -0.8,
+  "success_trend_pp_per_yr": 2.74,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 9,
+   "success": 0.0
+  }
+ },
+ "117": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   13,
+   4,
+   9,
+   6,
+   15,
+   6
+  ],
+  "success": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   18.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 8,
+   "success": 9.9
+  },
+  "pred_2027": {
+   "hunters": 8,
+   "success": 11.5
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 53,
+  "hunters_trend_pct_per_yr": 1.6,
+  "success_trend_pp_per_yr": 1.54,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 6,
+   "success": 0.0
+  }
+ },
+ "118": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   20,
+   22,
+   34,
+   14,
+   21,
+   20
+  ],
+  "success": [
+   15.0,
+   0.0,
+   15.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 19,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 18,
+   "success": 0.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 50,
+  "hunters_trend_pct_per_yr": 3.0,
+  "success_trend_pp_per_yr": -2.57,
+  "confidence": 0.03,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 20,
+   "success": 0.0
+  }
+ },
+ "120": {
+  "years": [
+   2019,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   3,
+   5,
+   3,
+   3
+  ],
+  "success": [
+   100.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 4,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 4,
+   "success": 0.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 29,
+  "hunters_trend_pct_per_yr": -0.0,
+  "success_trend_pp_per_yr": -21.43,
+  "confidence": 0.0,
+  "n_years": 4,
+  "last": {
+   "year": 2024,
+   "hunters": 3,
+   "success": 0.0
+  }
+ },
+ "121": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   10,
+   17,
+   10,
+   12,
+   6,
+   10
+  ],
+  "success": [
+   0.0,
+   35.0,
+   0.0,
+   47.0,
+   0.0,
+   50.0
+  ],
+  "est_2026": {
+   "hunters": 7,
+   "success": 46.7
+  },
+  "pred_2027": {
+   "hunters": 6,
+   "success": 52.2
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 68,
+  "hunters_trend_pct_per_yr": 8.2,
+  "success_trend_pp_per_yr": 5.49,
+  "confidence": 0.17,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 10,
+   "success": 50.0
+  }
+ },
+ "122": {
+  "years": [
+   2019,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   11,
+   10,
+   2,
+   8,
+   6
+  ],
+  "success": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   40.0
+  ],
+  "est_2026": {
+   "hunters": 3,
+   "success": 33.0
+  },
+  "pred_2027": {
+   "hunters": 2,
+   "success": 38.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 83,
+  "hunters_trend_pct_per_yr": 14.2,
+  "success_trend_pp_per_yr": 5.95,
+  "confidence": 0.32,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 6,
+   "success": 40.0
+  }
+ },
+ "123": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   38,
+   15,
+   88,
+   59,
+   39,
+   48
+  ],
+  "success": [
+   37.0,
+   53.0,
+   23.0,
+   41.0,
+   21.0,
+   35.0
+  ],
+  "est_2026": {
+   "hunters": 60,
+   "success": 23.7
+  },
+  "pred_2027": {
+   "hunters": 62,
+   "success": 21.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 42,
+  "hunters_trend_pct_per_yr": -5.6,
+  "success_trend_pp_per_yr": -2.51,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 48,
+   "success": 35.0
+  }
+ },
+ "124": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   30,
+   64,
+   49,
+   38,
+   3,
+   3
+  ],
+  "success": [
+   10.0,
+   13.0,
+   41.0,
+   19.0,
+   0.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 0,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 0.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 78,
+  "hunters_trend_pct_per_yr": 30.2,
+  "success_trend_pp_per_yr": -3.17,
+  "confidence": 0.15,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 3,
+   "success": 0.0
+  }
+ },
+ "125": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   17,
+   27,
+   29,
+   22,
+   36
+  ],
+  "success": [
+   18.0,
+   70.0,
+   0.0,
+   14.0,
+   14.0
+  ],
+  "est_2026": {
+   "hunters": 40,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 43,
+   "success": 0.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 32,
+  "hunters_trend_pct_per_yr": -11.0,
+  "success_trend_pp_per_yr": -4.95,
+  "confidence": 0.12,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 36,
+   "success": 14.0
+  }
+ },
+ "126": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   19,
+   38,
+   43,
+   25,
+   47
+  ],
+  "success": [
+   16.0,
+   21.0,
+   0.0,
+   10.0,
+   11.0
+  ],
+  "est_2026": {
+   "hunters": 52,
+   "success": 4.6
+  },
+  "pred_2027": {
+   "hunters": 56,
+   "success": 3.1
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 37,
+  "hunters_trend_pct_per_yr": -10.9,
+  "success_trend_pp_per_yr": -1.46,
+  "confidence": 0.13,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 47,
+   "success": 11.0
+  }
+ },
+ "127": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   27,
+   15,
+   34,
+   28,
+   36
+  ],
+  "success": [
+   0.0,
+   0.0,
+   0.0,
+   22.0,
+   8.0
+  ],
+  "est_2026": {
+   "hunters": 41,
+   "success": 19.0
+  },
+  "pred_2027": {
+   "hunters": 43,
+   "success": 21.7
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 42,
+  "hunters_trend_pct_per_yr": -9.4,
+  "success_trend_pp_per_yr": 2.7,
+  "confidence": 0.29,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 36,
+   "success": 8.0
+  }
+ },
+ "128": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024,
+   2025
+  ],
+  "hunters": [
+   206,
+   203,
+   214,
+   216,
+   237,
+   186
+  ],
+  "success": [
+   9.0,
+   12.0,
+   20.0,
+   20.0,
+   24.0,
+   18.8
+  ],
+  "est_2026": {
+   "hunters": 211,
+   "success": 25.2
+  },
+  "pred_2027": {
+   "hunters": 211,
+   "success": 27.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": -0.1,
+  "success_trend_pp_per_yr": 1.89,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 186,
+   "success": 18.8
+  }
+ },
+ "129": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   22,
+   33,
+   28,
+   22,
+   72
+  ],
+  "success": [
+   0.0,
+   24.0,
+   0.0,
+   11.0,
+   25.0
+  ],
+  "est_2026": {
+   "hunters": 76,
+   "success": 28.2
+  },
+  "pred_2027": {
+   "hunters": 85,
+   "success": 31.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 23,
+  "hunters_trend_pct_per_yr": -24.0,
+  "success_trend_pp_per_yr": 3.38,
+  "confidence": 0.28,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 72,
+   "success": 25.0
+  }
+ },
+ "130": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   52,
+   45,
+   73,
+   53,
+   66
+  ],
+  "success": [
+   29.0,
+   47.0,
+   7.0,
+   49.0,
+   8.0
+  ],
+  "est_2026": {
+   "hunters": 72,
+   "success": 8.5
+  },
+  "pred_2027": {
+   "hunters": 75,
+   "success": 4.5
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 39,
+  "hunters_trend_pct_per_yr": -5.2,
+  "success_trend_pp_per_yr": -4.05,
+  "confidence": 0.15,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 66,
+   "success": 8.0
+  }
+ },
+ "131": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1232,
+   1345,
+   1150,
+   1135,
+   1027,
+   872,
+   262
+  ],
+  "success": [
+   30.0,
+   23.0,
+   19.0,
+   24.0,
+   19.0,
+   23.0,
+   27.5
+  ],
+  "est_2026": {
+   "hunters": 435,
+   "success": 22.6
+  },
+  "pred_2027": {
+   "hunters": 293,
+   "success": 22.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 61,
+  "hunters_trend_pct_per_yr": 14.2,
+  "success_trend_pp_per_yr": -0.27,
+  "confidence": 0.02,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 262,
+   "success": 27.5
+  }
+ },
+ "132": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   28,
+   8,
+   19,
+   35,
+   26
+  ],
+  "success": [
+   39.0,
+   0.0,
+   0.0,
+   7.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 32,
+   "success": 0.0
+  },
+  "pred_2027": {
+   "hunters": 33,
+   "success": 0.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 35,
+  "hunters_trend_pct_per_yr": -7.5,
+  "success_trend_pp_per_yr": -5.42,
+  "confidence": 0.11,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 26,
+   "success": 0.0
+  }
+ },
+ "133": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024,
+   2025
+  ],
+  "hunters": [
+   56,
+   43,
+   41,
+   56,
+   85,
+   84
+  ],
+  "success": [
+   39.0,
+   28.0,
+   49.0,
+   42.0,
+   25.0,
+   52.4
+  ],
+  "est_2026": {
+   "hunters": 90,
+   "success": 43.0
+  },
+  "pred_2027": {
+   "hunters": 97,
+   "success": 43.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 41,
+  "hunters_trend_pct_per_yr": -11.5,
+  "success_trend_pp_per_yr": 0.91,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 84,
+   "success": 52.4
+  }
+ },
+ "134": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   39,
+   17,
+   32,
+   62,
+   63
+  ],
+  "success": [
+   31.0,
+   24.0,
+   16.0,
+   37.0,
+   53.0
+  ],
+  "est_2026": {
+   "hunters": 79,
+   "success": 57.4
+  },
+  "pred_2027": {
+   "hunters": 87,
+   "success": 62.7
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 29,
+  "hunters_trend_pct_per_yr": -18.0,
+  "success_trend_pp_per_yr": 5.26,
+  "confidence": 0.52,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 63,
+   "success": 53.0
+  }
+ },
+ "135": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   128,
+   181,
+   228,
+   166,
+   188
+  ],
+  "success": [
+   11.0,
+   13.0,
+   13.0,
+   17.0,
+   14.0
+  ],
+  "est_2026": {
+   "hunters": 215,
+   "success": 17.0
+  },
+  "pred_2027": {
+   "hunters": 223,
+   "success": 17.7
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 46,
+  "hunters_trend_pct_per_yr": -4.4,
+  "success_trend_pp_per_yr": 0.7,
+  "confidence": 0.17,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 188,
+   "success": 14.0
+  }
+ },
+ "136": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   83,
+   117,
+   131,
+   119,
+   85
+  ],
+  "success": [
+   24.0,
+   18.0,
+   23.0,
+   9.0,
+   20.0
+  ],
+  "est_2026": {
+   "hunters": 102,
+   "success": 13.7
+  },
+  "pred_2027": {
+   "hunters": 101,
+   "success": 12.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 50,
+  "hunters_trend_pct_per_yr": 1.0,
+  "success_trend_pp_per_yr": -1.07,
+  "confidence": 0.01,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 85,
+   "success": 20.0
+  }
+ },
+ "137": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   33,
+   25,
+   83,
+   44,
+   50
+  ],
+  "success": [
+   27.0,
+   24.0,
+   30.0,
+   35.0,
+   45.0
+  ],
+  "est_2026": {
+   "hunters": 65,
+   "success": 51.6
+  },
+  "pred_2027": {
+   "hunters": 69,
+   "success": 55.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 47,
+  "hunters_trend_pct_per_yr": -8.1,
+  "success_trend_pp_per_yr": 4.04,
+  "confidence": 0.11,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 50,
+   "success": 45.0
+  }
+ },
+ "138": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   17,
+   8,
+   10,
+   5,
+   3
+  ],
+  "success": [
+   35.0,
+   0.0,
+   0.0,
+   55.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 0,
+   "success": 7.3
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 5.1
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 71,
+  "hunters_trend_pct_per_yr": 28.8,
+  "success_trend_pp_per_yr": -2.23,
+  "confidence": 0.03,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 3,
+   "success": 0.0
+  }
+ },
+ "139": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   11,
+   8,
+   10,
+   27,
+   8
+  ],
+  "success": [
+   0.0,
+   0.0,
+   0.0,
+   20.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 15,
+   "success": 9.2
+  },
+  "pred_2027": {
+   "hunters": 16,
+   "success": 10.3
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 48,
+  "hunters_trend_pct_per_yr": -4.3,
+  "success_trend_pp_per_yr": 1.08,
+  "confidence": 0.02,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 8,
+   "success": 0.0
+  }
+ },
+ "140": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   354,
+   244,
+   320,
+   333,
+   265
+  ],
+  "success": [
+   24.0,
+   42.0,
+   29.0,
+   33.0,
+   41.0
+  ],
+  "est_2026": {
+   "hunters": 262,
+   "success": 44.2
+  },
+  "pred_2027": {
+   "hunters": 253,
+   "success": 46.4
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 56,
+  "hunters_trend_pct_per_yr": 2.8,
+  "success_trend_pp_per_yr": 2.18,
+  "confidence": 0.13,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 265,
+   "success": 41.0
+  }
+ },
+ "141": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   52,
+   34,
+   89,
+   66,
+   66
+  ],
+  "success": [
+   50.0,
+   59.0,
+   65.0,
+   40.0,
+   53.0
+  ],
+  "est_2026": {
+   "hunters": 82,
+   "success": 49.1
+  },
+  "pred_2027": {
+   "hunters": 87,
+   "success": 48.1
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 43,
+  "hunters_trend_pct_per_yr": -7.1,
+  "success_trend_pp_per_yr": -0.91,
+  "confidence": 0.03,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 66,
+   "success": 53.0
+  }
+ },
+ "142": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024,
+   2025
+  ],
+  "hunters": [
+   179,
+   121,
+   157,
+   141,
+   114,
+   21
+  ],
+  "success": [
+   20.0,
+   44.0,
+   36.0,
+   33.0,
+   29.0,
+   52.4
+  ],
+  "est_2026": {
+   "hunters": 41,
+   "success": 46.1
+  },
+  "pred_2027": {
+   "hunters": 21,
+   "success": 48.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 76,
+  "hunters_trend_pct_per_yr": 15.9,
+  "success_trend_pp_per_yr": 2.49,
+  "confidence": 0.26,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 21,
+   "success": 52.4
+  }
+ },
+ "143": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   84,
+   186,
+   96,
+   125,
+   143
+  ],
+  "success": [
+   32.0,
+   18.0,
+   26.0,
+   38.0,
+   47.0
+  ],
+  "est_2026": {
+   "hunters": 151,
+   "success": 53.2
+  },
+  "pred_2027": {
+   "hunters": 155,
+   "success": 57.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": -3.9,
+  "success_trend_pp_per_yr": 4.38,
+  "confidence": 0.06,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 143,
+   "success": 47.0
+  }
+ },
+ "144": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022
+  ],
+  "hunters": [
+   67,
+   99,
+   111,
+   82
+  ],
+  "success": [
+   16.0,
+   22.0,
+   17.0,
+   19.0
+  ],
+  "est_2026": {
+   "hunters": 121,
+   "success": 20.7
+  },
+  "pred_2027": {
+   "hunters": 127,
+   "success": 21.1
+  },
+  "crossover_year": 2020,
+  "crossover_achieved": true,
+  "crossover_score": 45,
+  "hunters_trend_pct_per_yr": -6.4,
+  "success_trend_pp_per_yr": 0.4,
+  "confidence": 0.04,
+  "n_years": 4,
+  "last": {
+   "year": 2022,
+   "hunters": 82,
+   "success": 19.0
+  }
+ },
+ "145": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   36,
+   27,
+   30,
+   34,
+   20
+  ],
+  "success": [
+   8.0,
+   56.0,
+   33.0,
+   25.0,
+   61.0
+  ],
+  "est_2026": {
+   "hunters": 18,
+   "success": 68.8
+  },
+  "pred_2027": {
+   "hunters": 16,
+   "success": 75.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 76,
+  "hunters_trend_pct_per_yr": 7.9,
+  "success_trend_pp_per_yr": 6.72,
+  "confidence": 0.34,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 20,
+   "success": 61.0
+  }
+ },
+ "146": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   44,
+   83,
+   78,
+   80,
+   91
+  ],
+  "success": [
+   18.0,
+   0.0,
+   6.0,
+   6.0,
+   15.0
+  ],
+  "est_2026": {
+   "hunters": 110,
+   "success": 10.9
+  },
+  "pred_2027": {
+   "hunters": 117,
+   "success": 11.4
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 43,
+  "hunters_trend_pct_per_yr": -9.6,
+  "success_trend_pp_per_yr": 0.41,
+  "confidence": 0.01,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 91,
+   "success": 15.0
+  }
+ },
+ "147": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2024
+  ],
+  "hunters": [
+   74,
+   101,
+   122,
+   92,
+   100
+  ],
+  "success": [
+   23.0,
+   29.0,
+   0.0,
+   24.0,
+   26.0
+  ],
+  "est_2026": {
+   "hunters": 112,
+   "success": 22.5
+  },
+  "pred_2027": {
+   "hunters": 116,
+   "success": 23.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 48,
+  "hunters_trend_pct_per_yr": -3.1,
+  "success_trend_pp_per_yr": 0.45,
+  "confidence": 0.01,
+  "n_years": 5,
+  "last": {
+   "year": 2024,
+   "hunters": 100,
+   "success": 26.0
+  }
+ },
+ "161": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   3627,
+   3935,
+   3249,
+   3176,
+   3294,
+   2888,
+   420
+  ],
+  "success": [
+   11.0,
+   8.0,
+   8.0,
+   9.0,
+   5.0,
+   11.0,
+   4.5
+  ],
+  "est_2026": {
+   "hunters": 1274,
+   "success": 5.7
+  },
+  "pred_2027": {
+   "hunters": 857,
+   "success": 5.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 67,
+  "hunters_trend_pct_per_yr": 14.2,
+  "success_trend_pp_per_yr": -0.59,
+  "confidence": 0.24,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 420,
+   "success": 4.5
+  }
+ },
+ "171": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1704,
+   1732,
+   2094,
+   1950,
+   1895,
+   1818,
+   57
+  ],
+  "success": [
+   10.0,
+   14.0,
+   6.0,
+   11.0,
+   3.0,
+   8.0,
+   0.0
+  ],
+  "est_2026": {
+   "hunters": 897,
+   "success": 1.0
+  },
+  "pred_2027": {
+   "hunters": 720,
+   "success": 0.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 63,
+  "hunters_trend_pct_per_yr": 11.0,
+  "success_trend_pp_per_yr": -1.61,
+  "confidence": 0.3,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 57,
+   "success": 0.0
+  }
+ },
+ "181": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2040,
+   1994,
+   2062,
+   1704,
+   1750,
+   1462,
+   352
+  ],
+  "success": [
+   7.0,
+   13.0,
+   6.0,
+   13.0,
+   6.0,
+   14.0,
+   4.5
+  ],
+  "est_2026": {
+   "hunters": 703,
+   "success": 8.3
+  },
+  "pred_2027": {
+   "hunters": 473,
+   "success": 8.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 61,
+  "hunters_trend_pct_per_yr": 14.2,
+  "success_trend_pp_per_yr": -0.2,
+  "confidence": 0.01,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 352,
+   "success": 4.5
+  }
+ },
+ "191": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   743,
+   464,
+   597,
+   612,
+   601,
+   601,
+   533
+  ],
+  "success": [
+   6.0,
+   5.0,
+   8.0,
+   8.0,
+   11.0,
+   4.0,
+   7.9
+  ],
+  "est_2026": {
+   "hunters": 543,
+   "success": 8.1
+  },
+  "pred_2027": {
+   "hunters": 530,
+   "success": 8.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 2.1,
+  "success_trend_pp_per_yr": 0.24,
+  "confidence": 0.05,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 533,
+   "success": 7.9
+  }
+ },
+ "201": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   199,
+   192,
+   174,
+   181,
+   187,
+   205,
+   185
+  ],
+  "success": [
+   45.0,
+   38.0,
+   45.0,
+   44.0,
+   51.0,
+   53.0,
+   57.3
+  ],
+  "est_2026": {
+   "hunters": 189,
+   "success": 58.0
+  },
+  "pred_2027": {
+   "hunters": 188,
+   "success": 60.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 53,
+  "hunters_trend_pct_per_yr": 0.1,
+  "success_trend_pp_per_yr": 2.6,
+  "confidence": 0.0,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 185,
+   "success": 57.3
+  }
+ },
+ "211": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2992,
+   2866,
+   2765,
+   3171,
+   2193,
+   1821,
+   13
+  ],
+  "success": [
+   24.0,
+   25.0,
+   24.0,
+   33.0,
+   17.0,
+   25.0,
+   61.5
+  ],
+  "est_2026": {
+   "hunters": 603,
+   "success": 45.0
+  },
+  "pred_2027": {
+   "hunters": 189,
+   "success": 48.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 84,
+  "hunters_trend_pct_per_yr": 18.3,
+  "success_trend_pp_per_yr": 3.77,
+  "confidence": 0.31,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 13,
+   "success": 61.5
+  }
+ },
+ "214": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2145,
+   2271,
+   2124,
+   1691,
+   1159,
+   1016,
+   159
+  ],
+  "success": [
+   32.0,
+   27.0,
+   28.0,
+   33.0,
+   26.0,
+   26.0,
+   28.3
+  ],
+  "est_2026": {
+   "hunters": 162,
+   "success": 26.5
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 25.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 75,
+  "hunters_trend_pct_per_yr": 22.3,
+  "success_trend_pp_per_yr": -0.54,
+  "confidence": 0.17,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 159,
+   "success": 28.3
+  }
+ },
+ "231": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   2229,
+   2270,
+   2240,
+   2206,
+   1767,
+   1497,
+   190
+  ],
+  "success": [
+   14.0,
+   13.0,
+   16.0,
+   14.0,
+   13.0,
+   14.0,
+   22.1
+  ],
+  "est_2026": {
+   "hunters": 609,
+   "success": 18.5
+  },
+  "pred_2027": {
+   "hunters": 318,
+   "success": 19.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 75,
+  "hunters_trend_pct_per_yr": 16.4,
+  "success_trend_pp_per_yr": 0.83,
+  "confidence": 0.31,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 190,
+   "success": 22.1
+  }
+ },
+ "301": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   1885,
+   1665,
+   1811,
+   1693,
+   752,
+   406
+  ],
+  "success": [
+   24.0,
+   16.0,
+   22.0,
+   23.0,
+   8.0,
+   14.0
+  ],
+  "est_2026": {
+   "hunters": 51,
+   "success": 8.4
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 6.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 80,
+  "hunters_trend_pct_per_yr": 21.4,
+  "success_trend_pp_per_yr": -2.09,
+  "confidence": 0.39,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 406,
+   "success": 14.0
+  }
+ },
+ "361": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   442,
+   405,
+   513,
+   441,
+   478,
+   18
+  ],
+  "success": [
+   11.0,
+   13.0,
+   5.0,
+   15.0,
+   8.0,
+   11.1
+  ],
+  "est_2026": {
+   "hunters": 132,
+   "success": 10.2
+  },
+  "pred_2027": {
+   "hunters": 74,
+   "success": 10.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 61,
+  "hunters_trend_pct_per_yr": 15.1,
+  "success_trend_pp_per_yr": -0.07,
+  "confidence": 0.0,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 18,
+   "success": 11.1
+  }
+ },
+ "371": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1479,
+   1831,
+   1450,
+   1196,
+   1261,
+   284
+  ],
+  "success": [
+   8.0,
+   6.0,
+   8.0,
+   8.0,
+   6.0,
+   15.5
+  ],
+  "est_2026": {
+   "hunters": 334,
+   "success": 13.4
+  },
+  "pred_2027": {
+   "hunters": 122,
+   "success": 14.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 83,
+  "hunters_trend_pct_per_yr": 16.9,
+  "success_trend_pp_per_yr": 1.1,
+  "confidence": 0.45,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 284,
+   "success": 15.5
+  }
+ },
+ "391": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   206,
+   182,
+   154,
+   148,
+   214,
+   204
+  ],
+  "success": [
+   40.0,
+   39.0,
+   37.0,
+   44.0,
+   38.0,
+   26.5
+  ],
+  "est_2026": {
+   "hunters": 196,
+   "success": 29.5
+  },
+  "pred_2027": {
+   "hunters": 198,
+   "success": 27.7
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 47,
+  "hunters_trend_pct_per_yr": -1.4,
+  "success_trend_pp_per_yr": -1.83,
+  "confidence": 0.04,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 204,
+   "success": 26.5
+  }
+ },
+ "411": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   705,
+   871,
+   740,
+   762,
+   642,
+   191
+  ],
+  "success": [
+   17.0,
+   17.0,
+   11.0,
+   17.0,
+   19.0,
+   22.0
+  ],
+  "est_2026": {
+   "hunters": 266,
+   "success": 21.5
+  },
+  "pred_2027": {
+   "hunters": 177,
+   "success": 22.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 73,
+  "hunters_trend_pct_per_yr": 13.7,
+  "success_trend_pp_per_yr": 1.0,
+  "confidence": 0.36,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 191,
+   "success": 22.0
+  }
+ },
+ "421": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3805,
+   3437,
+   3663,
+   3502,
+   3165,
+   690
+  ],
+  "success": [
+   14.0,
+   13.0,
+   15.0,
+   15.0,
+   17.0,
+   15.8
+  ],
+  "est_2026": {
+   "hunters": 1070,
+   "success": 17.1
+  },
+  "pred_2027": {
+   "hunters": 614,
+   "success": 17.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 82,
+  "hunters_trend_pct_per_yr": 15.0,
+  "success_trend_pp_per_yr": 0.49,
+  "confidence": 0.57,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 690,
+   "success": 15.8
+  }
+ },
+ "441": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ],
+  "hunters": [
+   2118,
+   1658,
+   1792,
+   1606,
+   870,
+   740
+  ],
+  "success": [
+   29.0,
+   31.0,
+   32.0,
+   36.0,
+   32.0,
+   37.0
+  ],
+  "est_2026": {
+   "hunters": 250,
+   "success": 38.9
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 40.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 96,
+  "hunters_trend_pct_per_yr": 18.4,
+  "success_trend_pp_per_yr": 1.34,
+  "confidence": 0.67,
+  "n_years": 6,
+  "last": {
+   "year": 2024,
+   "hunters": 740,
+   "success": 37.0
+  }
+ },
+ "444": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   731,
+   843,
+   878,
+   887,
+   992,
+   360
+  ],
+  "success": [
+   11.0,
+   20.0,
+   15.0,
+   16.0,
+   17.0,
+   27.2
+  ],
+  "est_2026": {
+   "hunters": 574,
+   "success": 26.2
+  },
+  "pred_2027": {
+   "hunters": 526,
+   "success": 28.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 61,
+  "hunters_trend_pct_per_yr": 6.1,
+  "success_trend_pp_per_yr": 1.97,
+  "confidence": 0.22,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 360,
+   "success": 27.2
+  }
+ },
+ "461": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   115,
+   123,
+   100,
+   108,
+   128,
+   142
+  ],
+  "success": [
+   5.0,
+   26.0,
+   9.0,
+   16.0,
+   12.0,
+   19.7
+  ],
+  "est_2026": {
+   "hunters": 138,
+   "success": 19.1
+  },
+  "pred_2027": {
+   "hunters": 143,
+   "success": 20.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 48,
+  "hunters_trend_pct_per_yr": -3.7,
+  "success_trend_pp_per_yr": 1.04,
+  "confidence": 0.09,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 142,
+   "success": 19.7
+  }
+ },
+ "471": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   282,
+   278,
+   329,
+   372,
+   288,
+   53
+  ],
+  "success": [
+   4.0,
+   10.0,
+   12.0,
+   12.0,
+   4.0,
+   11.3
+  ],
+  "est_2026": {
+   "hunters": 128,
+   "success": 11.0
+  },
+  "pred_2027": {
+   "hunters": 96,
+   "success": 11.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 62,
+  "hunters_trend_pct_per_yr": 12.0,
+  "success_trend_pp_per_yr": 0.5,
+  "confidence": 0.08,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 53,
+   "success": 11.3
+  }
+ },
+ "481": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   572,
+   530,
+   503,
+   513,
+   493,
+   523
+  ],
+  "success": [
+   21.0,
+   19.0,
+   20.0,
+   28.0,
+   22.0,
+   30.6
+  ],
+  "est_2026": {
+   "hunters": 490,
+   "success": 30.8
+  },
+  "pred_2027": {
+   "hunters": 483,
+   "success": 32.5
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 56,
+  "hunters_trend_pct_per_yr": 1.4,
+  "success_trend_pp_per_yr": 1.7,
+  "confidence": 0.33,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 523,
+   "success": 30.6
+  }
+ },
+ "500": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   636,
+   650,
+   634,
+   638,
+   610,
+   815
+  ],
+  "success": [
+   30.0,
+   29.0,
+   22.0,
+   25.0,
+   28.0,
+   31.2
+  ],
+  "est_2026": {
+   "hunters": 764,
+   "success": 28.8
+  },
+  "pred_2027": {
+   "hunters": 787,
+   "success": 29.1
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 47,
+  "hunters_trend_pct_per_yr": -3.5,
+  "success_trend_pp_per_yr": 0.29,
+  "confidence": 0.03,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 815,
+   "success": 31.2
+  }
+ },
+ "501": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   424,
+   381,
+   376,
+   387,
+   356,
+   378,
+   370
+  ],
+  "success": [
+   28.0,
+   15.0,
+   30.0,
+   24.0,
+   29.0,
+   33.0,
+   33.0
+  ],
+  "est_2026": {
+   "hunters": 355,
+   "success": 34.6
+  },
+  "pred_2027": {
+   "hunters": 348,
+   "success": 36.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 57,
+  "hunters_trend_pct_per_yr": 1.8,
+  "success_trend_pp_per_yr": 1.79,
+  "confidence": 0.38,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 370,
+   "success": 33.0
+  }
+ },
+ "511": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "hunters": [
+   1710,
+   1673,
+   1580,
+   1514,
+   1478,
+   1425,
+   326
+  ],
+  "success": [
+   8.0,
+   7.0,
+   8.0,
+   7.0,
+   7.0,
+   7.0,
+   12.9
+  ],
+  "est_2026": {
+   "hunters": 708,
+   "success": 10.1
+  },
+  "pred_2027": {
+   "hunters": 538,
+   "success": 10.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 67,
+  "hunters_trend_pct_per_yr": 12.2,
+  "success_trend_pp_per_yr": 0.49,
+  "confidence": 0.24,
+  "n_years": 7,
+  "last": {
+   "year": 2025,
+   "hunters": 326,
+   "success": 12.9
+  }
+ },
+ "512": {
+  "years": [
+   2019,
+   2020,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   2,
+   6,
+   4,
+   6,
+   7
+  ],
+  "success": [
+   50.0,
+   100.0,
+   100.0,
+   100.0,
+   100.0
+  ],
+  "est_2026": {
+   "hunters": 8,
+   "success": 100.0
+  },
+  "pred_2027": {
+   "hunters": 8,
+   "success": 100.0
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 43,
+  "hunters_trend_pct_per_yr": -12.3,
+  "success_trend_pp_per_yr": 6.14,
+  "confidence": 0.43,
+  "n_years": 5,
+  "last": {
+   "year": 2025,
+   "hunters": 7,
+   "success": 100.0
+  }
+ },
+ "521": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   3166,
+   2956,
+   2887,
+   2800,
+   2394,
+   803
+  ],
+  "success": [
+   15.0,
+   12.0,
+   11.0,
+   15.0,
+   15.0,
+   23.4
+  ],
+  "est_2026": {
+   "hunters": 924,
+   "success": 21.9
+  },
+  "pred_2027": {
+   "hunters": 560,
+   "success": 23.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 84,
+  "hunters_trend_pct_per_yr": 14.6,
+  "success_trend_pp_per_yr": 1.53,
+  "confidence": 0.57,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 803,
+   "success": 23.4
+  }
+ },
+ "551": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1543,
+   1481,
+   1573,
+   1550,
+   1443,
+   544
+  ],
+  "success": [
+   14.0,
+   15.0,
+   13.0,
+   15.0,
+   11.0,
+   16.5
+  ],
+  "est_2026": {
+   "hunters": 728,
+   "success": 14.8
+  },
+  "pred_2027": {
+   "hunters": 584,
+   "success": 14.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 59,
+  "hunters_trend_pct_per_yr": 10.7,
+  "success_trend_pp_per_yr": 0.16,
+  "confidence": 0.03,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 544,
+   "success": 16.5
+  }
+ },
+ "561": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   285,
+   270,
+   271,
+   258,
+   260,
+   295
+  ],
+  "success": [
+   12.0,
+   15.0,
+   21.0,
+   23.0,
+   19.0,
+   18.6
+  ],
+  "est_2026": {
+   "hunters": 278,
+   "success": 22.6
+  },
+  "pred_2027": {
+   "hunters": 279,
+   "success": 23.6
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 51,
+  "hunters_trend_pct_per_yr": -0.4,
+  "success_trend_pp_per_yr": 1.03,
+  "confidence": 0.03,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 295,
+   "success": 18.6
+  }
+ },
+ "581": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1551,
+   1710,
+   1581,
+   1508,
+   1609,
+   227
+  ],
+  "success": [
+   9.0,
+   11.0,
+   11.0,
+   10.0,
+   11.0,
+   19.8
+  ],
+  "est_2026": {
+   "hunters": 503,
+   "success": 18.3
+  },
+  "pred_2027": {
+   "hunters": 305,
+   "success": 19.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 84,
+  "hunters_trend_pct_per_yr": 14.6,
+  "success_trend_pp_per_yr": 1.47,
+  "confidence": 0.58,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 227,
+   "success": 19.8
+  }
+ },
+ "591": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   333,
+   251,
+   300,
+   230,
+   307,
+   37
+  ],
+  "success": [
+   10.0,
+   17.0,
+   19.0,
+   22.0,
+   18.0,
+   54.1
+  ],
+  "est_2026": {
+   "hunters": 76,
+   "success": 50.1
+  },
+  "pred_2027": {
+   "hunters": 38,
+   "success": 56.3
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 100,
+  "hunters_trend_pct_per_yr": 15.8,
+  "success_trend_pp_per_yr": 6.17,
+  "confidence": 0.59,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 37,
+   "success": 54.1
+  }
+ },
+ "681": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   1439,
+   1280,
+   1321,
+   1418,
+   1498
+  ],
+  "success": [
+   6.0,
+   8.0,
+   7.0,
+   9.0,
+   7.0
+  ],
+  "est_2026": {
+   "hunters": 1519,
+   "success": 8.9
+  },
+  "pred_2027": {
+   "hunters": 1545,
+   "success": 9.2
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 48,
+  "hunters_trend_pct_per_yr": -1.8,
+  "success_trend_pp_per_yr": 0.3,
+  "confidence": 0.17,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 1498,
+   "success": 7.0
+  }
+ },
+ "682": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   114,
+   90,
+   123,
+   89,
+   75,
+   66
+  ],
+  "success": [
+   58.0,
+   31.0,
+   45.0,
+   67.0,
+   63.0,
+   66.7
+  ],
+  "est_2026": {
+   "hunters": 58,
+   "success": 72.3
+  },
+  "pred_2027": {
+   "hunters": 50,
+   "success": 76.2
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 71,
+  "hunters_trend_pct_per_yr": 8.6,
+  "success_trend_pp_per_yr": 3.96,
+  "confidence": 0.35,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 66,
+   "success": 66.7
+  }
+ },
+ "691": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   99,
+   87,
+   126,
+   101,
+   97
+  ],
+  "success": [
+   4.0,
+   5.0,
+   4.0,
+   11.0,
+   7.0
+  ],
+  "est_2026": {
+   "hunters": 107,
+   "success": 12.2
+  },
+  "pred_2027": {
+   "hunters": 108,
+   "success": 13.4
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 50,
+  "hunters_trend_pct_per_yr": -1.0,
+  "success_trend_pp_per_yr": 1.2,
+  "confidence": 0.01,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 97,
+   "success": 7.0
+  }
+ },
+ "711": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1839,
+   1735,
+   1744,
+   1768,
+   1773,
+   36
+  ],
+  "success": [
+   14.0,
+   15.0,
+   14.0,
+   19.0,
+   14.0,
+   69.4
+  ],
+  "est_2026": {
+   "hunters": 390,
+   "success": 58.5
+  },
+  "pred_2027": {
+   "hunters": 137,
+   "success": 66.4
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 100,
+  "hunters_trend_pct_per_yr": 17.0,
+  "success_trend_pp_per_yr": 7.91,
+  "confidence": 0.59,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 36,
+   "success": 69.4
+  }
+ },
+ "741": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   490,
+   362,
+   302,
+   322,
+   344,
+   63
+  ],
+  "success": [
+   30.0,
+   27.0,
+   15.0,
+   21.0,
+   36.0,
+   55.6
+  ],
+  "est_2026": {
+   "hunters": 66,
+   "success": 50.3
+  },
+  "pred_2027": {
+   "hunters": 9,
+   "success": 54.8
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 94,
+  "hunters_trend_pct_per_yr": 18.2,
+  "success_trend_pp_per_yr": 4.51,
+  "confidence": 0.47,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 63,
+   "success": 55.6
+  }
+ },
+ "751": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   1472,
+   1205,
+   1151,
+   1086,
+   1192,
+   27
+  ],
+  "success": [
+   15.0,
+   23.0,
+   19.0,
+   24.0,
+   18.0,
+   66.7
+  ],
+  "est_2026": {
+   "hunters": 157,
+   "success": 57.9
+  },
+  "pred_2027": {
+   "hunters": 0,
+   "success": 64.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 100,
+  "hunters_trend_pct_per_yr": 19.5,
+  "success_trend_pp_per_yr": 7.0,
+  "confidence": 0.61,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 27,
+   "success": 66.7
+  }
+ },
+ "771": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   625,
+   563,
+   641,
+   548,
+   621
+  ],
+  "success": [
+   9.0,
+   15.0,
+   15.0,
+   15.0,
+   15.0
+  ],
+  "est_2026": {
+   "hunters": 588,
+   "success": 19.8
+  },
+  "pred_2027": {
+   "hunters": 586,
+   "success": 21.0
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 52,
+  "hunters_trend_pct_per_yr": 0.4,
+  "success_trend_pp_per_yr": 1.2,
+  "confidence": 0.01,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 621,
+   "success": 15.0
+  }
+ },
+ "791": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   83,
+   73,
+   89,
+   101,
+   96
+  ],
+  "success": [
+   53.0,
+   23.0,
+   43.0,
+   55.0,
+   45.0
+  ],
+  "est_2026": {
+   "hunters": 115,
+   "success": 51.8
+  },
+  "pred_2027": {
+   "hunters": 121,
+   "success": 53.4
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 47,
+  "hunters_trend_pct_per_yr": -6.1,
+  "success_trend_pp_per_yr": 1.6,
+  "confidence": 0.04,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 96,
+   "success": 45.0
+  }
+ },
+ "851": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2025
+  ],
+  "hunters": [
+   741,
+   628,
+   628,
+   614,
+   545,
+   71
+  ],
+  "success": [
+   34.0,
+   32.0,
+   25.0,
+   24.0,
+   34.0,
+   21.1
+  ],
+  "est_2026": {
+   "hunters": 116,
+   "success": 21.5
+  },
+  "pred_2027": {
+   "hunters": 18,
+   "success": 19.9
+  },
+  "crossover_year": 2022,
+  "crossover_achieved": true,
+  "crossover_score": 75,
+  "hunters_trend_pct_per_yr": 18.1,
+  "success_trend_pp_per_yr": -1.59,
+  "confidence": 0.37,
+  "n_years": 6,
+  "last": {
+   "year": 2025,
+   "hunters": 71,
+   "success": 21.1
+  }
+ },
+ "861": {
+  "years": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ],
+  "hunters": [
+   631,
+   620,
+   638,
+   754,
+   660
+  ],
+  "success": [
+   15.0,
+   13.0,
+   15.0,
+   17.0,
+   13.0
+  ],
+  "est_2026": {
+   "hunters": 757,
+   "success": 14.6
+  },
+  "pred_2027": {
+   "hunters": 776,
+   "success": 14.6
+  },
+  "crossover_year": 2021,
+  "crossover_achieved": true,
+  "crossover_score": 48,
+  "hunters_trend_pct_per_yr": -2.9,
+  "success_trend_pp_per_yr": 0.0,
+  "confidence": 0.0,
+  "n_years": 5,
+  "last": {
+   "year": 2023,
+   "hunters": 660,
+   "success": 13.0
+  }
+ }
+}

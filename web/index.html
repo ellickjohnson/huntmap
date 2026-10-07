@@ -112,6 +112,7 @@
       <div class="seg" id="metricSeg">
         <button data-m="hunt_score" class="active">Overall</button>
         <button data-m="harvest_score">Success</button>
+        <button data-m="crossover_score">Crossover</button>
         <button data-m="habitat_score">Habitat</button>
         <button data-m="public_pct">Public Land</button>
       </div>
@@ -318,6 +319,7 @@ const BASEMAPS = { streets: STREETS_STYLE, satellite: SATELLITE_STYLE, topo: TOP
 // ---------------- state ----------------
 let UNITS = null;
 let HISTORY = null;
+let PRED = null;
 let metric = 'hunt_score';
 let minScore = 0;
 let terrainOn = false;
@@ -361,9 +363,11 @@ function metricProp() {
   if (metric === 'habitat_score') return 'habitat_score';
   if (metric === 'harvest_score' && selectedYear !== 2024) return 'success_' + selectedYear;
   if (metric === 'harvest_score') return 'harvest_score';
+  if (metric === 'crossover_score') return 'crossover_score';
   return 'hunt_score';
 }
 function unitValue(p) {
+  if (metric === 'crossover_score') return (PRED && PRED[p.gmuid]) ? PRED[p.gmuid].crossover_score : 0;
   if (metric !== 'harvest_score' || selectedYear === 2024 || !HISTORY) return p[metric] || 0;
   const h = (HISTORY[p.gmuid] || {})[String(selectedYear)];
   return h ? h.success : 0;
@@ -554,11 +558,14 @@ function selectUnit(uid) {
 
 function renderDetail(p) {
   const hy = (HISTORY && HISTORY[selectedGmu]) ? HISTORY[selectedGmu][String(selectedYear)] : null;
+  const pred = (PRED && (PRED[selectedGmu] || PRED[String(selectedGmu)])) || null;
   const scoreEl = document.getElementById('dScore');
   const val = unitValue(p);
-  scoreEl.textContent = Math.round(metric === 'harvest_score' && hy ? hy.success : (p.hunt_score ?? 0));
+  scoreEl.textContent = Math.round(metric === 'crossover_score' && pred ? pred.crossover_score
+    : metric === 'harvest_score' && hy ? hy.success : (p.hunt_score ?? 0));
   scoreEl.style.color = heatColor((parseFloat(scoreEl.textContent) || 0) / 100);
   document.getElementById('dScoreLabel').textContent =
+    metric === 'crossover_score' ? 'CROSSOVER SCORE' :
     metric === 'harvest_score' && selectedYear !== 2024 ? `${selectedYear} SUCCESS %` : 'HUNT SCORE';
   const rows = [
     [`${selectedYear} success`, hy ? `${hy.success}%` : (p.success_pct != null ? `${p.success_pct}%` : '—')],
@@ -568,6 +575,12 @@ function renderDetail(p) {
     ['Public land', `${p.public_pct ?? '—'}%`],
     ['Habitat score', p.habitat_score ?? '—'],
   ];
+  if (pred) {
+    rows.push(['Crossover score', `${pred.crossover_score} <span style="color:var(--dim)">(0-100)</span>`]);
+    rows.push(['Crossover year', pred.crossover_achieved ? `${pred.crossover_year} (done)` : pred.crossover_year ? `~${pred.crossover_year}` : '—']);
+    rows.push(['2026 est success', `${pred.est_2026.success}%`]);
+    rows.push(['2027 pred success', `${pred.pred_2027.success}% (conf ${Math.round(pred.confidence * 100)}%)`]);
+  }
   document.getElementById('dStats').innerHTML = rows.map(([k, v]) =>
     `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
   renderHistory();
@@ -630,7 +643,7 @@ function renderHistory() {
 
   el.innerHTML = `
     <div class="hist-title">Tap a year — updates detail + map</div>
-    
+
     <div class="trend-summary" style="margin-bottom:12px;padding:10px;background:var(--panel2);border-radius:8px;font-size:12px">
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
         <span>Hunters: <strong>${hunterTrend}</strong></span>
@@ -645,11 +658,11 @@ function renderHistory() {
       <span><i style="background:var(--accent)"></i>Success rate %</span>
     </div>
     
-    <div class="bars" style="position:relative;height:46px">${mkBars('total', maxTotal, '')}</div>
-    <div class="bars hunters" style="height:34px">${mkBars('hunters', maxHunt, 'hunters')}</div>
-    
-    <!-- Success rate line overlay -->
-    <svg class="success-line" style="position:absolute;top:0;left:0;width:100%;height:80px;pointer-events:none" viewBox="0 0 300 80" preserveAspectRatio="none">
+    <div class="bars wrap" style="position:relative;height:46px">${mkBars('total', maxTotal, '')}</div>
+    <div class="bars wrap hunters" style="height:34px">${mkBars('hunters', maxHunt, 'hunters')}</div>
+    <div class="wrap" style="position:relative">
+    <!-- Success rate line overlay: sits over the bars above (absolute within .wrap) -->
+    <svg class="success-line" style="position:absolute;top:-80px;left:0;width:100%;height:80px;pointer-events:none" viewBox="0 0 300 80" preserveAspectRatio="none">
       <defs>
         <linearGradient id="successGrad" x1="0%" y1="100%" x2="0%" y2="0%">
           <stop offset="0%" style="stop-color:var(--accent);stop-opacity:0.3"/>
@@ -665,9 +678,12 @@ function renderHistory() {
                 <text x="${x}" y="${yVal - 8}" text-anchor="middle" font-size="8" fill="var(--accent)" font-weight="${isSel ? '700' : '400'}">${hist[y].success}%</text>`;
       }).join('')}
     </svg>
-    
+    </div>
     <div style="display:flex; gap:6px; margin-top:4px" class="bars-labels">
       ${years.map(y => `<span style="flex:1; text-align:center; font-size:9px; color:${+y === selectedYear ? 'var(--accent2)' : 'var(--dim)'}">${y.slice(2)}</span>`).join('')}</div>
+
+    <!-- Crossover panel: hunters↓ / success↑ forecast -->
+    ${PRED && PRED[selectedGmu] ? renderCrossover(PRED[selectedGmu]) : ''}
 
     <!-- Species breakdown -->
     <div class="hist-title" style="margin-top:16px">Species Harvest Breakdown</div>
@@ -698,6 +714,40 @@ function renderHistory() {
     if (p) renderDetail(p);
     ensureUnitLayers();
   }));
+}
+
+// Crossover forecast panel (from db/crossover.py predictions.json)
+function renderCrossover(d) {
+  const cy = d.crossover_year;
+  const ach = d.crossover_achieved;
+  const cyText = ach
+    ? `<span style="color:var(--accent2)">✅ crossed ${cy}</span>`
+    : cy ? `~${cy}` : '—';
+  const conf = Math.round(d.confidence * 100);
+  const confColor = conf >= 60 ? 'var(--accent2)' : conf >= 30 ? '#facc15' : '#ff6b35';
+  const trendH = d.hunters_trend_pct_per_yr <= -1 ? '↓' : d.hunters_trend_pct_per_yr >= 1 ? '↑' : '→';
+  const trendS = d.success_trend_pp_per_yr >= 0.5 ? '↑' : d.success_trend_pp_per_yr <= -0.5 ? '↓' : '→';
+  return `
+    <div class="hist-title" style="margin-top:16px">Crossover — hunters ↓ / success ↑</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-bottom:4px">
+      <div style="background:var(--panel2);border-radius:8px;padding:8px">
+        <div style="color:var(--dim);font-size:9.5px">HUNTERS ${trendH} ${d.hunters_trend_pct_per_yr > 0 ? '+' : ''}${d.hunters_trend_pct_per_yr}%/yr</div>
+        <div>2025: <strong>${d.last.hunters}</strong></div>
+        <div>2026 est: <strong>${d.est_2026.hunters}</strong></div>
+        <div>2027 pred: <strong style="color:var(--accent2)">${d.pred_2027.hunters}</strong></div>
+      </div>
+      <div style="background:var(--panel2);border-radius:8px;padding:8px">
+        <div style="color:var(--dim);font-size:9.5px">SUCCESS ${trendS} ${d.success_trend_pp_per_yr > 0 ? '+' : ''}${d.success_trend_pp_per_yr}pp/yr</div>
+        <div>2025: <strong>${d.last.success}%</strong></div>
+        <div>2026 est: <strong>${d.est_2026.success}%</strong></div>
+        <div>2027 pred: <strong style="color:var(--accent2)">${d.pred_2027.success}%</strong></div>
+      </div>
+    </div>
+    <div style="font-size:11px;background:var(--panel2);border-radius:8px;padding:8px;display:flex;justify-content:space-between;align-items:center">
+      <span>Crossover: <strong>${cyText}</strong></span>
+      <span>Confidence: <strong style="color:${confColor}">${conf}%</strong></span>
+      <span>Based on ${d.n_years} yrs</span>
+    </div>`;
 }
 
 // Simple linear regression slope
@@ -1223,11 +1273,17 @@ map.on('idle', () => {
 });
 map.on('load', async () => {
   try {
-    const [uRes, hRes] = await Promise.all([
-      fetch('/data/units.geojson'), fetch('/data/harvest_history.json')]);
+    const [uRes, hRes, pRes] = await Promise.all([
+      fetch('/data/units.geojson'), fetch('/data/harvest_history.json'),
+      fetch('/data/predictions.json')]);
     if (!uRes.ok) throw new Error('HTTP ' + uRes.status);
     UNITS = await uRes.json();
     HISTORY = hRes.ok ? await hRes.json() : null;
+    PRED = pRes.ok ? await pRes.json() : null;
+    if (PRED) {
+      // stamp crossover scores onto geojson properties so map fill + minScore filter work natively
+      UNITS.features.forEach(f => { const d = PRED[f.properties.gmuid]; if (d) f.properties.crossover_score = d.crossover_score; });
+    }
     UNITS.features.forEach(f => { f.properties._c = centroidOf(f); });
     wireClicks();
     ensureUnitLayers();

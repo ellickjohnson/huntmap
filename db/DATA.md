@@ -31,6 +31,31 @@ normalized to /0.9.
 3. Rerun `final_scores.py`
 4. Rebuild app data bundle
 
+## 2025+ hunt-code format (added 2026-10-07)
+From 2025 CPW publishes by HUNT CODE only (e.g. EM161E1R — GMU digits at chars 3-5),
+dropping per-GMU "All Manners" tables. `parse_harvest2025.py` handles this:
+- parses PDF → `harvest_2025` table + `gmu_2025.json` per-GMU aggregation
+- `web/data/harvest_history.json` gains a `2025` key per unit (flagged `"partial": true`)
+- ⚠️ 2025 hunter counts are LOWER-BOUND vs 2019-2024: codes with unit `000` are
+  statewide OTC pools (all OTC GMUs, e.g. EM000U2R = 23,668 rifle bulls) and cannot
+  be attributed to a single unit. Success% per attributed code is still valid.
+  Trend comparisons for HUNTER counts should use 2019-2024 like-for-like; the
+  crossover model in `crossover.py` damps low-confidence fits accordingly.
+
+## Crossover predictions (added 2026-10-07)
+`crossover.py` → `web/data/predictions.json` per GMU:
+- linear trend of hunters + success over 2019-2025 (R²-damped)
+- `crossover_year`: where normalized hunter trend crosses below success trend
+- `est_2026` / `pred_2027`: projected hunters + success%
+- `crossover_score` 0-100: 50 + 3×(hunters %/yr decline) + 4×(success pp/yr gain),
+  damped toward 50 by fit confidence (R²)
+Frontend: "Crossover" metric button, crossover panel in unit details, predictions
+layer served from PUBLIC_DATA.
+
+Direct official PDFs (Widen DAM CDN pattern discovered 2026-10-07):
+`https://cpw.widen.net/content/<asset-id>/pdf` — 2025 elk = `8uno656mtu`,
+2024 elk = `wkisb2j1f4`.
+
 ## API key note
 TypeSafe AI key lives in Vaultwarden item "typesafeai" (visible only to machine
 accounts on .145 — NOT readable from this drawer; use ssh docker exec crypto-bot

@@ -288,7 +288,7 @@ class Handler(SimpleHTTPRequestHandler):
     PUBLIC_GET = {'/login.html', '/admin.html', '/favicon.ico'}
     PUBLIC_API = {'/api/signup', '/api/login', '/api/logout', '/api/me', '/api/verify'}
     # Static data files that the frontend needs before login
-    PUBLIC_DATA = {'/data/harvest_history.json', '/data/units.geojson',
+    PUBLIC_DATA = {'/data/harvest_history.json', '/data/units.geojson', '/data/predictions.json',
                    '/data/land_public.geojson',
                    '/data/elk_summer_concentration.geojson',
                    '/data/elk_winter_concentration.geojson',
