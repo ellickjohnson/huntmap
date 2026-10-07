@@ -60,3 +60,34 @@ Direct official PDFs (Widen DAM CDN pattern discovered 2026-10-07):
 TypeSafe AI key lives in Vaultwarden item "typesafeai" (visible only to machine
 accounts on .145 — NOT readable from this drawer; use ssh docker exec crypto-bot
 + vw-fetch.py with OAEP-SHA1→SHA256 org key unwrap).
+## Colorado elk regulation changes affecting the data (researched 2026-10-07)
+
+### Recently enacted (2025-2026 seasons)
+- **Nonresident archery elk is now draw-only statewide** (previously unlimited OTC
+  west of I-25). Affects ~13,000 NR archery licenses/yr; resident archery stays OTC.
+- **Gunnison Basin (GMUs 54/55/551): unlimited OTC 2nd/3rd rifle bull tags replaced
+  with limited draw**, ~3-year average or at most 10% fewer than OTC use.
+- **GMU 82** antler point restrictions removed (2026).
+- 2025 draw: **80/20 resident/nonresident split** on most limited codes; up-to-35% NR
+  where qualifying; `NonResident Cap` values live per code in the Draw Recap.
+
+### Coming (announced / phase-in)
+- **2028 draw overhaul (approved 2025): uniform 75/25 R/NR split on ALL limited
+  licenses** (phasing 2026-2028: caps step down) — will shift NR pressure out of
+  NR-heavy limited units; residents gain ~5pp of quota.
+- Ranges/season dates otherwise stable through 2027 per the 2026-2027 regs packet.
+
+### Effects modeled in predictions (db/policy_adjust.py)
+1. Gunnison units: predicted 2027 hunters ×0.90 from 2026 (limited conversion).
+2. Archery-heavy units (share >15%, non-exempt): ×0.95 (NR archery draw-only).
+3. Limited-heavy NR units (NR share >30% & quota >200): ×0.95 from 2028 rule.
+Each adjustment is surfaced in the UI as a policy note in the crossover panel.
+
+### In-state vs out-of-state per unit
+CPW harvest reports do NOT split hunters by residency. Residency data comes from the
+**Draw Recap Report** (2025 Primary ELK Post Draw, 1123 pp): per hunt code — Total
+Quota, Adult Res/NonRes drawn at final level, `NonResident Cap` %. Aggregated per GMU
+in web/data/residency.json (db/build_residency.py). Limited-code residents:nonresidents
+statewide 2025: 116,772 : 13,005 adult quota (pre-draw), consistent with 80/20.
+Note: OTC (mostly rifle, resident-only now for NR west of I-25... actually NR rifle OTC
+persists) is NOT in the draw; residency.json covers limited units only.

@@ -47,15 +47,11 @@ def main():
     con = sqlite3.connect(DB)
     con.row_factory = sqlite3.Row
 
-    # Historical series: harvest_history.json (2019-2024, All-Manners per-GMU rows,
-    # like-for-like across years) + 2025 from the hunt-code aggregation.
+    # Historical series: harvest_history.json (2019-2025, normalized like-for-like:
+    # 2025 OTC pool codes allocated to units by historic share). No year gaps.
     HISTORY = json.load(open(HIST))
-    try:
-        gmu2025 = json.load(open("/opt/data/.scratch/huntdata/gmu_2025.json"))
-    except FileNotFoundError:
-        sys.exit("run parse_harvest2025.py first")
 
-    series = {}  # unit -> {year: (hunters, success_pct, total)}
+    series = {}  # unit -> {year: (hunters, success_pct, total, partial)}
     for u in HISTORY:
         try:
             ui = int(u)
@@ -63,14 +59,10 @@ def main():
             continue
         for y, r in HISTORY[u].items():
             y = int(y)
-            if 2019 <= y <= 2024 and r.get("hunters"):
+            if 2019 <= y <= 2025 and r.get("hunters"):
                 series.setdefault(ui, {})[y] = (
-                    float(r["hunters"]), float(r.get("success") or 0), float(r.get("total") or 0))
-    for u, rows in gmu2025.items():
-        u = int(u)
-        if rows.get("hunters"):
-            series.setdefault(u, {})[2025] = (
-                float(rows["hunters"]), float(rows["success_pct"] or 0), float(rows["total"] or 0))
+                    float(r["hunters"]), float(r.get("success") or 0), float(r.get("total") or 0),
+                    bool(r.get("partial")))
     con.close()
 
     out = {}
@@ -143,6 +135,7 @@ def main():
             "success_trend_pp_per_yr": round(d_success, 2),
             "confidence": round(conf, 2),
             "n_years": len(pts),
+            "pool_allocated": any(byyear[y][3] for y in byyear),
             "last": {"year": max(byyear), "hunters": round(last_h), "success": round(last_s, 1)},
         }
 

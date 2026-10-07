@@ -73,6 +73,15 @@
   .bigscore .n { font-size: 42px; font-weight: 800; line-height: 1; }
   .bigscore .l { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); }
   .hist { margin: 10px 0 4px; }
+  /* collapsible sections */
+  .sec { margin: 10px 0; }
+  .sec-head { width:100%; display:flex; justify-content:space-between; align-items:center;
+    background:var(--panel2); border:0; border-radius:7px; padding:8px 10px; cursor:pointer;
+    color:var(--fg); font-size:11px; text-transform:uppercase; letter-spacing:1.1px; }
+  .sec-chev { transition: transform .15s; font-size: 10px; }
+  .sec[data-open="0"] .sec-chev { transform: rotate(-90deg); }
+  .sec[data-open="0"] .sec-body { display:none; }
+  .sec-body { padding: 4px 2px 0; }
   .hist .hist-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--dim); margin-bottom: 6px; }
   .hist .bars { display: flex; align-items: flex-end; gap: 6px; height: 46px; margin-bottom: 4px; }
   .hist .bars.hunters { height: 34px; opacity: .8; }
@@ -224,6 +233,14 @@
     <div class="hot-note" id="dHot"></div>
   </div>
 </div>
+<template id="tpl-sec">
+  <div class="sec" data-open="1">
+    <button class="sec-head" type="button">
+      <span class="sec-title"></span><span class="sec-chev">▾</span>
+    </button>
+    <div class="sec-body"></div>
+  </div>
+</template>
 <div id="legend">
   <div id="legendLabel">Hunt score</div>
   <div class="grad"></div>
@@ -319,7 +336,8 @@ const BASEMAPS = { streets: STREETS_STYLE, satellite: SATELLITE_STYLE, topo: TOP
 // ---------------- state ----------------
 let UNITS = null;
 let HISTORY = null;
-let PRED = null;
+let PRED = null;let RESIDENCY = null;
+
 let metric = 'hunt_score';
 let minScore = 0;
 let terrainOn = false;
@@ -328,7 +346,7 @@ let fillMode = 'fill';
 let habitatLayer = 'none';
 let habitatOpacity = 0.30;
 let selectedGmu = null;
-let selectedYear = 2024;
+let selectedYear = 2025;
 let hotspotsCache = {};
 let clickWired = false;
 
@@ -361,17 +379,26 @@ function heatColor(t) {
 function metricProp() {
   if (metric === 'public_pct') return 'public_pct';
   if (metric === 'habitat_score') return 'habitat_score';
-  if (metric === 'harvest_score' && selectedYear !== 2024) return 'success_' + selectedYear;
-  if (metric === 'harvest_score') return 'harvest_score';
+  if (metric === 'harvest_score') return 'success_year';  // virtual prop stamped per selectedYear
   if (metric === 'crossover_score') return 'crossover_score';
   return 'hunt_score';
 }
 function unitValue(p) {
   if (metric === 'crossover_score') return (PRED && PRED[p.gmuid]) ? PRED[p.gmuid].crossover_score : 0;
-  if (metric !== 'harvest_score' || selectedYear === 2024 || !HISTORY) return p[metric] || 0;
+  if (metric !== 'harvest_score' || !HISTORY) return p[metric] || 0;
   const h = (HISTORY[p.gmuid] || {})[String(selectedYear)];
   return h ? h.success : 0;
 }
+
+function stampSuccessYear() {
+  // stamp selectedYear's success% onto geojson properties (virtual prop success_year)
+  if (!UNITS || !HISTORY) return;
+  UNITS.features.forEach(f => {
+    const h = (HISTORY[f.properties.gmuid] || {})[String(selectedYear)];
+    f.properties.success_year = h ? h.success : 0;
+  });
+}
+
 function centroidOf(f) {
   const rings = f.geometry.type === 'Polygon' ? [f.geometry.coordinates[0]] : f.geometry.coordinates.map(p => p[0]);
   const xs = [], ys = [];
@@ -566,7 +593,7 @@ function renderDetail(p) {
   scoreEl.style.color = heatColor((parseFloat(scoreEl.textContent) || 0) / 100);
   document.getElementById('dScoreLabel').textContent =
     metric === 'crossover_score' ? 'CROSSOVER SCORE' :
-    metric === 'harvest_score' && selectedYear !== 2024 ? `${selectedYear} SUCCESS %` : 'HUNT SCORE';
+    metric === 'harvest_score' ? `${selectedYear} SUCCESS %` : 'HUNT SCORE';
   const rows = [
     [`${selectedYear} success`, hy ? `${hy.success}%` : (p.success_pct != null ? `${p.success_pct}%` : '—')],
     [`${selectedYear} hunters`, hy ? hy.hunters.toLocaleString() : (p.hunters || 0).toLocaleString()],
@@ -581,9 +608,59 @@ function renderDetail(p) {
     rows.push(['2026 est success', `${pred.est_2026.success}%`]);
     rows.push(['2027 pred success', `${pred.pred_2027.success}% (conf ${Math.round(pred.confidence * 100)}%)`]);
   }
-  document.getElementById('dStats').innerHTML = rows.map(([k, v]) =>
+  const statsHtml = rows.map(([k, v]) =>
     `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
-  renderHistory();
+  renderSections(statsHtml, pred, renderHistory);
+}
+
+// ---- collapsible sections (mobile-friendly) ----
+function buildSec(title, innerHtml, open = true) {
+  const tpl = document.getElementById('tpl-sec');
+  const el = tpl.content.firstElementChild.cloneNode(true);
+  el.querySelector('.sec-title').textContent = title;
+  el.querySelector('.sec-body').innerHTML = innerHtml;
+  el.dataset.open = open ? '1' : '0';
+  el.querySelector('.sec-head').addEventListener('click', () => {
+    el.dataset.open = el.dataset.open === '1' ? '0' : '1';
+  });
+  return el;
+}
+
+function renderSections(statsHtml, pred, rerenderHistory) {
+  const wrap = document.createElement('div');
+  wrap.appendChild(buildSec(`${selectedYear} stats`, `<div id="dStats">${statsHtml}</div>`));
+
+  // trend & forecast section (history chart + crossover box live inside dHist render)
+  const trendSec = buildSec('Trend &amp; forecast', `<div id="dHist"></div>`);
+  wrap.appendChild(trendSec);
+
+  // residency section (in-state vs out-of-state, limited licenses)
+  const r = RESIDENCY && (RESIDENCY[selectedGmu] || RESIDENCY[String(selectedGmu)]);
+  if (r) {
+    const nr = r.nr_share_pct;
+    const rows2 = [
+      ['Limited licenses', (r.limited_quota || 0).toLocaleString()],
+      ['Drawn — residents', (r.res_drawn || 0).toLocaleString()],
+      ['Drawn — nonresidents', (r.nr_drawn || 0).toLocaleString()],
+      ['Nonresident share', nr != null ? `${nr}%` : '—'],
+    ];
+    // 2028 policy impact preview
+    let impact = '';
+    if (nr != null && nr > 30 && (r.limited_quota || 0) > 200) {
+      impact = `<div style="margin-top:6px;color:var(--dim);font-size:10px">⚠️ 2028 rule: uniform 75/25 R/NR — this unit's NR share (${nr}%) drops, freeing tags for residents.</div>`;
+    }
+    wrap.appendChild(buildColSec('Residents vs nonresidents (limited draw)',
+      rows2.map(([k, v]) => `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('') + impact, true));
+  }
+
+  const prev = document.getElementById('dSectionsWrap');
+  if (prev) prev.replaceWith(wrap); else document.getElementById('detailBody').appendChild(wrap);
+  wrap.id = 'dSectionsWrap';
+  rerenderHistory();
+}
+function buildColSec(title, innerHtml, open = true) {
+  const el = buildSec(title, innerHtml, open);
+  return el;
 }
 
 function renderHistory() {
@@ -709,6 +786,7 @@ function renderHistory() {
 
   el.querySelectorAll('.b').forEach(bEl => bEl.addEventListener('click', () => {
     selectedYear = +bEl.dataset.y;
+    stampSuccessYear();
     renderHistory();
     const p = UNITS.features.find(f => f.properties.gmuid === selectedGmu)?.properties;
     if (p) renderDetail(p);
@@ -747,7 +825,9 @@ function renderCrossover(d) {
       <span>Crossover: <strong>${cyText}</strong></span>
       <span>Confidence: <strong style="color:${confColor}">${conf}%</strong></span>
       <span>Based on ${d.n_years} yrs</span>
-    </div>`;
+    </div>
+    ${(d.policy_notes || []).map(n => `<div style="font-size:10px;color:var(--dim);margin-top:4px">📋 Reg change: ${n}</div>`).join('')}
+    ${d.pool_allocated ? `<div style="font-size:9.5px;color:var(--dim);margin-top:3px">* 2025 includes estimated OTC allocation (statewide pool codes split by historic share)</div>` : ''}`;
 }
 
 // Simple linear regression slope
@@ -1273,17 +1353,19 @@ map.on('idle', () => {
 });
 map.on('load', async () => {
   try {
-    const [uRes, hRes, pRes] = await Promise.all([
+    const [uRes, hRes, pRes, rRes] = await Promise.all([
       fetch('/data/units.geojson'), fetch('/data/harvest_history.json'),
-      fetch('/data/predictions.json')]);
+      fetch('/data/predictions.json'), fetch('/data/residency.json')]);
     if (!uRes.ok) throw new Error('HTTP ' + uRes.status);
     UNITS = await uRes.json();
     HISTORY = hRes.ok ? await hRes.json() : null;
     PRED = pRes.ok ? await pRes.json() : null;
+    RESIDENCY = rRes.ok ? await rRes.json() : null;
     if (PRED) {
       // stamp crossover scores onto geojson properties so map fill + minScore filter work natively
       UNITS.features.forEach(f => { const d = PRED[f.properties.gmuid]; if (d) f.properties.crossover_score = d.crossover_score; });
     }
+    stampSuccessYear();
     UNITS.features.forEach(f => { f.properties._c = centroidOf(f); });
     wireClicks();
     ensureUnitLayers();
