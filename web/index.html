@@ -902,6 +902,7 @@ const BUILDERS = {
     const sec = document.getElementById('markerSection');
     if (head) head.style.display = 'none';
     if (sec) { sec.style.display = ''; sec.style.flex = 'none'; body.appendChild(sec); }
+    if (typeof loadMarkers === 'function') loadMarkers();  // refresh list each time popup opens
   },
   railProfile: body => {
     if (!window._signedIn) {
@@ -1455,9 +1456,9 @@ async function loadMarkers() {
     if (!r.ok) return;
     const d = await r.json();
     markers = d.markers || [];
-    updateMarkerLayer();
     renderMarkerList();
-  } catch (e) { /* not signed in / old build */ }
+    try { updateMarkerLayer(); } catch (e) { console.warn('marker layer', e); }
+  } catch (e) { console.warn('loadMarkers:', e); }
 }
 
 function updateMarkerLayer() {
@@ -1543,6 +1544,24 @@ function updateMarkerLayer() {
   }
 }
 
+window.gotoMarker = function(id) {
+  const mk = markers.find(m => m.id === id);
+  if (!mk) return;
+  // close any open popup
+  document.querySelectorAll('.maplibregl-popup').forEach(el => el.remove());
+  map.easeTo({ center: [mk.lon, mk.lat], zoom: Math.max(map.getZoom(), 12), duration: 700 });
+  const html = `<strong>${MK_EMOJI[mk.kind] || '📍'} ${mk.name || mk.kind}</strong>` +
+    (mk.notes ? `<br><span style="font-size:12px">${mk.notes}</span>` : '') +
+    `<br><button onclick="deleteMarker(${mk.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>` +
+    `<br><button onclick="editMarker(${mk.id})" style="margin-top:6px;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer">✏️ Edit / move</button>`;
+  setTimeout(() => {
+    new maplibregl.Popup({ offset: 12 })
+      .setLngLat([mk.lon, mk.lat])
+      .setHTML(html)
+      .addTo(map);
+  }, 750);
+};
+
 window.editMarker = function(id) {
   const mk = markers.find(m => m.id === id);
   if (!mk) return;
@@ -1570,11 +1589,16 @@ function renderMarkerList() {
   const el = document.getElementById('markerList');
   if (!markers.length) { el.innerHTML = '<div style="font-size:11px;color:var(--dim)">No markers yet — click "Add marker" then click the map.</div>'; return; }
   el.innerHTML = markers.map(m =>
-    `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px;color:var(--txt)">
+    `<div data-mkid="${m.id}" style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px;color:var(--txt);cursor:pointer;border-radius:6px">
        <span>${MK_EMOJI[m.kind] || '📍'}</span>
        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.name || m.kind}</span>
-       <button onclick="deleteMarker(${m.id})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px">✕</button>
+       <button onclick="event.stopPropagation();deleteMarker(${m.id})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px">✕</button>
      </div>`).join('');
+  el.querySelectorAll('[data-mkid]').forEach(row => {
+    row.addEventListener('mouseenter', () => row.style.background = 'var(--panel2)');
+    row.addEventListener('mouseleave', () => row.style.background = '');
+    row.addEventListener('click', () => window.gotoMarker(parseInt(row.dataset.mkid)));
+  });
 }
 
 // placing flow
