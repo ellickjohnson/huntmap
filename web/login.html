@@ -72,6 +72,20 @@
     <label for="li_pw">Password</label>
     <input id="li_pw" type="password" autocomplete="current-password" required>
     <button class="btn" type="submit" id="loginBtn">Sign in</button>
+    <div style="text-align:center;margin-top:10px">
+      <a id="forgotLink" style="color:#5eead4;font-size:13px;cursor:pointer;text-decoration:none">Forgot password?</a>
+    </div>
+  </form>
+
+  <form id="formForgot">
+    <p style="color:#94a3b8;font-size:13px;line-height:1.5;margin:0 0 12px">
+      Enter your account email and we'll send you a reset link (valid 1 hour).</p>
+    <label for="fg_email">Email</label>
+    <input id="fg_email" type="email" autocomplete="email" required>
+    <button class="btn" type="submit" id="forgotBtn">Email me a reset link</button>
+    <div style="text-align:center;margin-top:10px">
+      <a id="forgotBack" style="color:#5eead4;font-size:13px;cursor:pointer;text-decoration:none">← Back to sign in</a>
+    </div>
   </form>
 
   <form id="formSignup">
@@ -87,6 +101,7 @@
   <div class="swap" id="swapHint">
     <span id="swapText">No account yet?</span> <a id="swapLink">Sign up</a>
   </div>
+  <style>#formForgot{display:none}</style>
 
   <div class="fine">
     <a href="/">← Back to map</a>
@@ -118,6 +133,39 @@ $('tabSignup').onclick = () => setTab(false);
 $('swapHint').querySelector('a').onclick = () => {
   setTab($('tabLogin').classList.contains('active'));
 };
+
+// ---- forgot password flow ----
+function showForgot(showIt) {
+  $('formForgot').style.display = showIt ? 'block' : 'none';
+  $('li_email').closest('form').style.display = showIt ? 'none' : ($('tabLogin').classList.contains('active') ? 'active' : 'none');
+  $('formSignup').style.display = showIt ? 'none' : ($('tabSignup').classList.contains('active') ? 'active' : 'none');
+  if (showIt) { $('fg_email').value = $('li_email').value || ''; $('fg_email').focus(); }
+  $('swapHint').style.display = showIt ? 'none' : 'block';
+  $('tabLogin').style.visibility = showIt ? 'hidden' : 'visible';
+  $('tabSignup').style.visibility = showIt ? 'hidden' : 'visible';
+  hideMsg();
+}
+$('forgotLink').onclick = () => showForgot(true);
+$('forgotBack').onclick = () => showForgot(false);
+
+$('formForgot').addEventListener('submit', async e => {
+  e.preventDefault();
+  hideMsg();
+  const btn = $('forgotBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const r = await fetch('/api/forgot', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: $('fg_email').value.trim()})
+    });
+    const d = await r.json();
+    if (!r.ok) { showMsg(d.error || 'Request failed', 'error'); return; }
+    showMsg(d.message || 'If that email has an account, a reset link is on its way.', 'ok');
+  } catch (err) {
+    showMsg('Network error — try again', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Email me a reset link';
+  }
+});
 
 $('formSignup').addEventListener('submit', async e => {
   e.preventDefault();

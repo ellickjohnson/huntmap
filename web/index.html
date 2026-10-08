@@ -109,64 +109,87 @@
     #legend { display: none; }
   }
 
-/* ---- left rail (onX style): icon-only buttons, per-button floating popover ---- */
-#railDock { position:absolute; top:12px; left:12px; z-index:11; width:48px;
-  display:flex; flex-direction:column; gap:7px; }
-.railBtn { width:48px; height:48px; border-radius:10px; border:1px solid var(--line);
-  background:color-mix(in srgb, var(--panel) 94%, transparent); color:var(--txt);
-  font-size:20px; cursor:pointer; line-height:1; backdrop-filter:blur(8px);
-  box-shadow:0 4px 16px rgba(0,0,0,.35); transition:background .12s, border-color .12s;
-  display:flex; align-items:center; justify-content:center; }
-.railBtn:hover { background:color-mix(in srgb, var(--panel2) 96%, transparent); }
-.railBtn.active { background:color-mix(in srgb, var(--accent2) 22%, var(--panel2));
-  border-color:var(--accent2); }
-#railMenu { position:absolute; z-index:10; left:68px; top:12px; width:280px;
+/* ---- left side panel (onX style): full-height panel + icon/text buttons ---- */
+#sidePanel { position:absolute; top:0; left:0; bottom:0; z-index:11; width:320px;
   background:color-mix(in srgb, var(--panel) 96%, transparent); backdrop-filter:blur(10px);
-  border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.4);
-  max-height:calc(100vh - 24px); display:none; flex-direction:column; overflow:hidden;
-  transform-origin: left top; }
-#railMenu.open { display:flex; animation: railPop .14s ease-out; }
-@keyframes railPop { from { opacity:0; transform:scale(.96) translateX(-4px); }
-                     to   { opacity:1; transform:none; } }
+  border-right:1px solid var(--line); box-shadow:4px 0 24px rgba(0,0,0,.35);
+  display:flex; flex-direction:column; transition:transform .2s ease; }
+#sidePanel.hidden { transform:translateX(-100%); pointer-events:none; }
+#panelToggleFloat { position:absolute; top:12px; left:12px; z-index:12; width:44px; height:44px;
+  border-radius:10px; border:1px solid var(--line); background:color-mix(in srgb, var(--panel) 94%, transparent);
+  color:var(--txt); font-size:18px; cursor:pointer; backdrop-filter:blur(8px);
+  box-shadow:0 4px 16px rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center;
+  transition: all .2s; }
+#panelToggleFloat:hover { border-color:var(--accent2); }
+#railNav { display:flex; flex-direction:column; gap:2px; padding:10px 8px 6px; border-bottom:1px solid var(--line);
+  overflow-y:auto; flex-shrink:0; }
+.railBtn { display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:10px 6px 8px; border-radius:10px; border:1px solid transparent;
+  background:transparent; color:var(--txt); cursor:pointer; transition:background .12s, border-color .12s; }
+.railBtn .ic { font-size:20px; line-height:1; }
+.railBtn .lbl { font-size:10.5px; color:var(--dim); font-weight:500; letter-spacing:.2px; }
+.railBtn:hover { background:color-mix(in srgb, var(--panel2) 96%, transparent); }
+.railBtn.active { background:color-mix(in srgb, var(--accent2) 18%, var(--panel2));
+  border-color:var(--accent2); }
+.railBtn.active .lbl { color:var(--accent2); }
+#railMenu { flex:1; display:none; flex-direction:column; overflow:hidden; min-height:0; }
+#railMenu.open { display:flex; }
 #railMenu .railTitle { padding:9px 12px; font-weight:600; font-size:13px; color:var(--txt);
-  border-bottom:1px solid var(--line);
-  display:flex; align-items:center; justify-content:space-between; }
+  border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0; }
 #railMenu .railClose { cursor:pointer; border:none; background:none; color:var(--dim); font-size:15px; }
 #railMenu .railClose:hover { color:var(--txt); }
-#railBody { padding:10px 12px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
-#railBody > * { min-width: 0; max-width: 100%; }
-#railBody .field { flex-wrap: wrap; }
-#railBody .field > input[type=range] { flex: 1; min-width: 90px; }
+#railBody { padding:10px 12px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; flex:1; min-height:0; }
+#panelFooter { border-top:1px solid var(--line); padding:8px 8px 10px; display:flex; flex-direction:column; gap:2px;
+  flex-shrink:0; }
+.panelUser { display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:12px; color:var(--dim); }
+.panelUser b { color:var(--txt); font-size:12.5px; }
+.panelBtn { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; border:0;
+  background:transparent; color:var(--txt); font-size:13px; cursor:pointer; text-align:left; width:100%; }
+.panelBtn:hover { background:var(--panel2); }
+.panelBtn.danger { color:#f87171; }
+.pfield { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+.pfield label { font-size:11px; color:var(--dim); }
+.pfield input { background:var(--panel2); border:1px solid var(--line); color:var(--txt);
+  padding:8px 10px; border-radius:7px; font-size:13px; width:100%; }
+.pfield input:focus { outline:2px solid var(--accent2); border-color:transparent; }
+.pmsg { padding:8px 10px; border-radius:7px; font-size:12px; line-height:1.4; display:none; margin-bottom:8px; }
+.pmsg.error { background:#7f1d1d33; color:#fca5a5; border:1px solid #7f1d1d; }
+.pmsg.ok { background:#14532d33; color:#86efac; border:1px solid #14532d; }
 
 @media (max-width: 700px){
-  #railDock { flex-direction:row; width:auto; top:auto; bottom:12px; left:50%;
-    transform:translateX(-50%); }
-  #railMenu { top:auto; bottom:60px; left:50%; transform:translateX(-50%); width:290px; }
-  @keyframes railPop { from { opacity:0; }
-                       to   { opacity:1; } }
+  #sidePanel { width:calc(100vw - 60px); }
 }
-
 </style>
 </head>
 <body>
 <div id="map"></div>
-<div id="railDock">
-  <button class="railBtn" id="railMap"     title="Map style">🗺️</button>
-  <button class="railBtn" id="railLayers"  title="Layers">🧭</button>
-  <button class="railBtn" id="railSearch"  title="Search">🔍</button>
-  <button class="railBtn" id="railMarkers" title="Markers">📍</button>
-  <button class="railBtn" id="railTools"   title="Tools">⚙️</button>
-</div>
-<div id="railMenu">
-  <div class="railTitle"><span id="railTitleTxt"></span><button class="railClose" id="railX" title="Close">✕</button></div>
-  <div id="railBody"></div>
-</div>
-<div class="panel" id="sidePanel" style="display:none">
-  <div class="panel-header">
-    <h1>Elk<span>HuntMap</span> 🦌</h1>
-    <button class="collapse-btn" id="panelToggle" title="Collapse panel">◀</button>
+<button id="panelToggleFloat" title="Menu">☰</button>
+<div id="sidePanel">
+  <div class="panel-header" style="border-bottom:1px solid var(--line)">
+    <h1 style="font-size:15px">Elk<span>HuntMap</span> 🦌</h1>
+    <button class="collapse-btn" id="panelToggle" title="Hide panel">◀</button>
   </div>
-  <div class="panel-body">
+  <nav id="railNav">
+    <button class="railBtn" id="railMap"><span class="ic">🗺️</span><span class="lbl">Map Style</span></button>
+    <button class="railBtn" id="railLayers"><span class="ic">📚</span><span class="lbl">Layers</span></button>
+    <button class="railBtn" id="railSearch"><span class="ic">🔍</span><span class="lbl">Search</span></button>
+    <button class="railBtn" id="railMarkers"><span class="ic">📍</span><span class="lbl">Markers</span></button>
+    <button class="railBtn" id="railTools"><span class="ic">🧰</span><span class="lbl">Tools</span></button>
+    <button class="railBtn" id="railProfile"><span class="ic">👤</span><span class="lbl">Profile</span></button>
+    <button class="railBtn adminOnly" id="railAdmin" style="display:none"><span class="ic">🛡️</span><span class="lbl">Admin</span></button>
+  </nav>
+  <div id="railMenu">
+    <div class="railTitle"><span id="railTitleTxt"></span><button class="railClose" id="railX" title="Close">✕</button></div>
+    <div id="railBody"></div>
+  </div>
+  <div id="panelFooter">
+    <div class="panelUser" id="panelUser" style="display:none"><b id="panelUserName"></b><span id="panelUserRole"></span></div>
+    <button class="panelBtn" id="panelSignOut" style="display:none"><span>🚪</span><span>Sign out</span></button>
+    <button class="panelBtn adminOnly" id="panelAdminLink" style="display:none" onclick="location.href='/admin.html'"><span>🛡️</span><span>Admin Panel</span></button>
+    <button class="panelBtn" id="panelSignIn" onclick="location.href='/login.html'"><span>🔐</span><span>Sign in</span></button>
+  </div>
+  <div class="panel-body" style="display:none">
     <div class="controls">
       <div class="seg" id="metricSeg">
         <button data-m="hunt_score" class="active">Overall</button>
@@ -205,9 +228,9 @@
         <span class="chip" id="parcelChip">🟥 Parcels</span>
         <span class="chip" id="trailsChip">🥾 Trails</span>
         <span class="chip" id="burnsChip">🔥 Burn areas</span>
-        <span class="chip on" id="hotspotChip">🔥 Hotspots</span>
+        <span class="chip" id="hotspotChip">🔥 Hotspots</span>
         <span class="chip" id="landChip">🗺️ Public land</span>
-        <span class="chip on" id="contourChip">📈 Contours</span>
+        <span class="chip" id="contourChip">📈 Contours</span>
         <span class="chip on" id="unitsChip">📏 ft · miles</span>
       </div>
       <div class="field">
@@ -501,7 +524,7 @@ function scheduleParcels() {
   parcelTimer = setTimeout(updateParcels, 450);
 }
 // contour chip: contours default ON in hybrid; chip toggles them (and auto-switches to hybrid)
-let contoursOn = true;
+let contoursOn = false;
 function applyContours() {
   if (!map.isStyleLoaded()) { map.once('idle', applyContours); return; }
   ['contour-minor', 'contour-major'].forEach(id => {
@@ -518,7 +541,7 @@ let PRED = null;let RESIDENCY = null;
 let metric = 'hunt_score';
 let minScore = 0;
 let terrainOn = false;
-let hotspotsOn = true;
+let hotspotsOn = false;
 let fillMode = 'fill';
 let habitatLayer = 'none';
 let habitatOpacity = 0.30;
@@ -603,14 +626,14 @@ function ensureUnitLayers() {
       paint: {
         'fill-color': fillExpr(),
         'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.0,
-          fillMode === 'fill' ? 0.80 : 0.0],
+          fillMode === 'fill' ? (window._fillOpacity ?? 0.80) : 0.0],
       },
     });
   } else {
     map.setPaintProperty('gmu-fill', 'fill-color', fillExpr());
     map.setPaintProperty('gmu-fill', 'fill-opacity', [
       'case', ['boolean', ['feature-state', 'selected'], false], 0.0,
-      fillMode === 'fill' ? 0.80 : 0.0]);
+      fillMode === 'fill' ? (window._fillOpacity ?? 0.80) : 0.0]);
   }
   map.setFilter('gmu-fill', minScore > 0
     ? ['>=', ['to-number', ['coalesce', ['get', metricProp()], 0]], minScore] : null);
@@ -736,7 +759,7 @@ function setTerrain(on) {
   try {
     if (on) {
       if (!map.getSource('terrain-dem')) map.addSource('terrain-dem', TERRAIN_DEM);
-      map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
+      map.setTerrain({ source: 'terrain-dem', exaggeration: window._exaggeration ?? 1.5 });
       // 3D is invisible at top-down: tilt the camera so relief shows
       map.easeTo({ pitch: 60, duration: 700 });
     } else {
@@ -746,14 +769,15 @@ function setTerrain(on) {
   } catch (err) { console.error('terrain:', err); }
 }
 
-// ---------------- left rail controller (onX style: click toggles per-button popover) ----------------
+// ---------------- left panel controller: sections switch inside the panel ----------------
 
 const SECTION_DEFS = [
   { key: 'railMap',     icon: '🗺️', title: 'Map style' },
-  { key: 'railLayers',  icon: '🧭', title: 'Layers' },
+  { key: 'railLayers',  icon: '📚', title: 'Layers' },
   { key: 'railSearch',  icon: '🔍', title: 'Search' },
   { key: 'railMarkers', icon: '📍', title: 'Markers' },
-  { key: 'railTools',   icon: '⚙️', title: 'Tools' },
+  { key: 'railTools',   icon: '🧰', title: 'Tools' },
+  { key: 'railProfile', icon: '👤', title: 'Profile' },
 ];
 const menu = document.getElementById('railMenu');
 const railBody = document.getElementById('railBody');
@@ -773,6 +797,16 @@ const BUILDERS = {
     body.appendChild(document.getElementById('baseSeg'));
     body.appendChild(fld('Unit style'));
     body.appendChild(document.getElementById('fillSeg'));
+    // fill opacity slider (fill mode: lets basemap roads/cities/cities show through)
+    body.appendChild(fld('Fill opacity'));
+    const fo = document.createElement('div');
+    fo.style.cssText = 'display:flex;align-items:center;gap:8px';
+    const foR = document.createElement('input');
+    foR.type = 'range'; foR.id = 'fillOpacity'; foR.min = 0; foR.max = 100; foR.value = Math.round((window._fillOpacity ?? 0.80) * 100);
+    foR.style.flex = '1'; foR.accentColor = 'var(--accent)';
+    const foV = document.createElement('span'); foV.className = 'val'; foV.id = 'fillOpacityVal'; foV.textContent = foR.value;
+    fo.appendChild(foR); fo.appendChild(foV);
+    body.appendChild(fo);
     body.appendChild(fld('Min score'));
     const mw = document.createElement('div'); mw.style.cssText = 'display:flex;align-items:center;gap:8px';
     mw.appendChild(document.getElementById('minScore'));
@@ -785,8 +819,18 @@ const BUILDERS = {
     const row2 = document.createElement('div'); row2.className = 'toggles';
     ['hotspotChip','landChip','contourChip','unitsChip'].forEach(id => { const el = document.getElementById(id); if (el) row2.appendChild(el); });
     body.appendChild(row1); body.appendChild(row2);
+    // 3D elevation exaggeration (onX-style) — live-updates terrain
+    body.appendChild(fld('3D elevation exaggeration'));
+    const ex = document.createElement('div');
+    ex.style.cssText = 'display:flex;align-items:center;gap:8px';
+    const exR = document.createElement('input');
+    exR.type = 'range'; exR.id = 'exaggeration'; exR.min = 0; exR.max = 300; exR.step = 5; exR.value = Math.round((window._exaggeration ?? 1.5) * 100);
+    exR.style.flex = '1'; exR.accentColor = 'var(--accent)';
+    const exV = document.createElement('span'); exV.className = 'val'; exV.id = 'exaggerationVal'; exV.textContent = (exR.value / 100).toFixed(2) + 'x';
+    ex.appendChild(exR); ex.appendChild(exV);
+    body.appendChild(ex);
     const habOp = document.getElementById('habitatOpacityField');
-    if (habOp) { habOp.style.display = ''; body.appendChild(habOp); }
+    if (habOp) { habOp.style.display = habitatLayer === 'none' ? 'none' : 'flex'; body.appendChild(habOp); }
     const habSeg = document.getElementById('layerToggles');
     if (habSeg) body.appendChild(habSeg);
   },
@@ -809,9 +853,54 @@ const BUILDERS = {
     w.textContent = 'Weather forecast per unit coming soon';
     body.appendChild(w);
   },
+  railProfile: body => {
+    if (!window._signedIn) {
+      body.innerHTML = '<div style="font-size:13px;color:var(--dim);padding:8px 0">Not signed in. <a href="/login.html" style="color:#5eead4">Sign in</a> to manage your profile.</div>';
+      return;
+    }
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:4px';
+    wrap.innerHTML = `
+      <div class="pmsg" id="pfMsg"></div>
+      <div class="pfield"><label>Signed in as</label><input id="pfEmail" type="email" value="${window._userEmail || ''}" placeholder="you@example.com"/></div>
+      <div class="pfield"><label>Name</label><input id="pfName" type="text" value="${window._userName || ''}"/></div>
+      <div style="height:12px"></div>
+      <div class="pfield"><label>Current password (required to change email)</label><input id="pfEmailPw" type="password"/></div>
+      <div class="pfield"><label>New email</label><input id="pfNewEmail" type="email"/></div>
+      <button class="panelBtn" id="pfEmailBtn" style="background:var(--panel2);border-radius:8px;border:1px solid var(--line);justify-content:center"><span>📧</span><span>Send email-change confirmation</span></button>
+      <div style="height:10px"></div>
+      <div class="pfield"><label>Current password</label><input id="pfCur" type="password"/></div>
+      <div class="pfield"><label>New password (8+ characters)</label><input id="pfNewPw" type="password"/></div>
+      <button class="panelBtn" id="pfPwBtn" style="background:var(--panel2);border-radius:8px;border:1px solid var(--line);justify-content:center"><span>🔑</span><span>Change password</span></button>
+    `;
+    body.appendChild(wrap);
+    const show = (txt, kind) => {
+      const m = wrap.querySelector('#pfMsg');
+      m.textContent = txt; m.className = 'pmsg ' + kind; m.style.display = 'block';
+    };
+    wrap.querySelector('#pfPwBtn').addEventListener('click', async () => {
+      const cur = wrap.querySelector('#pfCur').value, nw = wrap.querySelector('#pfNewPw').value;
+      if (nw.length < 8) return show('New password must be at least 8 characters', 'error');
+      const r = await fetch('/api/profile/password', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({current: cur, new: nw}) });
+      const d = await r.json();
+      if (!r.ok) return show(d.error || 'Change failed', 'error');
+      show('Password changed.', 'ok');
+      wrap.querySelector('#pfCur').value = ''; wrap.querySelector('#pfNewPw').value = '';
+    });
+    wrap.querySelector('#pfEmailBtn').addEventListener('click', async () => {
+      const pw = wrap.querySelector('#pfEmailPw').value, ne = wrap.querySelector('#pfNewEmail').value.trim();
+      const r = await fetch('/api/profile/email', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({password: pw, new_email: ne}) });
+      const d = await r.json();
+      if (!r.ok) return show(d.error || 'Request failed', 'error');
+      show(d.message || 'Confirmation link sent.', 'ok');
+      wrap.querySelector('#pfEmailPw').value = ''; wrap.querySelector('#pfNewEmail').value = '';
+    });
+  },
 };
 // build each section's content lazily into its own detached holder so we can
-// show exactly one at a time (like onX's per-button popovers)
+// show exactly one at a time inside the panel body
 const railSections = {};
 SECTION_DEFS.forEach(def => {
   const body = document.createElement('div');
@@ -826,24 +915,14 @@ function setActiveBtn(key) {
   document.querySelectorAll('.railBtn').forEach(b => b.classList.toggle('active', b.id === key));
 }
 function railShow(key) {
+  if (!railSections[key]) return; // admin/profile hidden when signed out
   activeRailKey = key;
+  if (key === 'railProfile') { railSections[key].body.innerHTML = ''; (BUILDERS.railProfile)(railSections[key].body); }
   railSections[key].body.style.display = '';
   SECTION_DEFS.forEach(d => { if (d.key !== key) railSections[d.key].body.style.display = 'none'; });
   railTitleTxt.textContent = railSections[key].def.title;
   menu.classList.add('open');
   setActiveBtn(key);
-  // anchor popover to the button: desktop = beside rail; mobile = centered sheet
-  if (window.innerWidth > 700) {
-    const btn = document.getElementById(key);
-    menu.style.top = '12px';
-    menu.style.transform = '';
-    const y = btn ? btn.getBoundingClientRect().top - 12 : 12;
-    menu.style.top = Math.max(12, Math.min(y, window.innerHeight - menu.offsetHeight - 12)) + 'px';
-    menu.style.transform = '';
-  } else {
-    menu.style.top = 'auto';
-    menu.style.transform = '';
-  }
 }
 function railHide() {
   activeRailKey = null;
@@ -856,27 +935,34 @@ function railToggle(key) {
 }
 SECTION_DEFS.forEach(d => {
   const b = document.getElementById(d.key);
-  b.addEventListener('click', e => { e.stopPropagation(); railToggle(d.key); });
+  if (b) b.addEventListener('click', e => { e.stopPropagation(); railToggle(d.key); });
 });
+// Admin button opens the admin panel (external page)
+const adminBtn = document.getElementById('railAdmin');
+if (adminBtn) adminBtn.addEventListener('click', () => { location.href = '/admin.html'; });
 document.getElementById('railX').addEventListener('click', railHide);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); });
 
-// clicking outside any rail UI (map, panels, anything) closes the popover
+// show/hide the side panel
+const panelEl = document.getElementById('sidePanel');
+function setPanelVisible(v) {
+  panelEl.classList.toggle('hidden', !v);
+  const t = document.getElementById('panelToggleFloat');
+  t.style.opacity = v ? '0' : '1';
+  t.style.pointerEvents = v ? 'none' : 'auto';
+}
+document.getElementById('panelToggle').addEventListener('click', () => setPanelVisible(false));
+document.getElementById('panelToggleFloat').addEventListener('click', () => setPanelVisible(true));
+setPanelVisible(true);
+
+// clicking outside the panel (on the map) closes the open section
 function placingActive() {
   const bar = document.getElementById('addMarkerBar');
   return bar && bar.style.display === 'block';
 }
-document.addEventListener('click', e => {
-  if (placingActive()) return; // don't yank the panel while the user is placing a marker
-  if (!menu.contains(e.target) && !e.target.closest('.railBtn')) railHide();
-});
-// also close on map interactions (pan/zoom counts as map use) — but not while placing
 map.on('click', () => { if (!placingActive()) railHide(); });
 map.on('dragstart', () => { if (!placingActive()) railHide(); });
 map.on('zoomstart', () => { if (!placingActive() && menu.classList.contains('open')) railHide(); });
-
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); });
 
 // ---------------- selection & detail ----------------
 function selectUnit(uid) {
@@ -1577,37 +1663,6 @@ map.on('moveend', () => {
   listTimer = setTimeout(() => { listTimer = null; renderUnitList(); }, 150);
 });
 
-// ---------------- UI wiring ----------------
-const panelToggle = document.getElementById('panelToggle');
-panelToggle.addEventListener('click', () => {
-  const collapsed = document.getElementById('sidePanel').classList.toggle('collapsed');
-  panelToggle.textContent = collapsed ? '▶' : '◀';
-});
-// draggable side panel (desktop): drag by its header
-(function () {
-  const panel = document.getElementById('sidePanel');
-  const head = panel.querySelector('.panel-header');
-  let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
-  head.addEventListener('pointerdown', e => {
-    if (e.target.closest('.collapse-btn')) return;
-    if (window.innerWidth < 720) return;
-    dragging = true; sx = e.clientX; sy = e.clientY;
-    const r = panel.getBoundingClientRect();
-    ox = r.left; oy = r.top;
-    panel.style.left = ox + 'px'; panel.style.top = oy + 'px';
-    head.setPointerCapture(e.pointerId);
-  });
-  head.addEventListener('pointermove', e => {
-    if (!dragging) return;
-    panel.style.left = Math.max(0, Math.min(window.innerWidth - 120, ox + e.clientX - sx)) + 'px';
-    panel.style.top = Math.max(0, Math.min(window.innerHeight - 40, oy + e.clientY - sy)) + 'px';
-  });
-  head.addEventListener('pointerup', () => { dragging = false; });
-})();
-if (window.innerWidth < 720) {
-  document.getElementById('sidePanel').classList.add('collapsed');
-  panelToggle.textContent = '▶';
-}
 // collapse + drag for the detail box (selection persists)
 const detailEl = document.getElementById('detail');
 document.getElementById('detailMin').addEventListener('click', () => detailEl.classList.toggle('min'));
@@ -1837,6 +1892,20 @@ habOpEl.addEventListener('input', () => {
   if (map.getLayer('habitat-fill')) map.setPaintProperty('habitat-fill', 'fill-opacity', habitatOpacity);
 });
 
+const fillOpEl = document.getElementById('fillOpacity');
+if (fillOpEl) fillOpEl.addEventListener('input', () => {
+  window._fillOpacity = +fillOpEl.value / 100;
+  document.getElementById('fillOpacityVal').textContent = fillOpEl.value;
+  ensureUnitLayers();
+});
+const exagEl = document.getElementById('exaggeration');
+if (exagEl) exagEl.addEventListener('input', () => {
+  window._exaggeration = +exagEl.value / 100;
+  const v = document.getElementById('exaggerationVal');
+  if (v) v.textContent = window._exaggeration.toFixed(2) + 'x';
+  setTerrain(terrainOn);
+});
+
 // ---------------- lifecycle ----------------
 map.on('style.load', () => {
   // style switch wipes sources/layers/terrain — rebuild all
@@ -1875,28 +1944,38 @@ map.on('load', async () => {
 });
 </script>
 
-<!-- auth state chip -->
+<!-- auth state -> panel footer -->
 <script>
 (async () => {
   try {
     const r = await fetch('/api/me');
     const d = await r.json();
-    const chip = document.createElement('a');
-    chip.href = d.user ? '/admin.html' : '/login.html';
-    chip.style.cssText = 'position:fixed;top:12px;right:12px;z-index:9999;background:#0f766e;color:#fff;' +
-      'padding:8px 14px;border-radius:99px;font-size:13px;font-weight:600;text-decoration:none;' +
-      'box-shadow:0 2px 8px rgba(0,0,0,.4);font-family:system-ui,sans-serif';
-    chip.textContent = d.user ? ('⚙ ' + (d.user.role === 'admin' ? 'Admin' : d.user.name)) : '🔐 Sign in';
-    document.body.appendChild(chip);
+    const user = document.getElementById('panelUser');
+    const out = document.getElementById('panelSignOut');
+    const inb = document.getElementById('panelSignIn');
+    const adminLink = document.getElementById('panelAdminLink');
+    const adminRail = document.getElementById('railAdmin');
+    const roleEl = document.getElementById('panelUserRole');
     if (d.user) {
-      const out = document.createElement('a');
-      out.href = '#';
-      out.style.cssText = 'position:fixed;top:12px;right:' + (chip.offsetWidth + 24) + 'px;z-index:9999;' +
-        'color:#94a3b8;font-size:13px;text-decoration:none;font-family:system-ui,sans-serif';
-      out.textContent = 'Sign out';
-      out.onclick = async (e) => { e.preventDefault(); await fetch('/api/logout', {method:'POST'}); location.reload(); };
-      document.body.appendChild(out);
+      window._signedIn = true;
+      window._userEmail = d.user.email || '';
+      window._userName = d.user.name || '';
+      window._userRole = d.user.role || 'user';
+      user.style.display = 'flex';
+      document.getElementById('panelUserName').textContent = d.user.name || d.user.email;
+      roleEl.textContent = d.user.role === 'admin' ? ' · admin' : '';
+      out.style.display = 'flex';
+      inb.style.display = 'none';
+      if (d.user.role === 'admin') {
+        adminLink.style.display = 'flex';
+        adminRail.style.display = 'flex';
+      }
+      document.getElementById('pfEmail').value = d.user.email || '';
+      document.getElementById('pfName').value = d.user.name || '';
+    } else {
+      document.querySelector('#railProfile .lbl').textContent = 'Sign in';
     }
+    out.addEventListener('click', async () => { await fetch('/api/logout', {method:'POST'}); location.reload(); });
   } catch (e) { /* auth endpoints missing = old build, ignore */ }
 })();
 </script>

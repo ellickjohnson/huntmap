@@ -30,6 +30,7 @@ BASE_URL = os.environ.get('HUNTMAP_BASE_URL', 'https://huntmap.ellickjohnson.net
 SESSION_TTL = 14 * 86400
 VERIFY_TTL = 24 * 3600
 RESET_TTL = 3600
+EMAILCHANGE_TTL = 24 * 3600
 
 SALT_ROUNDS = 100_000
 
@@ -226,6 +227,28 @@ VERIFY_EMAIL_TMPL = '''<div style="font-family:sans-serif;max-width:480px;margin
   <p style="color:#94a3b8;font-size:12px">This link expires in 24 hours. If you didn't sign up, ignore this email.</p>
 </div>'''
 
+RESET_EMAIL_TMPL = '''<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+  <h2 style="color:#0f766e">Reset your HuntMap password</h2>
+  <p>Click below to choose a new password:</p>
+  <p style="margin:24px 0">
+    <a href="{base}/verify?code={code}&kind=reset"
+       style="background:#0f766e;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">
+       Reset my password</a>
+  </p>
+  <p style="color:#94a3b8;font-size:12px">This link expires in 1 hour. If you didn't request it, ignore this email - your password stays as-is.</p>
+</div>'''
+
+EMAILCHANGE_TMPL = '''<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+  <h2 style="color:#0f766e">Confirm your new HuntMap email</h2>
+  <p>Click below to confirm <b>{new_email}</b> as the email on your account:</p>
+  <p style="margin:24px 0">
+    <a href="{base}/verify?code={code}&kind=emailchange"
+       style="background:#0f766e;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none">
+       Confirm new email</a>
+  </p>
+  <p style="color:#94a3b8;font-size:12px">This link expires in 24 hours. You keep signing in with the old email until you confirm.</p>
+</div>'''''
+
 
 # ---------- HTTP ----------
 
@@ -286,7 +309,8 @@ class Handler(SimpleHTTPRequestHandler):
     # PUBLIC paths: login page, signup/login APIs, verify link/page, me/logout, admin page.
     # Everything else (the map, units API, static data) requires a signed-in session.
     PUBLIC_GET = {'/login.html', '/admin.html', '/favicon.ico'}
-    PUBLIC_API = {'/api/signup', '/api/login', '/api/logout', '/api/me', '/api/verify'}
+    PUBLIC_API = {'/api/signup', '/api/login', '/api/logout', '/api/me', '/api/verify',
+                  '/api/forgot', '/api/reset'}
     # Static data files that the frontend needs before login
     PUBLIC_DATA = {'/data/harvest_history.json', '/data/units.geojson', '/data/predictions.json', '/data/residency.json',
                    '/data/land_public.geojson',
@@ -324,7 +348,8 @@ class Handler(SimpleHTTPRequestHandler):
         if u.path.startswith('/verify'):
             qs = parse_qs(u.query)
             code = (qs.get('code') or [''])[0]
-            return self.do_verify(code)
+            kind = (qs.get('kind') or ['verify'])[0]
+            return self.do_verify(code, kind)
         if u.path in self.PUBLIC_GET or u.path.startswith('/login') or u.path.startswith('/admin') or u.path in self.PUBLIC_DATA:
             return super().do_GET()
         # everything else requires login
@@ -361,6 +386,11 @@ class Handler(SimpleHTTPRequestHandler):
             '/api/markers': lambda: self.api_markers(body),
             '/api/markers/delete': lambda: self.api_marker_delete(body),
             '/api/markers/update': lambda: self.api_marker_update(body),
+            '/api/forgot': lambda: self.api_forgot(body),
+            '/api/reset': lambda: self.api_reset(body),
+            '/api/profile/password': lambda: self.api_profile_password(body),
+            '/api/profile/email': lambda: self.api_profile_email(body),
+            '/api/profile/email/confirm': lambda: self.api_profile_email_confirm(body),
         }
         fn = m.get(path)
         if fn:
@@ -450,10 +480,36 @@ class Handler(SimpleHTTPRequestHandler):
         u = self.me()
         self.send_json({'user': u} if u else {'user': None})
 
-    def do_verify(self, code):
-        """GET /verify?code=... -> mark verified, redirect to app with result banner."""
+    def do_verify(self, code, kind='verify'):
+        """GET /verify?code=...[&kind=reset|emailchange]"""
         if not code:
             return self._verify_page('Missing verification code', ok=False)
+        if kind == 'reset':
+            # token validity check only; the form posts back to /api/reset
+            uid = self._peek_token(code, 'reset')
+            if not uid:
+                return self._verify_page('Invalid or expired reset link - request a new one from the login page', ok=False)
+            return self._reset_page(code)
+        if kind == 'emailchange':
+            uid = consume_token(code, 'emailchange')
+            if not uid:
+                return self._verify_page('Invalid or expired confirmation link - request a new email change from your profile', ok=False)
+            con = sqlite3.connect(AUTHDB)
+            row = con.execute('SELECT value FROM settings WHERE key=?', (f'emailchange_uid_{uid}',)).fetchone()
+            new_email = row[0] if row else None
+            if not new_email:
+                con.close()
+                return self._verify_page('Pending email change not found - request it again from your profile', ok=False)
+            try:
+                con.execute('UPDATE users SET email=?, verified=1 WHERE id=?', (new_email.lower(), uid))
+                con.execute('DELETE FROM settings WHERE key=?', (f'emailchange_uid_{uid}',))
+                con.commit()
+            except sqlite3.IntegrityError:
+                con.close()
+                return self._verify_page('That email is already used by another account', ok=False)
+            con.close()
+            return self._verify_page('Email updated! Use the new address to sign in from now on.', ok=True)
+        # default: signup verification
         uid = consume_token(code, 'verify')
         if not uid:
             return self._verify_page('Invalid or expired verification link - request a new one from the signup page', ok=False)
@@ -462,6 +518,54 @@ class Handler(SimpleHTTPRequestHandler):
         con.commit()
         con.close()
         return self._verify_page('Email verified! You can now log in.', ok=True)
+
+    def _peek_token(self, tok, kind):
+        """Check a token is valid WITHOUT consuming it (reset form flow)."""
+        h = hashlib.sha256(tok.encode()).hexdigest()
+        con = sqlite3.connect(AUTHDB)
+        row = con.execute('SELECT user_id, expires_at FROM tokens WHERE token=? AND kind=?', (h, kind)).fetchone()
+        con.close()
+        return row[0] if row and row[1] > time.time() else None
+
+    def _reset_page(self, code):
+        page = '''<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HuntMap — Choose a new password</title><style>
+body{font-family:system-ui,sans-serif;background:linear-gradient(160deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px}
+.card{background:#1e293b;padding:32px;border-radius:16px;max-width:400px;width:100%}
+h1{font-size:20px;margin:0 0 8px} p{color:#94a3b8;font-size:13px;line-height:1.5}
+input{width:100%;padding:12px 14px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#f1f5f9;font-size:15px;margin:6px 0 4px}
+.btn{background:#0f766e;color:#fff;border:0;padding:13px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:10px}
+.btn:disabled{opacity:.6}
+</style></head><body>
+<div class="card">
+<h1>🔒 Choose a new password</h1>
+<p>Enter a new password (8+ characters) for your HuntMap account.</p>
+<form id="f">
+<input id="pw" type="password" placeholder="New password (8+ characters)" minlength="8" required>
+<button class="btn" id="b" type="submit">Save new password</button>
+</form>
+<div id="msg" style="margin-top:14px;font-size:14px;line-height:1.5;color:#94a3b8"></div>
+</div>
+<script>
+document.getElementById('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  const b = document.getElementById('b'); b.disabled = true; b.textContent = 'Saving…';
+  try {
+    const r = await fetch('/api/reset', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({code: "{code}", password: document.getElementById('pw').value})});
+    const d = await r.json();
+    const m = document.getElementById('msg');
+    if (!r.ok) { m.textContent = d.error || 'Reset failed'; b.disabled = false; b.textContent = 'Save new password'; return; }
+    m.innerHTML = 'Password reset! <a href="/login.html" style="color:#5eead4">Sign in</a> with your new password.';
+  } catch (err) { document.getElementById('b').textContent = 'Network error'; }
+});
+</script></body></html>'''.replace('{code}', code)
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(page)))
+        self.end_headers()
+        self.wfile.write(page.encode())
 
     def _verify_page(self, msg, ok):
         color = '#0f766e' if ok else '#b91c1c'
@@ -494,6 +598,115 @@ h1{{color:{color};font-size:20px}} p{{line-height:1.5}}
         con.commit()
         con.close()
         self.send_json({'ok': True, 'message': 'Email verified! You can now log in.'})
+
+    def api_forgot(self, body):
+        """Always returns ok=true (no account enumeration). Mails reset link if the account exists."""
+        email = (body.get('email') or '').strip().lower()
+        con = sqlite3.connect(AUTHDB)
+        con.row_factory = sqlite3.Row
+        row = con.execute('SELECT id, name FROM users WHERE email=?', (email,)).fetchone()
+        con.close()
+        if row:
+            tok = create_token(row['id'], 'reset', RESET_TTL)
+            link = f"{BASE_URL}/verify?code={tok}&kind=reset"
+            try:
+                send_mail(email, 'Reset your HuntMap password',
+                          RESET_EMAIL_TMPL.format(base=BASE_URL, code=tok))
+            except Exception as e:
+                print(f'reset mail failed: {e}')
+        self.send_json({'ok': True, 'message': "If that email has an account, a reset link is on its way. Check spam too - it expires in 1 hour."})
+
+    def api_reset(self, body):
+        code = (body.get('code') or '').strip()
+        pw = body.get('password') or ''
+        if len(pw) < 8:
+            return self.send_json({'error': 'Password must be at least 8 characters'}, 400)
+        uid = consume_token(code, 'reset')
+        if not uid:
+            return self.send_json({'error': 'Invalid or expired reset link - request a new one from the login page'}, 400)
+        con = sqlite3.connect(AUTHDB)
+        con.execute('UPDATE users SET password=? WHERE id=?', (hash_pw(pw), uid))
+        # kill all sessions for that user (forced re-login)
+        con.execute('DELETE FROM sessions WHERE user_id=?', (uid,))
+        con.execute('DELETE FROM tokens WHERE user_id=? AND kind=?', (uid, 'reset'))
+        con.commit()
+        con.close()
+        self.send_json({'ok': True, 'message': 'Password reset. Sign in with your new password.'})
+
+    def api_profile_password(self, body):
+        """Change password while signed in: requires current password."""
+        u = self.require_auth()
+        if not u:
+            return
+        cur = body.get('current') or ''
+        pw = body.get('new') or ''
+        if len(pw) < 8:
+            return self.send_json({'error': 'New password must be at least 8 characters'}, 400)
+        con = sqlite3.connect(AUTHDB)
+        con.row_factory = sqlite3.Row
+        row = con.execute('SELECT password FROM users WHERE id=?', (u['id'],)).fetchone()
+        con.close()
+        if not row or not check_pw(cur, row['password']):
+            return self.send_json({'error': 'Current password is incorrect'}, 401)
+        con = sqlite3.connect(AUTHDB)
+        con.execute('UPDATE users SET password=? WHERE id=?', (hash_pw(pw), u['id']))
+        con.commit()
+        con.close()
+        self.send_json({'ok': True, 'message': 'Password changed.'})
+
+    def api_profile_email(self, body):
+        """Request email change: requires password; mails a confirmation link to the NEW address."""
+        u = self.require_auth()
+        if not u:
+            return
+        pw = body.get('password') or ''
+        new_email = (body.get('new_email') or '').strip().lower()
+        if not EMAIL_RE.match(new_email):
+            return self.send_json({'error': 'Enter a valid new email address'}, 400)
+        con = sqlite3.connect(AUTHDB)
+        con.row_factory = sqlite3.Row
+        row = con.execute('SELECT password FROM users WHERE id=?', (u['id'],)).fetchone()
+        if not row or not check_pw(pw, row['password']):
+            con.close()
+            return self.send_json({'error': 'Password is incorrect'}, 401)
+        if con.execute('SELECT 1 FROM users WHERE email=?', (new_email,)).fetchone():
+            con.close()
+            return self.send_json({'error': 'That email is already used by another account'}, 409)
+        con.close()
+        tok = create_token(u['id'], 'emailchange', EMAILCHANGE_TTL)
+        # stash the pending new email keyed by uid
+        set_setting(f'emailchange_uid_{u["id"]}', new_email)
+        try:
+            send_mail(new_email, 'Confirm your new HuntMap email',
+                      EMAILCHANGE_TMPL.format(base=BASE_URL, code=tok, new_email=new_email))
+            mailed = True
+        except Exception as e:
+            print(f'emailchange mail failed: {e}')
+            mailed = False
+        self.send_json({'ok': True, 'mailed': mailed,
+                        'message': f'Confirmation link sent to {new_email}. Click it to finish the change. It expires in 24 hours.'})
+
+    def api_profile_email_confirm(self, body):
+        """Fallback JSON confirm (in case the link page isn't used)."""
+        code = (body.get('code') or '').strip()
+        if not code:
+            return self.send_json({'error': 'Missing code'}, 400)
+        uid = consume_token(code, 'emailchange')
+        if not uid:
+            return self.send_json({'error': 'Invalid or expired link'}, 400)
+        pending = get_setting(f'emailchange_uid_{uid}')
+        if not pending:
+            return self.send_json({'error': 'Pending email change not found'}, 400)
+        con = sqlite3.connect(AUTHDB)
+        try:
+            con.execute('UPDATE users SET email=?, verified=1 WHERE id=?', (pending.lower(), uid))
+            con.execute('DELETE FROM settings WHERE key=?', (f'emailchange_uid_{uid}',))
+            con.commit()
+        except sqlite3.IntegrityError:
+            con.close()
+            return self.send_json({'error': 'Email already in use'}, 409)
+        con.close()
+        self.send_json({'ok': True, 'message': 'Email updated'})
 
     def api_users(self, body):
         u = self.require_auth(admin=True)
