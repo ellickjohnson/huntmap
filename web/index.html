@@ -255,14 +255,25 @@ const STREETS_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.j
 const SATELLITE_STYLE = {
   version: 8,
   sources: {
-    esri: {
+    gmaps: {
       type: 'raster',
-      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-      tileSize: 256, maxzoom: 19,
-      attribution: 'Esri, Maxar, Earthstar Geographics',
+      tiles: ['https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
+              'https://mt1.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}'],
+      tileSize: 256, maxzoom: 20,
+      attribution: 'Imagery © Google',
+    },
+    hillshade: {
+      type: 'raster-dem',
+      tiles: ['https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/{z}/{x}/{y}.png'],
+      tileSize: 256, maxzoom: 15, encoding: 'terrarium',
     },
   },
-  layers: [{ id: 'esri-imagery', type: 'raster', source: 'esri' }],
+  layers: [
+    { id: 'gmaps-imagery', type: 'raster', source: 'gmaps' },
+    { id: 'gmaps-hillshade', type: 'hillshade', source: 'hillshade',
+      paint: { 'hillshade-exaggeration': 0.45, 'hillshade-shadow-color': '#0a0a0a',
+               'hillshade-highlight-color': '#ffffff' } },
+  ],
 };
 const TOPO_STYLE = {
   version: 8,
@@ -276,20 +287,31 @@ const TOPO_STYLE = {
       attribution: '© OpenTopoMap (CC-BY-SA), © OpenStreetMap',
     },
   },
-  layers: [{ id: 'opentopo', type: 'raster', source: 'opentopo', minzoom: 0, maxzoom: 22 }],
+  hillshade: {
+    type: 'raster-dem',
+    tiles: ['https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/{z}/{x}/{y}.png'],
+    tileSize: 256, maxzoom: 15, encoding: 'terrarium',
+  },
+  layers: [
+    { id: 'opentopo', type: 'raster', source: 'opentopo', minzoom: 0, maxzoom: 22 },
+    { id: 'topo-hillshade', type: 'hillshade', source: 'hillshade',
+      paint: { 'hillshade-exaggeration': 0.35, 'hillshade-shadow-color': '#2a2a2a',
+               'hillshade-highlight-color': '#ffffff' } },
+  ],
 };
 const HYBRID_STYLE = {
   version: 8,
   sources: {
-    esri: {
+    gmaps: {
       type: 'raster',
-      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-      tileSize: 256, maxzoom: 19,
-      attribution: 'Esri, Maxar | Contours: TrailSplits | Labels © CARTO © OpenStreetMap',
+      tiles: ['https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
+              'https://mt1.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}'],
+      tileSize: 256, maxzoom: 20,
+      attribution: 'Imagery © Google | Contours: TrailSplits | Labels © CARTO © OpenStreetMap',
     },
     hillshade: {
       type: 'raster-dem',
-      tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+      tiles: ['https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/{z}/{x}/{y}.png'],
       tileSize: 256, maxzoom: 15, encoding: 'terrarium',
     },
     contours: {
@@ -306,7 +328,7 @@ const HYBRID_STYLE = {
     },
   },
   layers: [
-    { id: 'esri-imagery', type: 'raster', source: 'esri' },
+    { id: 'gmaps-imagery', type: 'raster', source: 'gmaps' },
     { id: 'hybrid-hillshade', type: 'hillshade', source: 'hillshade',
       paint: { 'hillshade-exaggeration': 0.35, 'hillshade-shadow-color': '#000000', 'hillshade-highlight-color': '#ffffff' } },
     { id: 'contour-minor', type: 'line', source: 'contours', 'source-layer': 'contours',
@@ -552,7 +574,7 @@ function wireClicks() {
 // ---------------- terrain ----------------
 const TERRAIN_DEM = {
   type: 'raster-dem',
-  tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+  tiles: ['https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/{z}/{x}/{y}.png'],
   encoding: 'terrarium', tileSize: 256, maxzoom: 15,
 };
 function setTerrain(on) {
