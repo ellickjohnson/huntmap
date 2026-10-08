@@ -94,7 +94,7 @@
   </div>
 </dialog>
 
-<script>
+<script type="module">
 const $ = id => document.getElementById(id);
 function showMsg(el, text, kind) { el.textContent = text; el.className = 'msg ' + kind; el.style.display = 'block'; }
 async function api(path, body) {

@@ -96,9 +96,8 @@
   .hist .legend2 b { color: var(--accent2); font-weight: 600; }
   .hist .legend2 i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
   .hot-note { font-size: 10px; color: var(--dim); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); line-height: 1.5; }
-  #legend { position: absolute; bottom: 18px; left: 12px; z-index: 10;
-    background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 14px; font-size: 11px; color: var(--dim); }
+  #legend { position: static;
+    background: transparent; border: 0; border-radius: 0; padding: 0; font-size: 11px; color: var(--dim); }
   #legend .grad { height: 10px; width: 180px; border-radius: 5px; margin: 5px 0 3px;
     background: linear-gradient(90deg, #181c34, #0e7490, #22c55e, #facc15, #ef4444); }
   .maplibregl-ctrl-attrib { background: rgba(15,20,25,.7) !important; color: var(--dim) !important; }
@@ -106,7 +105,7 @@
   @media (max-width: 720px) {
     .panel { width: calc(100vw - 24px); max-height: 48vh; }
     .detail { width: calc(100vw - 24px); top: auto; bottom: 12px; max-height: 42vh; }
-    #legend { display: none; }
+
   }
 
 /* ---- left side panel (onX style): full-height panel + icon/text buttons ---- */
@@ -164,6 +163,23 @@
 .pmsg.error { background:#7f1d1d33; color:#fca5a5; border:1px solid #7f1d1d; }
 .pmsg.ok { background:#14532d33; color:#86efac; border:1px solid #14532d; }
 
+
+  /* popup contrast fix (burn area + land popups): explicit dark bg / bright text */
+  .maplibregl-popup { z-index: 20; }
+  .maplibregl-popup-content {
+    background: #10171e !important; color: #f2f7fb !important;
+    border: 1px solid #33414e; border-radius: 10px; padding: 10px 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5); font-size: 12.5px; line-height: 1.55;
+    min-width: 160px;
+  }
+  .maplibregl-popup-content strong { color: #ffc79e; font-size: 13px; }
+  .maplibregl-popup-content span { color: #cfdce6; }
+  .maplibregl-popup-tip { border-top-color: #10171e !important; border-bottom-color: #10171e !important; }
+  .maplibregl-popup-close-button { color: #cfdce6 !important; font-size: 18px; padding: 2px 8px !important; }
+
+  .railBtn.bot-btn { padding: 7px 4px 5px; }
+  .railBtn.bot-btn .ic { font-size: 17px; }
+  .railBtn.bot-btn .lbl { font-size: 8.5px; }
 </style>
 </head>
 <body>
@@ -180,18 +196,18 @@
     <button class="railBtn" id="railSearch"><span class="ic">🔍</span><span class="lbl">Search</span></button>
     <button class="railBtn" id="railMarkers"><span class="ic">📍</span><span class="lbl">Markers</span></button>
     <button class="railBtn" id="railTools"><span class="ic">🧰</span><span class="lbl">Tools</span></button>
-    <button class="railBtn" id="railProfile"><span class="ic">👤</span><span class="lbl">Profile</span></button>
-    <button class="railBtn adminOnly" id="railAdmin" style="display:none"><span class="ic">🛡️</span><span class="lbl">Admin</span></button>
   </nav>
   <div id="railMenu">
     <div class="railTitle"><span id="railTitleTxt"></span><button class="railClose" id="railX" title="Close">✕</button></div>
     <div id="railBody"></div>
   </div>
+  <div style="flex:1"></div>
   <div id="panelFooter">
+    <div class="railBtn bot-btn" id="railProfile"><span class="ic">👤</span><span class="lbl">Profile</span></div>
+    <button class="railBtn bot-btn adminOnly" id="railAdmin" style="display:none"><span class="ic">🛡️</span><span class="lbl">Admin</span></button>
+    <button class="railBtn bot-btn" id="panelSignOut" style="display:none"><span class="ic">🚪</span><span class="lbl">Sign out</span></button>
     <div class="panelUser" id="panelUser" style="display:none"><b id="panelUserName"></b><span id="panelUserRole"></span></div>
-    <button class="panelBtn" id="panelSignOut" style="display:none"><span>🚪</span><span>Sign out</span></button>
-    <button class="panelBtn adminOnly" id="panelAdminLink" style="display:none" onclick="location.href='/admin.html'"><span>🛡️</span><span>Admin Panel</span></button>
-    <button class="panelBtn" id="panelSignIn" onclick="location.href='/login.html'"><span>🔐</span><span>Sign in</span></button>
+    <button class="railBtn bot-btn" id="panelSignIn" onclick="location.href='/login.html'"><span class="ic">🔐</span><span class="lbl">Sign in</span></button>
   </div>
   <div class="panel-body" style="display:none">
     <div class="controls">
@@ -332,10 +348,7 @@
     <div class="sec-body"></div>
   </div>
 </template>
-<div id="legend">
-  <div id="legendLabel">Hunt score</div>
-  <div class="grad"></div>
-  <div style="display:flex; justify-content:space-between"><span>low</span><span>high</span></div>
+
 </div>
 
 <script type="module">
@@ -377,11 +390,11 @@ const TOPO_STYLE = {
       tileSize: 256, minzoom: 0, maxzoom: 17,
       attribution: '© OpenTopoMap (CC-BY-SA), © OpenStreetMap',
     },
-  },
-  hillshade: {
-    type: 'raster-dem',
-    tiles: ['https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/{z}/{x}/{y}.png'],
-    tileSize: 256, maxzoom: 15, encoding: 'terrarium',
+    hillshade: {
+      type: 'raster-dem',
+      tiles: ['https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/{z}/{x}/{y}.png'],
+      tileSize: 256, maxzoom: 15, encoding: 'terrarium',
+    },
   },
   layers: [
     { id: 'opentopo', type: 'raster', source: 'opentopo', minzoom: 0, maxzoom: 22 },
@@ -560,6 +573,7 @@ const map = new maplibregl.Map({
   center: [-105.9, 39.6], zoom: 7.2, pitch: 0, maxPitch: 85, attributionControl: true,
 });
 map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+window._map = map; // debug/verification handle
 
 // ---------------- color ramps ----------------
 const FILL_STOPS = [
@@ -816,6 +830,14 @@ const BUILDERS = {
     mw.appendChild(document.getElementById('minScore'));
     mw.appendChild(document.getElementById('minScoreVal'));
     body.appendChild(mw);
+    // hunt-score legend (was a floating map overlay; now lives in Map Style)
+    const lg = document.createElement('div');
+    lg.id = 'legend';
+    lg.innerHTML = '<div id="legendLabel">Hunt score</div><div class="grad"></div>\n  <div style="display:flex; justify-content:space-between"><span>low</span><span>high</span></div>';
+    lg.style.marginTop = '10px';
+    lg.style.paddingTop = '10px';
+    lg.style.borderTop = '1px solid var(--line)';
+    body.appendChild(lg);
   },
   railLayers: body => {
     const row1 = document.createElement('div'); row1.className = 'toggles';
@@ -950,9 +972,6 @@ SECTION_DEFS.forEach(d => {
   const b = document.getElementById(d.key);
   if (b) b.addEventListener('click', e => { e.stopPropagation(); railToggle(d.key); });
 });
-// Admin button opens the admin panel (external page)
-const adminBtn = document.getElementById('railAdmin');
-if (adminBtn) adminBtn.addEventListener('click', () => { location.href = '/admin.html'; });
 document.getElementById('railX').addEventListener('click', railHide);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); });
 
@@ -1715,7 +1734,8 @@ document.getElementById('metricSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   document.querySelectorAll('#metricSeg button').forEach(x => x.classList.toggle('active', x === b));
   metric = b.dataset.m;
-  document.getElementById('legendLabel').textContent = b.textContent + ' score';
+  const ll = document.getElementById('legendLabel');
+  if (ll) ll.textContent = b.textContent + ' score';
   ensureUnitLayers();
 });
 document.getElementById('baseSeg').addEventListener('click', e => {
@@ -1966,7 +1986,7 @@ map.on('load', async () => {
     const user = document.getElementById('panelUser');
     const out = document.getElementById('panelSignOut');
     const inb = document.getElementById('panelSignIn');
-    const adminLink = document.getElementById('panelAdminLink');
+    const profBtn = document.getElementById('railProfile');
     const adminRail = document.getElementById('railAdmin');
     const roleEl = document.getElementById('panelUserRole');
     if (d.user) {
@@ -1979,14 +1999,15 @@ map.on('load', async () => {
       roleEl.textContent = d.user.role === 'admin' ? ' · admin' : '';
       out.style.display = 'flex';
       inb.style.display = 'none';
+      profBtn.style.display = 'flex';
       if (d.user.role === 'admin') {
-        adminLink.style.display = 'flex';
         adminRail.style.display = 'flex';
+        adminRail.onclick = () => location.href = '/admin.html';
       }
       document.getElementById('pfEmail').value = d.user.email || '';
       document.getElementById('pfName').value = d.user.name || '';
     } else {
-      document.querySelector('#railProfile .lbl').textContent = 'Sign in';
+      profBtn.style.display = 'none';
     }
     out.addEventListener('click', async () => { await fetch('/api/logout', {method:'POST'}); location.reload(); });
   } catch (e) { /* auth endpoints missing = old build, ignore */ }
