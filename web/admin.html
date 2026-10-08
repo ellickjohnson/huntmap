@@ -99,6 +99,26 @@
 </div>
 
 <div class="card">
+  <h2>AI stats assistant <span class="muted">(powers the "Ask AI" panel)</span></h2>
+  <div class="grid">
+    <div><label>Provider</label><select id="a_provider">
+      <option value="">— choose —</option>
+      <option value="openai">OpenAI</option><option value="groq">Groq (free tier)</option>
+      <option value="freellmapi">freellmapi (local)</option><option value="ollama">Ollama (local)</option>
+      <option value="custom">Custom base URL</option>
+    </select></div>
+    <div><label>Model</label><input id="a_model" placeholder="e.g. glm-5.3-flash / llama-3.3-70b / gpt-4o-mini"></div>
+    <div style="grid-column:1/-1"><label>Base URL (auto from provider; override for custom)</label><input id="a_base" placeholder="https://api.groq.com/openai/v1"></div>
+    <div style="grid-column:1/-1"><label>API key</label><input id="a_key" type="password" placeholder="leave blank = keep current"></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button class="btn" id="saveAI">Save AI settings</button>
+    <button class="btn ghost" id="testAI">Send test question</button>
+  </div>
+  <div class="msg" id="aiMsg"></div>
+</div>
+
+<div class="card">
   <h2>Users</h2>
   <table>
     <thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Verified</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead>
@@ -187,6 +207,9 @@ async function loadSettings() {
     $('s_host').value = s.smtp_host || ''; $('s_port').value = s.smtp_port || '';
     $('s_tls').value = s.smtp_tls || 'starttls'; $('s_user').value = s.smtp_user || '';
     $('s_from').value = s.from_address || '';
+    $('a_provider').value = s.ai_provider || ''; $('a_model').value = s.ai_model || '';
+    $('a_base').value = s.ai_base_url || ''; $('a_key').placeholder = s.ai_api_key ? 'configured (*****' : 'leave blank to keep';
+    if (s.ai_api_key) $('a_key').placeholder = 'configured (*******)';
     if (s.smtp_password) $('s_pw').placeholder = 'configured (********) — leave blank to keep';
   }
 }
@@ -202,6 +225,17 @@ $('saveSmtp').onclick = async () => {
   const {ok, data} = await api('/api/admin/settings', p);
   showMsg($('smtpMsg'), ok ? 'Saved ✓' : (data.error || 'Save failed'), ok ? 'ok' : 'error');
   if (ok) { $('s_pw').value = ''; loadSettings(); }
+};
+$('saveAI').onclick = async () => {
+  const p = { ai_provider: $('a_provider').value, ai_model: $('a_model').value.trim(), ai_base_url: $('a_base').value.trim() };
+  if ($('a_key').value) p.ai_api_key = $('a_key').value;
+  const {ok, data} = await api('/api/admin/settings', p);
+  showMsg($('aiMsg'), ok ? 'Saved ✓' : (data.error || 'Save failed'), ok ? 'ok' : 'error');
+  if (ok) { $('a_key').value = ''; loadSettings(); }
+};
+$('testAI').onclick = async () => {
+  const {ok, data} = await api('/api/ai/chat', {message: 'Which unit has the highest success rate?'});
+  showMsg($('aiMsg'), ok ? ('AI replied: ' + (data.reply || '').slice(0, 120) + '…') : (data.error || 'Test failed. Is the app open?'), ok ? 'ok' : 'error');
 };
 $('testSmtp').onclick = async () => {
   const {ok, data} = await api('/api/admin/settings', {send_test: true, test_to: $('test_to').value.trim()});

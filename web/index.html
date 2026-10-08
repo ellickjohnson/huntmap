@@ -169,8 +169,10 @@
   background:transparent; color:var(--txt); cursor:pointer;
   transition:background .15s var(--ease), border-color .15s var(--ease), transform .12s var(--ease); width:100%; }
 .railBtn:active { transform:scale(.94); }
-.railBtn .ic { font-size:20px; line-height:1; transition:transform .2s var(--ease); }
-@media (hover:hover) { .railBtn:hover .ic { transform:translateY(-1px) scale(1.08); } .railBtn:hover { background:color-mix(in srgb, var(--txt) 9%, transparent); } }
+.railBtn .ic { display:inline-flex; width:21px; height:21px; line-height:1; transition:transform .2s var(--ease); }
+.railBtn .ic svg { width:100%; height:100%; filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--accent2) 25%, transparent)); }
+  .railBtn.active .ic { color: var(--accent2); }
+  @media (hover:hover) { .railBtn:hover .ic { transform:translateY(-1px) scale(1.08); } .railBtn:hover { background:color-mix(in srgb, var(--txt) 9%, transparent); } }
 .railBtn .lbl { font-size:10.5px; color:var(--dim); font-weight:500; letter-spacing:.2px; }
 .railBtn:hover { background:color-mix(in srgb, var(--txt) 6%, transparent); }
 .railBtn.active { background:color-mix(in srgb, var(--accent2) 16%, transparent);
@@ -245,7 +247,7 @@
   .maplibregl-popup-close-button:hover { color: var(--txt) !important; background: color-mix(in srgb, var(--txt) 8%, transparent); border-radius: 8px !important; }
 
   .railBtn.bot-btn { padding: 6px 4px 5px; }
-  .railBtn.bot-btn .ic { font-size: 17px; }
+  .railBtn.bot-btn .ic { width:18px; height:18px; }
   .railBtn.bot-btn .lbl { font-size: 8.5px; opacity: .85; }
   .themeOpt { display:flex; align-items:center; gap:9px; background:color-mix(in srgb, var(--txt) 4%, transparent); border:1px solid color-mix(in srgb, var(--line) 75%, transparent);
     border-radius:var(--radius-s); padding:7px 9px; color:var(--txt); font-size:11.5px; cursor:pointer; text-align:left;
@@ -278,6 +280,42 @@
     from { opacity: 0; transform: translateY(14px) scale(.94); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
+  /* ---- AI chat ---- */
+  .ai-chat { display:flex; flex-direction:column; gap:8px; }
+  .ai-msgs { display:flex; flex-direction:column; gap:8px; overflow-y:auto; overscroll-behavior:contain; padding:4px 2px; min-height:120px; max-height:min(46vh,420px); }
+  .ai-msg { max-width:88%; padding:10px 13px; border-radius:14px; font-size:12.5px; line-height:1.5; animation:aiIn .28s var(--ease); }
+  .ai-user { align-self:flex-end; color:#fff;
+    background:linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 72%, var(--accent2)));
+    border-bottom-right-radius:5px; box-shadow:0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .ai-bot { align-self:flex-start; color:var(--txt);
+    background:color-mix(in srgb, var(--txt) 7%, transparent);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-bottom-left-radius:5px; box-shadow:0 2px 10px rgba(0,0,0,.18); }
+  .ai-bot b { color:var(--accent2); }
+  @keyframes aiIn { from { opacity:0; transform:translateY(8px) scale(.97); } }
+  .ai-typing { display:inline-flex; gap:4px; padding:2px 0; }
+  .ai-typing span { width:6px; height:6px; border-radius:50%; background:var(--dim); display:inline-block;
+    animation:aiBounce 1.1s ease-in-out infinite; }
+  .ai-typing span:nth-child(2) { animation-delay:.15s; } .ai-typing span:nth-child(3) { animation-delay:.3s; }
+  @keyframes aiBounce { 0%,60%,100% { transform:translateY(0); opacity:.45; } 30% { transform:translateY(-4px); opacity:1; } }
+  .ai-warn { font-size:9.5px; color:var(--dim); text-align:center; letter-spacing:.3px; }
+  .ai-inputrow { display:flex; gap:6px; align-items:center; }
+  .ai-inputrow input { flex:1; background:color-mix(in srgb, var(--bg) 75%, transparent); border:1px solid var(--line);
+    color:var(--txt); border-radius:12px; padding:10px 12px; font-size:12.5px; outline:none;
+    transition: border-color .18s var(--ease), box-shadow .18s var(--ease); }
+  .ai-inputrow input:focus { border-color:color-mix(in srgb, var(--accent2) 55%, transparent);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--accent2) 15%, transparent); }
+  .ai-send { width:40px; height:40px; flex-shrink:0; display:grid; place-items:center; border:0; border-radius:12px;
+    color:#fff; cursor:pointer; background:linear-gradient(135deg, var(--accent2), color-mix(in srgb, var(--accent2) 65%, var(--accent)));
+    box-shadow:0 4px 14px color-mix(in srgb, var(--accent2) 30%, transparent);
+    transition: transform .15s var(--ease), filter .15s var(--ease); }
+  .ai-send svg { width:16px; height:16px; }
+  .ai-send:not(:disabled):active { transform:scale(.96); }
+  .ai-send:disabled { opacity:.55; cursor:wait; }
+  .ai-clear { align-self:center; background:none; border:0; color:var(--dim); font-size:10px; cursor:pointer;
+    padding:2px 6px; border-radius:6px; transition: color .15s var(--ease); }
+  .ai-clear:hover { color:var(--accent); }
   /* Theme switch: kill all transitions while swapping (better-ui law) */
   html.theming, html.theming *, html.theming *::before, html.theming *::after {
     transition: none !important;
@@ -349,10 +387,11 @@
     <h1 style="font-size:11px;text-align:center;width:100%">Elk<span>HuntMap</span> 🦌</h1>
   </div>
   <nav id="railNav">
-    <button class="railBtn" id="railMap"><span class="ic">🗺️</span><span class="lbl">Map Style</span></button>
-    <button class="railBtn" id="railLayers"><span class="ic">📚</span><span class="lbl">Layers</span></button>
-    <button class="railBtn" id="railSearch"><span class="ic">🔍</span><span class="lbl">Search</span></button>
-    <button class="railBtn" id="railMarkers"><span class="ic">📍</span><span class="lbl">Markers</span></button>
+    <button class="railBtn" id="railMap"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3.6 5.1a1 1 0 0 0-.6.92V19a1 1 0 0 0 1.4.92L9 18l6 3 5.4-2.1a1 1 0 0 0 .6-.92V5a1 1 0 0 0-1.4-.92L15 6 9 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg></span><span class="lbl">Map Style</span></button>
+    <button class="railBtn" id="railLayers"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M6.08 10.37l-3.5 1.59a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 1.73-1.51"/></svg></span><span class="lbl">Layers</span></button>
+    <button class="railBtn" id="railSearch"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span><span class="lbl">Search</span></button>
+    <button class="railBtn" id="railMarkers"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.99-5.7 10.28-7.4 11.83a1 1 0 0 1-1.3 0C9.7 20.28 4 15 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="lbl">Markers</span></button>
+        <button class="railBtn" id="railAI"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1a2 2 0 0 0 1.2 1.2L20.2 11l-5.1 1.9a2 2 0 0 0-1.2 1.2L12 19.2l-1.9-5.1a2 2 0 0 0-1.2-1.2L3.8 11l5.1-1.9a2 2 0 0 0 1.2-1.2L12 3z"/><path d="M19 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z"/></svg></span><span class="lbl">Ask AI</span></button>
       </nav>
   <div id="railMenu">
     <div class="railTitle"><span id="railTitleTxt"></span><button class="railClose" id="railX" title="Close">✕</button></div>
@@ -360,11 +399,11 @@
   </div>
   <div style="flex:1"></div>
   <div id="panelFooter">
-    <div class="railBtn bot-btn" id="railProfile"><span class="ic">👤</span><span class="lbl">Settings</span></div>
-    <button class="railBtn bot-btn adminOnly" id="railAdmin" style="display:none"><span class="ic">🛡️</span><span class="lbl">Admin</span></button>
-    <button class="railBtn bot-btn" id="panelSignOut" style="display:none"><span class="ic">🚪</span><span class="lbl">Sign out</span></button>
+    <div class="railBtn bot-btn" id="railProfile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><span class="lbl">Settings</span></div>
+    <button class="railBtn bot-btn adminOnly" id="railAdmin" style="display:none"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5.5v5.2c0 4.9 3.4 9.4 8 10.8 4.6-1.4 8-5.9 8-10.8V5.5L12 2z"/><circle cx="12" cy="11" r="2.6"/><path d="M12 13.6V17"/></svg></span><span class="lbl">Admin</span></button>
+    <button class="railBtn bot-btn" id="panelSignOut" style="display:none"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></span><span class="lbl">Sign out</span></button>
     <div class="panelUser" id="panelUser" style="display:none"><b id="panelUserName"></b><span id="panelUserRole"></span></div>
-    <button class="railBtn bot-btn" id="panelSignIn" onclick="location.href='/login.html'"><span class="ic">🔐</span><span class="lbl">Sign in</span></button>
+    <button class="railBtn bot-btn" id="panelSignIn" onclick="location.href='/login.html'"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg></span><span class="lbl">Sign in</span></button>
   </div>
   <div class="panel-body" style="display:none">
     <div class="controls">
@@ -985,6 +1024,7 @@ const SECTION_DEFS = [
   { key: 'railSearch',  icon: '🔍', title: 'Search' },
   { key: 'railMarkers', icon: '📍', title: 'Markers' },
   { key: 'railProfile', icon: '👤', title: 'Profile & Settings' },
+  { key: 'railAI',     icon: '✨', title: 'Ask the Stats AI' },
 ];
 const menu = document.getElementById('railMenu');
 const railBody = document.getElementById('railBody');
@@ -1066,6 +1106,67 @@ const BUILDERS = {
     if (head) head.style.display = 'none';
     if (sec) { sec.style.display = ''; sec.style.flex = 'none'; body.appendChild(sec); }
     if (typeof loadMarkers === 'function') loadMarkers();  // refresh list each time popup opens
+  },
+  railAI: body => {
+    body.innerHTML = `
+      <div id="aiChat" class="ai-chat">
+        <div id="aiMsgs" class="ai-msgs"></div>
+        <div class="ai-warn">Elk-stats questions only · history saved to your account</div>
+        <form id="aiForm" class="ai-inputrow">
+          <input id="aiInput" type="text" placeholder="e.g. units where success is rising but hunters are down" maxlength="1200" autocomplete="off">
+          <button type="submit" id="aiSend" class="ai-send" title="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
+          </button>
+        </form>
+        <button id="aiClear" class="ai-clear">Clear history</button>
+      </div>`;
+    const msgs = body.querySelector('#aiMsgs');
+    const addMsg = (role, text, cls='') => {
+      const d = document.createElement('div');
+      d.className = 'ai-msg ' + (role==='user' ? 'ai-user' : 'ai-bot') + ' ' + cls;
+      d.innerHTML = text;
+      msgs.appendChild(d);
+      msgs.scrollTop = msgs.scrollHeight;
+      return d;
+    };
+    const md = t => t
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+      .replace(/^[-•] (?![<])/gm,'&bull; ')
+      .replace(/\n/g,'<br>');
+    let busy = false;
+    const send = async (q) => {
+      if (!q.trim() || busy) return;
+      busy = true;
+      addMsg('user', md(q));
+      const pending = addMsg('assistant', '<span class="ai-typing"><span></span><span></span><span></span></span>', 'ai-pending');
+      try {
+        const r = await fetch('/api/ai/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message: q})});
+        const d = await r.json();
+        if (r.ok) { pending.remove(); addMsg('assistant', md(d.reply)); }
+        else { pending.remove(); addMsg('assistant', `<span style="color:var(--accent)">${md(d.error || 'Error')}</span>`); }
+      } catch (e) { pending.remove(); addMsg('assistant', '<span style="color:var(--accent)">Network error</span>'); }
+      busy = false;
+    };
+    body.querySelector('#aiForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const inp = body.querySelector('#aiInput');
+      send(inp.value);
+      inp.value = '';
+    });
+    body.querySelector('#aiClear').addEventListener('click', async () => {
+      await fetch('/api/ai/chat/clear', {method:'POST'});
+      msgs.innerHTML = '';
+      addMsg('assistant', md('History cleared. What hunting stat can I dig up for you?'));
+    });
+    // load history
+    fetch('/api/ai/chat/history').then(r=>r.json()).then(d => {
+      if (d.messages && d.messages.length) {
+        d.messages.forEach(m => addMsg(m.role, md(m.text)));
+      } else {
+        addMsg('assistant', md("Hi! I'm your elk-stats assistant. Ask me things like *which units have the best success trend since 2020* and I'll dig through the harvest data."));
+      }
+    }).catch(() => addMsg('assistant', md('Could not load history.')));
   },
   railProfile: body => {
     if (!window._signedIn) {
