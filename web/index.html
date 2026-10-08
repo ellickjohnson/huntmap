@@ -30,7 +30,8 @@
   .panel-body { display: flex; flex-direction: column; overflow: hidden; }
   .panel.collapsed .panel-body { display: none; }
   .controls { padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
-  .seg { display: flex; background: var(--panel2); border-radius: 8px; padding: 3px; gap: 3px; }
+  .seg { display: flex; flex-wrap: wrap; background: var(--panel2); border-radius: 8px; padding: 3px; gap: 3px; }
+.seg button { flex: 1 1 auto; min-width: 64px; white-space: nowrap; }
   .seg button { flex: 1; padding: 7px 0; border: 0; background: transparent; color: var(--dim);
     border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
   .seg button.active { background: var(--accent); color: #fff; }
@@ -117,7 +118,7 @@
   box-shadow:0 4px 16px rgba(0,0,0,.35); transition:background .12s; }
 .railBtn:hover { background:color-mix(in srgb, var(--panel2) 95%, transparent); }
 .railBtn.active { background:#1b3a5c; border-color:#33507a; }
-#railMenu { position:absolute; top:12px; left:72px; z-index:10; width:250px;
+#railMenu { position:absolute; top:12px; left:72px; z-index:10; width:260px;
   background:color-mix(in srgb, var(--panel) 95%, transparent); backdrop-filter:blur(10px);
   border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.4);
   max-height:calc(100vh - 24px); display:none; flex-direction:column; overflow:hidden; }
@@ -127,6 +128,16 @@
   display:flex; align-items:center; justify-content:space-between; }
 #railMenu .railClose { cursor:pointer; border:none; background:none; color:#8fa3c8; font-size:15px; }
 #railBody { padding:10px 12px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+#railBody > * { min-width: 0; max-width: 100%; }
+#railBody .field { flex-wrap: wrap; }
+#railBody .field > input[type=range] { flex: 1; min-width: 90px; }
+.railSec { border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--panel2) 60%, transparent); }
+.railSecHead { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px;
+  cursor: pointer; font-size: 12px; font-weight: 600; color: var(--txt); user-select: none; }
+.railSecHead:hover { background: color-mix(in srgb, var(--panel2) 90%, transparent); border-radius: 10px; }
+.railCaret { color: #8fa3c8; font-size: 11px; transition: transform .15s; }
+.railSecBody { padding: 2px 10px 10px; display: flex; flex-direction: column; gap: 7px; }
+
 @media (max-width: 700px){
   #railDock { flex-direction:row; width:auto; top:auto; bottom:12px; left:50%;
     transform:translateX(-50%); }
@@ -144,7 +155,7 @@
   <button class="railBtn" id="railTools"  title="Tools">⚙️</button>
 </div>
 <div id="railMenu">
-  <div class="railTitle"><span id="railTitleTxt"></span><button class="railClose" id="railX">✕</button></div>
+  <div class="railTitle"><span id="railTitleTxt"></span><span style="display:flex;gap:10px;align-items:center"><button class="railClose" id="railPin" title="Pin panel open">📌</button><button class="railClose" id="railX">✕</button></span></div>
   <div id="railBody"></div>
 </div>
 <div class="panel" id="sidePanel" style="display:none">
@@ -333,7 +344,7 @@ const TOPO_STYLE = {
       tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
               'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
               'https://c.tile.opentopomap.org/{z}/{x}/{y}.png'],
-      tileSize: 256, minzoom: 9, maxzoom: 17,
+      tileSize: 256, minzoom: 0, maxzoom: 17,
       attribution: '© OpenTopoMap (CC-BY-SA), © OpenStreetMap',
     },
   },
@@ -733,147 +744,154 @@ function setTerrain(on) {
 }
 
 // ---------------- left rail controller (hover=desktop, click=mobile) ----------------
-const RAIL_SECTIONS = {
-  railMap:    { title: 'Map style', ids: ['metricSeg-base','metricSeg-wrap','baseSeg-wrap','fillSeg-wrap','minScore-wrap','legendLabel-wrap'] },
-  railLayers: { title: 'Layers', ids: ['layerChips-wrap','landChip-wrap','habitatOpacity-wrap'] },
-  railSearch: { title: 'Search', ids: ['searchBox-wrap'] },
-  railMarkers:{ title: 'Markers', ids: ['markerSectionHead','markerSection','markerSection-wrap'] },
-  railTools:  { title: 'Tools & display', ids: ['terrainChip-wrap','parcelChip-wrap','hotspotChip-wrap','contourChip-wrap','unitChip-wrap','habitatChip-wrap','miscChips-wrap'] },
-};
-function railWrapBlocks() {
-  // group existing DOM into logical wrap blocks by walking .controls children
-  const c = document.querySelector('#sidePanel .controls');
-  const kids = Array.from(c.children);
-  const grab = (test) => kids.filter(k => test(k));
-  const chipsFirst = kids.find(k => k.classList.contains('toggles'));   // terrain/parcel/hotspot/land/contour/units = first toggles block
-  const habitatField = document.getElementById('habitatOpacityField');
-  return kids;
-}
+
+const SECTION_DEFS = [
+  { key: 'railMap',     icon: '🗺️', title: 'Map style' },
+  { key: 'railLayers',  icon: '🧭', title: 'Layers' },
+  { key: 'railSearch',  icon: '🔍', title: 'Search' },
+  { key: 'railMarkers', icon: '📍', title: 'Markers' },
+  { key: 'railTools',   icon: '⚙️', title: 'Tools' },
+];
 const menu = document.getElementById('railMenu');
 const railBody = document.getElementById('railBody');
 const railTitleTxt = document.getElementById('railTitleTxt');
-let railOpenBtn = null;
 const controlsEl = document.querySelector('#sidePanel .controls');
 const railChildren = Array.from(controlsEl.children);
-function railIdFor(btn) {
-  return { railMap: 'railMap', railLayers: 'railLayers', railSearch: 'railSearch', railMarkers: 'railMarkers', railTools: 'railTools' }[btn.id];
-}
-
-// holding area so re-parented nodes survive menu switches
 const railHold = document.createElement('div');
 railHold.style.display = 'none';
 document.body.appendChild(railHold);
-function railStash() {
-  Array.from(railBody.children).forEach(ch => railHold.appendChild(ch));
-}
+let railPinned = localStorage.getItem('hm_railPinned') === '1';
+let railExpanded = JSON.parse(localStorage.getItem('hm_railExpanded') || '{}'); // key->bool
 
-function railShow(btn) {
-  if (railOpenBtn === btn) { railHide(); return; }
-  railOpenBtn = btn;
-  document.querySelectorAll('.railBtn').forEach(b => b.classList.toggle('active', b === btn));
-  const key = btn.id; // railMap etc
-  const groups = {
-    railMap: {
-      title: 'Map style',
-      build: () => {
-        railBody.innerHTML = '';
-        // metric label
-        const l1 = document.createElement('div');
-        l1.innerHTML = '<div class="field"><label>Color units by</label></div>';
-        railBody.appendChild(l1.firstChild);
-        railBody.appendChild(document.getElementById('metricSeg'));
-        const l2 = document.createElement('div');
-        l2.innerHTML = '<div class="field" style="margin-top:4px"><label>Basemap</label></div>';
-        railBody.appendChild(l2.firstChild);
-        const baseField = railChildren.find(k => k.querySelector && k.querySelector('#baseSeg'));
-        railBody.appendChild(document.getElementById('baseSeg'));
-        const fillField = railChildren.find(k => k.id !== 'fake' && k.querySelector && k.querySelector('#fillSeg'));
-        const l3 = document.createElement('div');
-        l3.innerHTML = '<div class="field" style="margin-top:4px"><label>Unit style</label></div>';
-        railBody.appendChild(l3.firstChild);
-        railBody.appendChild(document.getElementById('fillSeg'));
-        const minW = document.getElementById('minScore').closest('.field');
-        const l4 = document.createElement('div');
-        l4.innerHTML = '<div class="field" style="margin-top:4px"><label>Min score</label></div>';
-        railBody.appendChild(l4.firstChild);
-        railBody.appendChild(document.getElementById('minScore'));
-        railBody.appendChild(document.getElementById('minScoreVal'));
-      }
-    },
-    railLayers: {
-      title: 'Layers',
-      build: () => {
-        railBody.innerHTML = '';
-        const lab = document.createElement('div');
-        lab.innerHTML = '<div class="field"><label>Map layers</label></div>';
-        railBody.appendChild(lab.firstChild);
-        const habitatSeg = document.getElementById('layerToggles');
-        railBody.appendChild(habitatSeg);
-        const chipRow = railChildren.find(k => k.classList && k.classList.contains('toggles') && k.querySelector('#terrainChip'));
-        const row2 = document.createElement('div'); row2.className = 'toggles';
-        ['terrainChip','parcelChip','trailsChip','burnsChip','hotspotChip','landChip','contourChip','unitsChip'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) { row2.appendChild(el); }
-        });
-        railBody.appendChild(row2);
-        const habOp = document.getElementById('habitatOpacityField');
-        if (habOp) { habOp.style.display = ''; railBody.appendChild(habOp); }
-      }
-    },
-    railSearch: {
-      title: 'Search',
-      build: () => {
-        const box = document.getElementById('searchBox').closest('.field') || document.getElementById('searchBox').parentElement;
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'position:relative';
-        wrap.appendChild(document.getElementById('searchBox'));
-        wrap.appendChild(document.getElementById('searchResults'));
-        railBody.appendChild(wrap);
-      }
-    },
-    railMarkers: {
-      title: 'Markers',
-      build: () => {
-        railBody.innerHTML = '';
-        const head = document.getElementById('markerSectionHead');
-        const sec = document.getElementById('markerSection');
-        if (head) { head.style.display = 'none'; }
-        if (sec) { sec.style.display = ''; sec.style.flex = 'none'; railBody.appendChild(sec); }
-      }
-    },
-    railTools: {
-      title: 'Tools',
-      build: () => {
-        railBody.innerHTML = '';
-        const w = document.createElement('div');
-        w.style.cssText = 'font-size:11px;color:#8fa3c8;padding:4px 2px';
-        w.textContent = 'Forecast per unit coming here 👇';
-        railBody.appendChild(w);
-      }
-    },
-  };
-  railStash();
-  (groups[key].build)();
-  railTitleTxt.textContent = groups[key].title;
+function fld(label) {
+  const d = document.createElement('div');
+  d.innerHTML = `<div class="field" style="margin-top:2px"><label>${label}</label></div>`;
+  return d.firstChild;
+}
+const BUILDERS = {
+  railMap: body => {
+    body.appendChild(fld('Color units by'));
+    body.appendChild(document.getElementById('metricSeg'));
+    body.appendChild(fld('Basemap'));
+    body.appendChild(document.getElementById('baseSeg'));
+    body.appendChild(fld('Unit style'));
+    body.appendChild(document.getElementById('fillSeg'));
+    body.appendChild(fld('Min score'));
+    const mw = document.createElement('div'); mw.style.cssText = 'display:flex;align-items:center;gap:8px';
+    mw.appendChild(document.getElementById('minScore'));
+    mw.appendChild(document.getElementById('minScoreVal'));
+    body.appendChild(mw);
+  },
+  railLayers: body => {
+    const row1 = document.createElement('div'); row1.className = 'toggles';
+    ['terrainChip','parcelChip','trailsChip','burnsChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
+    const row2 = document.createElement('div'); row2.className = 'toggles';
+    ['hotspotChip','landChip','contourChip','unitsChip'].forEach(id => { const el = document.getElementById(id); if (el) row2.appendChild(el); });
+    body.appendChild(row1); body.appendChild(row2);
+    const habOp = document.getElementById('habitatOpacityField');
+    if (habOp) { habOp.style.display = ''; body.appendChild(habOp); }
+    const habSeg = document.getElementById('layerToggles');
+    if (habSeg) body.appendChild(habSeg);
+  },
+  railSearch: body => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative';
+    wrap.appendChild(document.getElementById('searchBox'));
+    wrap.appendChild(document.getElementById('searchResults'));
+    body.appendChild(wrap);
+  },
+  railMarkers: body => {
+    const head = document.getElementById('markerSectionHead');
+    const sec = document.getElementById('markerSection');
+    if (head) head.style.display = 'none';
+    if (sec) { sec.style.display = ''; sec.style.flex = 'none'; body.appendChild(sec); }
+  },
+  railTools: body => {
+    const w = document.createElement('div');
+    w.style.cssText = 'font-size:11px;color:#8fa3c8;padding:4px 2px';
+    w.textContent = 'Weather forecast per unit coming soon';
+    body.appendChild(w);
+  },
+};
+// build ALL sections ONCE, stacked, each collapsible w/ persistent open state
+const railSections = {};
+function buildUnifiedPanel() {
+  railTitleTxt.textContent = 'Menu';
+  SECTION_DEFS.forEach(def => {
+    const sec = document.createElement('div');
+    sec.className = 'railSec';
+    sec.dataset.key = def.key;
+    sec.innerHTML = `<div class="railSecHead"><span>${def.icon} ${def.title}</span><span class="railCaret">▾</span></div>`;
+    const body = document.createElement('div');
+    body.className = 'railSecBody';
+    sec.appendChild(body);
+    (BUILDERS[def.key])(body);
+    railBody.appendChild(sec);
+    railSections[def.key] = { sec, body };
+    if (railExpanded[def.key] === undefined) railExpanded[def.key] = true;
+    sec.querySelector('.railSecHead').addEventListener('click', () => {
+      railExpanded[def.key] = !railExpanded[def.key];
+      persistRailState();
+      applySectionState(def.key);
+    });
+    applySectionState(def.key);
+  });
+}
+function applySectionState(key) {
+  const { sec, body } = railSections[key];
+  const open = railExpanded[key];
+  body.style.display = open ? '' : 'none';
+  sec.querySelector('.railCaret').textContent = open ? '▾' : '▸';
+  sec.classList.toggle('collapsed', !open);
+}
+function persistRailState() {
+  localStorage.setItem('hm_railExpanded', JSON.stringify(railExpanded));
+}
+let panelOpen = false;
+function railShow() {
+  panelOpen = true;
   menu.classList.add('open');
-  if (key === 'railSearch') setTimeout(() => document.getElementById('searchBox').focus(), 60);
 }
 function railHide() {
-  railOpenBtn = null;
+  if (railPinned) return;
+  panelOpen = false;
   menu.classList.remove('open');
   document.querySelectorAll('.railBtn').forEach(b => b.classList.remove('active'));
+}
+function jumpTo(key) {
+  railShow();
+  const { sec } = railSections[key];
+  if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.railBtn').forEach(b => b.classList.toggle('active', b.id === key));
 }
 ['railMap','railLayers','railSearch','railMarkers','railTools'].forEach(id => {
   const b = document.getElementById(id);
   const isCoarse = window.matchMedia('(hover: none)').matches;
-  if (!isCoarse) b.addEventListener('mouseenter', () => { if (railOpenBtn === null || railOpenBtn === b) railShow(b); });
-  b.addEventListener('click', () => railShow(b));
+  if (!isCoarse) b.addEventListener('mouseenter', () => jumpTo(id));
+  b.addEventListener('click', () => jumpTo(id));
 });
+const pinBtn = document.getElementById('railPin');
+function applyPin() {
+  pinBtn.style.color = railPinned ? '#fbbf24' : '#8fa3c8';
+  pinBtn.title = railPinned ? 'Unpin panel' : 'Pin panel open';
+}
+pinBtn.addEventListener('click', () => {
+  railPinned = !railPinned;
+  localStorage.setItem('hm_railPinned', railPinned ? '1' : '0');
+  applyPin();
+  if (railPinned) railShow();
+});
+applyPin();
 document.getElementById('railX').addEventListener('click', railHide);
+buildUnifiedPanel();
+if (railPinned) railShow();
+
+// Escape closes unless pinned (handled inside railHide)
+
 document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); });
 
 // click on map closes menu:
-map.on('click', () => { if (menu.classList.contains('open')) railHide(); });
+map.on('click', () => { if (!railPinned && menu.classList.contains('open')) railHide(); });
 
 // ---------------- selection & detail ----------------
 function selectUnit(uid) {
