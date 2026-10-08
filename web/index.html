@@ -582,8 +582,11 @@ function setTerrain(on) {
     if (on) {
       if (!map.getSource('terrain-dem')) map.addSource('terrain-dem', TERRAIN_DEM);
       map.setTerrain({ source: 'terrain-dem', exaggeration: 1.35 });
+      // 3D is invisible at top-down: tilt the camera so relief shows
+      map.easeTo({ pitch: 55, duration: 600 });
     } else {
       map.setTerrain(null);
+      map.easeTo({ pitch: 0, duration: 600 });
     }
   } catch (err) { console.error('terrain:', err); }
 }
@@ -602,7 +605,8 @@ function selectUnit(uid) {
   ensureUnitLayers();
   loadHotspots(uid);
   const c = centroidOf(u);
-  map.flyTo({ center: c, zoom: Math.max(map.getZoom(), 8.5), pitch: 0, duration: 800 });
+  // keep the user's pitch (don't snap 3D terrain back to flat on select)
+  map.flyTo({ center: c, zoom: Math.max(map.getZoom(), 8.5), duration: 800 });
 }
 
 function renderDetail(p) {
