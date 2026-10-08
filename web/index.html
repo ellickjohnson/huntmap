@@ -109,53 +109,56 @@
     #legend { display: none; }
   }
 
-/* ---- left rail docking ---- */
-#railDock { position:absolute; top:12px; left:12px; z-index:11; width:52px;
-  display:flex; flex-direction:column; gap:6px; }
-.railBtn { width:52px; height:44px; border-radius:10px; border:1px solid var(--line);
-  background:color-mix(in srgb, var(--panel) 92%, transparent); color:var(--txt);
+/* ---- left rail (onX style): icon-only buttons, per-button floating popover ---- */
+#railDock { position:absolute; top:12px; left:12px; z-index:11; width:48px;
+  display:flex; flex-direction:column; gap:7px; }
+.railBtn { width:48px; height:48px; border-radius:10px; border:1px solid var(--line);
+  background:color-mix(in srgb, var(--panel) 94%, transparent); color:var(--txt);
   font-size:20px; cursor:pointer; line-height:1; backdrop-filter:blur(8px);
-  box-shadow:0 4px 16px rgba(0,0,0,.35); transition:background .12s; }
-.railBtn:hover { background:color-mix(in srgb, var(--panel2) 95%, transparent); }
-.railBtn.active { background:#1b3a5c; border-color:#33507a; }
-#railMenu { position:absolute; top:12px; left:72px; z-index:10; width:260px;
-  background:color-mix(in srgb, var(--panel) 95%, transparent); backdrop-filter:blur(10px);
+  box-shadow:0 4px 16px rgba(0,0,0,.35); transition:background .12s, border-color .12s;
+  display:flex; align-items:center; justify-content:center; }
+.railBtn:hover { background:color-mix(in srgb, var(--panel2) 96%, transparent); }
+.railBtn.active { background:color-mix(in srgb, var(--accent2) 22%, var(--panel2));
+  border-color:var(--accent2); }
+#railMenu { position:absolute; z-index:10; left:68px; top:12px; width:280px;
+  background:color-mix(in srgb, var(--panel) 96%, transparent); backdrop-filter:blur(10px);
   border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.4);
-  max-height:calc(100vh - 24px); display:none; flex-direction:column; overflow:hidden; }
-#railMenu.open { display:flex; }
-#railMenu .railTitle { padding:8px 12px; font-weight:600; font-size:12px; color:#8fa3c8;
-  border-bottom:1px solid var(--line); text-transform:uppercase; letter-spacing:.05em;
+  max-height:calc(100vh - 24px); display:none; flex-direction:column; overflow:hidden;
+  transform-origin: left top; }
+#railMenu.open { display:flex; animation: railPop .14s ease-out; }
+@keyframes railPop { from { opacity:0; transform:scale(.96) translateX(-4px); }
+                     to   { opacity:1; transform:none; } }
+#railMenu .railTitle { padding:9px 12px; font-weight:600; font-size:13px; color:var(--txt);
+  border-bottom:1px solid var(--line);
   display:flex; align-items:center; justify-content:space-between; }
-#railMenu .railClose { cursor:pointer; border:none; background:none; color:#8fa3c8; font-size:15px; }
+#railMenu .railClose { cursor:pointer; border:none; background:none; color:var(--dim); font-size:15px; }
+#railMenu .railClose:hover { color:var(--txt); }
 #railBody { padding:10px 12px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
 #railBody > * { min-width: 0; max-width: 100%; }
 #railBody .field { flex-wrap: wrap; }
 #railBody .field > input[type=range] { flex: 1; min-width: 90px; }
-.railSec { border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--panel2) 60%, transparent); }
-.railSecHead { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px;
-  cursor: pointer; font-size: 12px; font-weight: 600; color: var(--txt); user-select: none; }
-.railSecHead:hover { background: color-mix(in srgb, var(--panel2) 90%, transparent); border-radius: 10px; }
-.railCaret { color: #8fa3c8; font-size: 11px; transition: transform .15s; }
-.railSecBody { padding: 2px 10px 10px; display: flex; flex-direction: column; gap: 7px; }
 
 @media (max-width: 700px){
   #railDock { flex-direction:row; width:auto; top:auto; bottom:12px; left:50%;
     transform:translateX(-50%); }
-  #railMenu { top:auto; bottom:64px; left:50%; transform:translateX(-50%); width:290px; }
+  #railMenu { top:auto; bottom:60px; left:50%; transform:translateX(-50%); width:290px; }
+  @keyframes railPop { from { opacity:0; }
+                       to   { opacity:1; } }
 }
+
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="railDock">
-  <button class="railBtn" id="railMap"    title="Map">🗺️</button>
-  <button class="railBtn" id="railLayers" title="Layers">🧭</button>
-  <button class="railBtn" id="railSearch" title="Search">🔍</button>
+  <button class="railBtn" id="railMap"     title="Map style">🗺️</button>
+  <button class="railBtn" id="railLayers"  title="Layers">🧭</button>
+  <button class="railBtn" id="railSearch"  title="Search">🔍</button>
   <button class="railBtn" id="railMarkers" title="Markers">📍</button>
-  <button class="railBtn" id="railTools"  title="Tools">⚙️</button>
+  <button class="railBtn" id="railTools"   title="Tools">⚙️</button>
 </div>
 <div id="railMenu">
-  <div class="railTitle"><span id="railTitleTxt"></span><span style="display:flex;gap:10px;align-items:center"><button class="railClose" id="railPin" title="Pin panel open">📌</button><button class="railClose" id="railX">✕</button></span></div>
+  <div class="railTitle"><span id="railTitleTxt"></span><button class="railClose" id="railX" title="Close">✕</button></div>
   <div id="railBody"></div>
 </div>
 <div class="panel" id="sidePanel" style="display:none">
@@ -743,7 +746,7 @@ function setTerrain(on) {
   } catch (err) { console.error('terrain:', err); }
 }
 
-// ---------------- left rail controller (hover=desktop, click=mobile) ----------------
+// ---------------- left rail controller (onX style: click toggles per-button popover) ----------------
 
 const SECTION_DEFS = [
   { key: 'railMap',     icon: '🗺️', title: 'Map style' },
@@ -755,13 +758,7 @@ const SECTION_DEFS = [
 const menu = document.getElementById('railMenu');
 const railBody = document.getElementById('railBody');
 const railTitleTxt = document.getElementById('railTitleTxt');
-const controlsEl = document.querySelector('#sidePanel .controls');
-const railChildren = Array.from(controlsEl.children);
-const railHold = document.createElement('div');
-railHold.style.display = 'none';
-document.body.appendChild(railHold);
-let railPinned = localStorage.getItem('hm_railPinned') === '1';
-let railExpanded = JSON.parse(localStorage.getItem('hm_railExpanded') || '{}'); // key->bool
+let activeRailKey = null;
 
 function fld(label) {
   const d = document.createElement('div');
@@ -813,85 +810,73 @@ const BUILDERS = {
     body.appendChild(w);
   },
 };
-// build ALL sections ONCE, stacked, each collapsible w/ persistent open state
+// build each section's content lazily into its own detached holder so we can
+// show exactly one at a time (like onX's per-button popovers)
 const railSections = {};
-function buildUnifiedPanel() {
-  railTitleTxt.textContent = 'Menu';
-  SECTION_DEFS.forEach(def => {
-    const sec = document.createElement('div');
-    sec.className = 'railSec';
-    sec.dataset.key = def.key;
-    sec.innerHTML = `<div class="railSecHead"><span>${def.icon} ${def.title}</span><span class="railCaret">▾</span></div>`;
-    const body = document.createElement('div');
-    body.className = 'railSecBody';
-    sec.appendChild(body);
-    (BUILDERS[def.key])(body);
-    railBody.appendChild(sec);
-    railSections[def.key] = { sec, body };
-    if (railExpanded[def.key] === undefined) railExpanded[def.key] = true;
-    sec.querySelector('.railSecHead').addEventListener('click', () => {
-      railExpanded[def.key] = !railExpanded[def.key];
-      persistRailState();
-      applySectionState(def.key);
-    });
-    applySectionState(def.key);
-  });
-}
-function applySectionState(key) {
-  const { sec, body } = railSections[key];
-  const open = railExpanded[key];
-  body.style.display = open ? '' : 'none';
-  sec.querySelector('.railCaret').textContent = open ? '▾' : '▸';
-  sec.classList.toggle('collapsed', !open);
-}
-function persistRailState() {
-  localStorage.setItem('hm_railExpanded', JSON.stringify(railExpanded));
-}
-let panelOpen = false;
-function railShow() {
-  panelOpen = true;
-  menu.classList.add('open');
-}
-function railHide() {
-  if (railPinned) return;
-  panelOpen = false;
-  menu.classList.remove('open');
-  document.querySelectorAll('.railBtn').forEach(b => b.classList.remove('active'));
-}
-function jumpTo(key) {
-  railShow();
-  const { sec } = railSections[key];
-  if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+SECTION_DEFS.forEach(def => {
+  const body = document.createElement('div');
+  body.className = 'railSecBody';
+  body.style.display = 'none';
+  (BUILDERS[def.key])(body);
+  railBody.appendChild(body);
+  railSections[def.key] = { def, body };
+});
+
+function setActiveBtn(key) {
   document.querySelectorAll('.railBtn').forEach(b => b.classList.toggle('active', b.id === key));
 }
-['railMap','railLayers','railSearch','railMarkers','railTools'].forEach(id => {
-  const b = document.getElementById(id);
-  const isCoarse = window.matchMedia('(hover: none)').matches;
-  if (!isCoarse) b.addEventListener('mouseenter', () => jumpTo(id));
-  b.addEventListener('click', () => jumpTo(id));
-});
-const pinBtn = document.getElementById('railPin');
-function applyPin() {
-  pinBtn.style.color = railPinned ? '#fbbf24' : '#8fa3c8';
-  pinBtn.title = railPinned ? 'Unpin panel' : 'Pin panel open';
+function railShow(key) {
+  activeRailKey = key;
+  railSections[key].body.style.display = '';
+  SECTION_DEFS.forEach(d => { if (d.key !== key) railSections[d.key].body.style.display = 'none'; });
+  railTitleTxt.textContent = railSections[key].def.title;
+  menu.classList.add('open');
+  setActiveBtn(key);
+  // anchor popover to the button: desktop = beside rail; mobile = centered sheet
+  if (window.innerWidth > 700) {
+    const btn = document.getElementById(key);
+    menu.style.top = '12px';
+    menu.style.transform = '';
+    const y = btn ? btn.getBoundingClientRect().top - 12 : 12;
+    menu.style.top = Math.max(12, Math.min(y, window.innerHeight - menu.offsetHeight - 12)) + 'px';
+    menu.style.transform = '';
+  } else {
+    menu.style.top = 'auto';
+    menu.style.transform = '';
+  }
 }
-pinBtn.addEventListener('click', () => {
-  railPinned = !railPinned;
-  localStorage.setItem('hm_railPinned', railPinned ? '1' : '0');
-  applyPin();
-  if (railPinned) railShow();
+function railHide() {
+  activeRailKey = null;
+  menu.classList.remove('open');
+  setActiveBtn(null);
+}
+function railToggle(key) {
+  if (activeRailKey === key) railHide();
+  else railShow(key);
+}
+SECTION_DEFS.forEach(d => {
+  const b = document.getElementById(d.key);
+  b.addEventListener('click', e => { e.stopPropagation(); railToggle(d.key); });
 });
-applyPin();
 document.getElementById('railX').addEventListener('click', railHide);
-buildUnifiedPanel();
-if (railPinned) railShow();
-
-// Escape closes unless pinned (handled inside railHide)
-
 document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); });
 
-// click on map closes menu:
-map.on('click', () => { if (!railPinned && menu.classList.contains('open')) railHide(); });
+// clicking outside any rail UI (map, panels, anything) closes the popover
+function placingActive() {
+  const bar = document.getElementById('addMarkerBar');
+  return bar && bar.style.display === 'block';
+}
+document.addEventListener('click', e => {
+  if (placingActive()) return; // don't yank the panel while the user is placing a marker
+  if (!menu.contains(e.target) && !e.target.closest('.railBtn')) railHide();
+});
+// also close on map interactions (pan/zoom counts as map use) — but not while placing
+map.on('click', () => { if (!placingActive()) railHide(); });
+map.on('dragstart', () => { if (!placingActive()) railHide(); });
+map.on('zoomstart', () => { if (!placingActive() && menu.classList.contains('open')) railHide(); });
+
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); });
 
 // ---------------- selection & detail ----------------
 function selectUnit(uid) {
