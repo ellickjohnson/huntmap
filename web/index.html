@@ -620,9 +620,9 @@ function setTerrain(on) {
   try {
     if (on) {
       if (!map.getSource('terrain-dem')) map.addSource('terrain-dem', TERRAIN_DEM);
-      map.setTerrain({ source: 'terrain-dem', exaggeration: 1.35 });
+      map.setTerrain({ source: 'terrain-dem', exaggeration: 2.2 });
       // 3D is invisible at top-down: tilt the camera so relief shows
-      map.easeTo({ pitch: 55, duration: 600 });
+      map.easeTo({ pitch: 65, duration: 700 });
     } else {
       map.setTerrain(null);
       map.easeTo({ pitch: 0, duration: 600 });
