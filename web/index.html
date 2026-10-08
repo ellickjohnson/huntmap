@@ -152,6 +152,7 @@
       </div>
       <div class="toggles">
         <span class="chip" id="terrainChip">⛰️ 3D Terrain</span>
+        <span class="chip" id="parcelChip">🟥 Parcels</span>
         <span class="chip on" id="hotspotChip">🔥 Hotspots</span>
         <span class="chip" id="landChip">🗺️ Public land</span>
         <span class="chip on" id="contourChip">📈 Contours</span>
@@ -345,6 +346,44 @@ const HYBRID_STYLE = {
 // contour toggle: contours are ON in hybrid by default now (no 'none' layout above);
 // the chip only matters on non-hybrid basemaps. Keep applyContours for style re-apply.
 
+// parcels: Colorado Public Parcels (statewide, 2.6M polygons) fetched per-viewport as GeoJSON
+let parcelsOn = false;
+let parcelAbort = null;
+const PARCEL_SRC = 'https://gis.colorado.gov/public/rest/services/Address_and_Parcel/Colorado_Public_Parcels/FeatureServer/0/query';
+async function updateParcels() {
+  if (!map.isStyleLoaded()) { map.once('idle', updateParcels); return; }
+  if (!parcelsOn) return;
+  if (!map.getSource('parcels')) {
+    map.addSource('parcels', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({
+      id: 'parcel-lines', type: 'line', source: 'parcels',
+      paint: { 'line-color': '#e11d48', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 1.6],
+               'line-opacity': 0.9 },
+    });
+  }
+  const b = map.getBounds();
+  const bbox = `${b.getWest().toFixed(5)}%2C${b.getSouth().toFixed(5)}%2C${b.getEast().toFixed(5)}%2C${b.getNorth().toFixed(5)}`;
+  const z = Math.min(Math.floor(map.getZoom()) + 1, 15);
+  const url = `${PARCEL_SRC}?where=1%3D1`
+    + `&geometry=${bbox.replace(/%2C/g, ',')}&geometryType=esriGeometryEnvelope&inSR=4326`
+    + `&outFields=parcel_id,landAcres&outSR=4326&f=geojson&resultRecordCount=1200`
+    + `&resultOffset=0`;
+  if (parcelAbort) parcelAbort.abort();
+  parcelAbort = new AbortController();
+  try {
+    const r = await fetch(url, { signal: parcelAbort.signal });
+    if (!r.ok) throw new Error('parcel fetch ' + r.status);
+    const gj = await r.json();
+    map.getSource('parcels').setData(gj);
+  } catch (err) { if (err.name !== 'AbortError') console.error('parcels:', err); }
+}
+// refetch on pan/zoom (debounced)
+let parcelTimer = null;
+function scheduleParcels() {
+  if (!parcelsOn) return;
+  clearTimeout(parcelTimer);
+  parcelTimer = setTimeout(updateParcels, 450);
+}
 // contour chip: contours default ON in hybrid; chip toggles them (and auto-switches to hybrid)
 let contoursOn = true;
 function applyContours() {
@@ -1242,6 +1281,14 @@ const UNITS_FMT = {
 };
 
 // contour + public-land chips
+const parcelChip = document.getElementById('parcelChip');
+parcelChip.addEventListener('click', () => {
+  parcelsOn = !parcelsOn;
+  parcelChip.classList.toggle('on', parcelsOn);
+  if (parcelsOn) { updateParcels(); }
+  else if (map.getSource('parcels')) map.getSource('parcels').setData({ type: 'FeatureCollection', features: [] });
+});
+map.on('moveend', scheduleParcels);
 const contourChip = document.getElementById('contourChip');
 contourChip.addEventListener('click', () => {
   contoursOn = !contoursOn;
