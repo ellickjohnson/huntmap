@@ -24,7 +24,14 @@
   .panel.collapsed .panel-header { border-bottom: 0; }
   .panel-header h1 { font-size: 17px; font-weight: 700; flex: 1; }
   .panel-header h1 span { color: var(--accent); }
-  .collapse-btn { background: var(--panel2); border: 1px solid var(--line); color: var(--dim);
+  #panelToggle { position:fixed; top:14px; left:92px; z-index:12; width:26px; height:36px;
+  border-radius:0 10px 10px 0; border:1px solid var(--line); border-left:none;
+  background:var(--panel2); color:var(--txt); font-size:13px; cursor:pointer;
+  box-shadow:3px 0 14px rgba(0,0,0,.35); transition:left .25s ease;
+  display:flex; align-items:center; justify-content:center; padding:0; }
+#panelToggle.show { left:0; }
+#panelToggle:hover { color:var(--accent2); }
+.collapse-btn { background: var(--panel2); border: 1px solid var(--line); color: var(--dim);
     border-radius: 8px; width: 30px; height: 30px; font-size: 14px; cursor: pointer; }
   .collapse-btn:hover { color: var(--txt); border-color: var(--accent2); }
   .panel-body { display: flex; flex-direction: column; overflow: hidden; }
@@ -109,10 +116,6 @@
   }
 
 /* ---- left side panel (onX style): full-height panel + icon/text buttons ---- */
-  #panelPeek { position:fixed; top:12px; left:10px; z-index:13; width:38px; height:38px;
-    border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--txt);
-    font-size:16px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.35); }
-  #panelPeek:hover { border-color:var(--accent2); }
 #sidePanel { position:absolute; top:0; left:0; bottom:0; z-index:11; width:92px;
   background:color-mix(in srgb, var(--panel) 96%, transparent); backdrop-filter:blur(10px);
   border-right:1px solid var(--line); box-shadow:4px 0 24px rgba(0,0,0,.35);
@@ -188,26 +191,24 @@
 </head>
 <body>
 <div id="map"></div>
-<button id="panelPeek" title="Show menu" style="display:none">☰</button>
+<button id="panelToggle" title="Show / hide menu" class="panelToggleTab">◀</button>
 <div id="sidePanel">
   <div class="panel-header" style="border-bottom:1px solid var(--line)">
     <h1 style="font-size:11px;text-align:center;width:100%">Elk<span>HuntMap</span> 🦌</h1>
-    <button class="collapse-btn" id="panelToggle" title="Hide panel">◀</button>
   </div>
   <nav id="railNav">
     <button class="railBtn" id="railMap"><span class="ic">🗺️</span><span class="lbl">Map Style</span></button>
     <button class="railBtn" id="railLayers"><span class="ic">📚</span><span class="lbl">Layers</span></button>
     <button class="railBtn" id="railSearch"><span class="ic">🔍</span><span class="lbl">Search</span></button>
     <button class="railBtn" id="railMarkers"><span class="ic">📍</span><span class="lbl">Markers</span></button>
-    <button class="railBtn" id="railTools"><span class="ic">🧰</span><span class="lbl">Tools</span></button>
-  </nav>
+      </nav>
   <div id="railMenu">
     <div class="railTitle"><span id="railTitleTxt"></span><button class="railClose" id="railX" title="Close">✕</button></div>
     <div id="railBody"></div>
   </div>
   <div style="flex:1"></div>
   <div id="panelFooter">
-    <div class="railBtn bot-btn" id="railProfile"><span class="ic">👤</span><span class="lbl">Profile</span></div>
+    <div class="railBtn bot-btn" id="railProfile"><span class="ic">👤</span><span class="lbl">Settings</span></div>
     <button class="railBtn bot-btn adminOnly" id="railAdmin" style="display:none"><span class="ic">🛡️</span><span class="lbl">Admin</span></button>
     <button class="railBtn bot-btn" id="panelSignOut" style="display:none"><span class="ic">🚪</span><span class="lbl">Sign out</span></button>
     <div class="panelUser" id="panelUser" style="display:none"><b id="panelUserName"></b><span id="panelUserRole"></span></div>
@@ -255,7 +256,7 @@
         <span class="chip" id="hotspotChip">🔥 Hotspots</span>
         <span class="chip" id="landChip">🗺️ Public land</span>
         <span class="chip" id="contourChip">📈 Contours</span>
-        <span class="chip on" id="unitsChip">📏 ft · miles</span>
+        
       </div>
       <div class="field">
         <label>Min score</label>
@@ -824,8 +825,7 @@ const SECTION_DEFS = [
   { key: 'railLayers',  icon: '📚', title: 'Layers' },
   { key: 'railSearch',  icon: '🔍', title: 'Search' },
   { key: 'railMarkers', icon: '📍', title: 'Markers' },
-  { key: 'railTools',   icon: '🧰', title: 'Tools' },
-  { key: 'railProfile', icon: '👤', title: 'Profile' },
+  { key: 'railProfile', icon: '👤', title: 'Profile & Settings' },
 ];
 const menu = document.getElementById('railMenu');
 const railBody = document.getElementById('railBody');
@@ -873,7 +873,7 @@ const BUILDERS = {
     const row1 = document.createElement('div'); row1.className = 'toggles';
     ['terrainChip','parcelChip','trailsChip','burnsChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
     const row2 = document.createElement('div'); row2.className = 'toggles';
-    ['hotspotChip','landChip','contourChip','unitsChip'].forEach(id => { const el = document.getElementById(id); if (el) row2.appendChild(el); });
+    ['hotspotChip','landChip','contourChip'].forEach(id => { const el = document.getElementById(id); if (el) row2.appendChild(el); });
     body.appendChild(row1); body.appendChild(row2);
     // 3D elevation exaggeration (onX-style) — live-updates terrain
     body.appendChild(fld('3D elevation exaggeration'));
@@ -902,50 +902,6 @@ const BUILDERS = {
     const sec = document.getElementById('markerSection');
     if (head) head.style.display = 'none';
     if (sec) { sec.style.display = ''; sec.style.flex = 'none'; body.appendChild(sec); }
-  },
-  railTools: body => {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px';
-    const ttl = document.createElement('div');
-    ttl.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim)';
-    ttl.textContent = 'Theme';
-    const modeRow = document.createElement('div');
-    modeRow.className = 'seg';
-    modeRow.innerHTML = `<button data-tmode="dark">🌙 Dark</button><button data-tmode="light">☀️ Light</button>`;
-    const grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:5px';
-    const mkSwatch = (id, t) => {
-      const b = document.createElement('button');
-      b.className = 'themeOpt';
-      b.dataset.tid = id;
-      b.title = t.name;
-      b.innerHTML = `<i style="background:linear-gradient(135deg, ${t.bg} 45%, ${t.accent} 45%, ${t.accent} 62%, ${t.accent2} 62%)"></i><span>${t.name}</span>`;
-      return b;
-    };
-    Object.entries(THEMES).forEach(([id, t]) => grid.appendChild(mkSwatch(id, t)));
-    wrap.appendChild(ttl);
-    wrap.appendChild(modeRow);
-    wrap.appendChild(grid);
-    body.appendChild(wrap);
-
-    const markSel = () => {
-      grid.querySelectorAll('.themeOpt').forEach(b => b.classList.toggle('on', b.dataset.tid === localStorage.getItem('hm-theme')));
-      modeRow.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.tmode === document.documentElement.dataset.themeMode));
-    };
-    modeRow.addEventListener('click', e => {
-      const b = e.target.closest('button'); if (!b) return;
-      const mode = b.dataset.tmode;
-      const cur = localStorage.getItem('hm-theme') || 'midnight-blaze';
-      const id = THEMES[cur] && THEMES[cur].mode === mode ? cur : Object.keys(THEMES).find(k => THEMES[k].mode === mode);
-      applyTheme(id);
-      markSel();
-    });
-    grid.addEventListener('click', e => {
-      const b = e.target.closest('.themeOpt'); if (!b) return;
-      applyTheme(b.dataset.tid);
-      markSel();
-    });
-    markSel();
   },
   railProfile: body => {
     if (!window._signedIn) {
@@ -991,6 +947,63 @@ const BUILDERS = {
       show(d.message || 'Confirmation link sent.', 'ok');
       wrap.querySelector('#pfEmailPw').value = ''; wrap.querySelector('#pfNewEmail').value = '';
     });
+
+    // ---------- THEMES ----------
+    const ttl = document.createElement('div');
+    ttl.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-top:10px';
+    ttl.textContent = 'Theme';
+    const modeRow = document.createElement('div');
+    modeRow.className = 'seg';
+    modeRow.innerHTML = `<button data-tmode="dark">🌙 Dark</button><button data-tmode="light">☀️ Light</button>`;
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:5px';
+    const mkSwatch = (id, t) => {
+      const b = document.createElement('button');
+      b.className = 'themeOpt';
+      b.dataset.tid = id;
+      b.title = t.name;
+      b.innerHTML = `<i style="background:linear-gradient(135deg, ${t.bg} 45%, ${t.accent} 45%, ${t.accent} 62%, ${t.accent2} 62%)"></i><span>${t.name}</span>`;
+      return b;
+    };
+    Object.entries(THEMES).forEach(([id, t]) => grid.appendChild(mkSwatch(id, t)));
+    wrap.appendChild(ttl); wrap.appendChild(modeRow); wrap.appendChild(grid);
+    const markSel = () => {
+      grid.querySelectorAll('.themeOpt').forEach(b => b.classList.toggle('on', b.dataset.tid === localStorage.getItem('hm-theme')));
+      modeRow.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.tmode === document.documentElement.dataset.themeMode));
+    };
+    modeRow.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const mode = b.dataset.tmode;
+      const cur = localStorage.getItem('hm-theme') || 'midnight-blaze';
+      const id = THEMES[cur] && THEMES[cur].mode === mode ? cur : Object.keys(THEMES).find(k => THEMES[k].mode === mode);
+      applyTheme(id); markSel();
+    });
+    grid.addEventListener('click', e => {
+      const b = e.target.closest('.themeOpt'); if (!b) return;
+      applyTheme(b.dataset.tid); markSel();
+    });
+    markSel();
+
+    // ---------- UNITS (metric / imperial) ----------
+    const uttl = document.createElement('div');
+    uttl.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-top:10px';
+    uttl.textContent = 'Units';
+    const uRow = document.createElement('div');
+    uRow.className = 'seg';
+    uRow.innerHTML = `<button data-units="imperial">🦌 Imperial</button><button data-units="metric">📐 Metric</button>`;
+    wrap.appendChild(uttl); wrap.appendChild(uRow);
+    const markUnits = () => {
+      uRow.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.units === (localStorage.getItem('hm-units') || 'imperial')));
+    };
+    uRow.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      localStorage.setItem('hm-units', b.dataset.units);
+      window.unitsImperial = (b.dataset.units === 'imperial');
+      unitsImperial = window.unitsImperial;
+      markUnits();
+      if (window._reapplyUnits) window._reapplyUnits();
+    });
+    markUnits();
   },
 };
 // build each section's content lazily into its own detached holder so we can
@@ -1047,11 +1060,22 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); 
 const panelEl = document.getElementById('sidePanel');
 function setPanelVisible(v) {
   panelEl.classList.toggle('hidden', !v);
-  const peek = document.getElementById('panelPeek');
-  if (peek) peek.style.display = v ? 'none' : 'block';
+  const t = document.getElementById('panelToggle');
+  if (t) {
+    t.textContent = v ? '◀' : '▶';
+    t.classList.toggle('show', !v);
+    t.style.left = v ? '92px' : '0px';
+  }
 }
-document.getElementById('panelPeek').addEventListener('click', () => setPanelVisible(true));
-document.getElementById('panelToggle').addEventListener('click', () => setPanelVisible(false));
+(function(){
+  const t = document.getElementById('panelToggle');
+  // click anywhere on the toggle opens OR closes the panel
+  t.addEventListener('click', () => setPanelVisible(panelEl.classList.contains('hidden')));
+  // keyboard safety hatch: if panel ever stuck hidden, Ctrl+M restores it
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key.toLowerCase() === 'm') { e.preventDefault(); setPanelVisible(true); }
+  });
+})();
 setPanelVisible(true);
 
 // clicking outside the panel (on the map) closes the open section
@@ -1843,18 +1867,14 @@ document.getElementById('baseSeg').addEventListener('click', e => {
   // but re-apply hotspots + markers explicitly once settled
   map.once('idle', () => { updateHotspotLayer(); updateMarkerLayer(); });
 });
-const unitsChip = document.getElementById('unitsChip');
-let unitsImperial = true;
-unitsChip.addEventListener('click', () => {
-  unitsImperial = !unitsImperial;
-  unitsChip.classList.toggle('on', unitsImperial);
-  unitsChip.textContent = unitsImperial ? '📏 ft · miles' : '📏 m · km';
+let unitsImperial = (localStorage.getItem('hm-units') || 'imperial') === 'imperial';
+window._reapplyUnits = () => {
   // repaint any unit-dependent labels
   if (selectedGmu) {
     const u = UNITS.features.find(f => String(f.properties.gmuid) === String(selectedGmu));
     if (u) selectUnit(u.properties.gmuid);
   }
-});
+};
 const UNITS_FMT = {
   area: mi2 => unitsImperial ? `${Math.round(mi2).toLocaleString()} mi²` : `${Math.round(mi2 * 2.58999).toLocaleString()} km²`,
   dist: m => unitsImperial ? `${(m / 1609.34).toFixed(2)} mi` : `${(m / 1000).toFixed(2)} km`,
