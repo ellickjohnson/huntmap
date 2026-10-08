@@ -109,6 +109,10 @@
   }
 
 /* ---- left side panel (onX style): full-height panel + icon/text buttons ---- */
+  #panelPeek { position:fixed; top:12px; left:10px; z-index:13; width:38px; height:38px;
+    border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--txt);
+    font-size:16px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.35); }
+  #panelPeek:hover { border-color:var(--accent2); }
 #sidePanel { position:absolute; top:0; left:0; bottom:0; z-index:11; width:92px;
   background:color-mix(in srgb, var(--panel) 96%, transparent); backdrop-filter:blur(10px);
   border-right:1px solid var(--line); box-shadow:4px 0 24px rgba(0,0,0,.35);
@@ -184,6 +188,7 @@
 </head>
 <body>
 <div id="map"></div>
+<button id="panelPeek" title="Show menu" style="display:none">☰</button>
 <div id="sidePanel">
   <div class="panel-header" style="border-bottom:1px solid var(--line)">
     <h1 style="font-size:11px;text-align:center;width:100%">Elk<span>HuntMap</span> 🦌</h1>
@@ -1042,7 +1047,10 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); 
 const panelEl = document.getElementById('sidePanel');
 function setPanelVisible(v) {
   panelEl.classList.toggle('hidden', !v);
+  const peek = document.getElementById('panelPeek');
+  if (peek) peek.style.display = v ? 'none' : 'block';
 }
+document.getElementById('panelPeek').addEventListener('click', () => setPanelVisible(true));
 document.getElementById('panelToggle').addEventListener('click', () => setPanelVisible(false));
 setPanelVisible(true);
 
