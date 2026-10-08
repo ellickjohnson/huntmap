@@ -110,7 +110,7 @@
   }
 
 /* ---- left side panel (onX style): full-height panel + icon/text buttons ---- */
-#sidePanel { position:absolute; top:0; left:0; bottom:0; z-index:11; width:320px;
+#sidePanel { position:absolute; top:0; left:0; bottom:0; z-index:11; width:92px;
   background:color-mix(in srgb, var(--panel) 96%, transparent); backdrop-filter:blur(10px);
   border-right:1px solid var(--line); box-shadow:4px 0 24px rgba(0,0,0,.35);
   display:flex; flex-direction:column; transition:transform .2s ease; }
@@ -121,18 +121,23 @@
   box-shadow:0 4px 16px rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center;
   transition: all .2s; }
 #panelToggleFloat:hover { border-color:var(--accent2); }
-#railNav { display:flex; flex-direction:column; gap:2px; padding:10px 8px 6px; border-bottom:1px solid var(--line);
+#railNav { display:flex; flex-direction:column; gap:1px; padding:8px 6px 4px; border-bottom:1px solid var(--line);
   overflow-y:auto; flex-shrink:0; }
 .railBtn { display:flex; flex-direction:column; align-items:center; gap:4px;
-  padding:10px 6px 8px; border-radius:10px; border:1px solid transparent;
-  background:transparent; color:var(--txt); cursor:pointer; transition:background .12s, border-color .12s; }
+  padding:10px 4px 7px; border-radius:10px; border:1px solid transparent;
+  background:transparent; color:var(--txt); cursor:pointer; transition:background .12s, border-color .12s; width:100%; }
+.railBtn .ic { font-size:21px; }
+.railBtn .lbl { font-size:9.5px; }
 .railBtn .ic { font-size:20px; line-height:1; }
 .railBtn .lbl { font-size:10.5px; color:var(--dim); font-weight:500; letter-spacing:.2px; }
 .railBtn:hover { background:color-mix(in srgb, var(--panel2) 96%, transparent); }
 .railBtn.active { background:color-mix(in srgb, var(--accent2) 18%, var(--panel2));
   border-color:var(--accent2); }
 .railBtn.active .lbl { color:var(--accent2); }
-#railMenu { flex:1; display:none; flex-direction:column; overflow:hidden; min-height:0; }
+#railMenu { position:absolute; left:calc(100% + 10px); width:320px; max-width:calc(100vw - 120px);
+  display:none; flex-direction:column; overflow:hidden; max-height:calc(100vh - 30px);
+  background:color-mix(in srgb, var(--panel) 97%, transparent); backdrop-filter:blur(10px);
+  border:1px solid var(--line); border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.45); }
 #railMenu.open { display:flex; }
 #railMenu .railTitle { padding:9px 12px; font-weight:600; font-size:13px; color:var(--txt);
   border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;
@@ -140,12 +145,14 @@
 #railMenu .railClose { cursor:pointer; border:none; background:none; color:var(--dim); font-size:15px; }
 #railMenu .railClose:hover { color:var(--txt); }
 #railBody { padding:10px 12px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; flex:1; min-height:0; }
-#panelFooter { border-top:1px solid var(--line); padding:8px 8px 10px; display:flex; flex-direction:column; gap:2px;
+#panelFooter { border-top:1px solid var(--line); padding:6px 5px 8px; display:flex; flex-direction:column; gap:2px;
   flex-shrink:0; }
-.panelUser { display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:12px; color:var(--dim); }
-.panelUser b { color:var(--txt); font-size:12.5px; }
-.panelBtn { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; border:0;
-  background:transparent; color:var(--txt); font-size:13px; cursor:pointer; text-align:left; width:100%; }
+.panelUser { display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 4px; font-size:9.5px; color:var(--dim); text-align:center; }
+.panelUser b { color:var(--txt); font-size:10.5px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.panelBtn { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 6px;
+  border-radius:8px; border:0; background:transparent; color:var(--txt); font-size:11px;
+  cursor:pointer; text-align:center; width:100%; }
+.panelBtn span:first-child { font-size:17px; }
 .panelBtn:hover { background:var(--panel2); }
 .panelBtn.danger { color:#f87171; }
 .pfield { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
@@ -157,9 +164,6 @@
 .pmsg.error { background:#7f1d1d33; color:#fca5a5; border:1px solid #7f1d1d; }
 .pmsg.ok { background:#14532d33; color:#86efac; border:1px solid #14532d; }
 
-@media (max-width: 700px){
-  #sidePanel { width:calc(100vw - 60px); }
-}
 </style>
 </head>
 <body>
@@ -167,7 +171,7 @@
 <button id="panelToggleFloat" title="Menu">☰</button>
 <div id="sidePanel">
   <div class="panel-header" style="border-bottom:1px solid var(--line)">
-    <h1 style="font-size:15px">Elk<span>HuntMap</span> 🦌</h1>
+    <h1 style="font-size:11px;text-align:center;width:100%">Elk<span>HuntMap</span> 🦌</h1>
     <button class="collapse-btn" id="panelToggle" title="Hide panel">◀</button>
   </div>
   <nav id="railNav">
@@ -922,6 +926,15 @@ function railShow(key) {
   SECTION_DEFS.forEach(d => { if (d.key !== key) railSections[d.key].body.style.display = 'none'; });
   railTitleTxt.textContent = railSections[key].def.title;
   menu.classList.add('open');
+  // position the popover vertically beside the clicked button (onX-style)
+  const btn = document.getElementById(key);
+  if (btn) {
+    const br = btn.getBoundingClientRect();
+    const mh = menu.offsetHeight || 400;
+    const raw = br.top - 6;
+    const top = Math.max(8, Math.min(window.innerHeight - mh - 12, raw));
+    menu.style.top = top + 'px';
+  }
   setActiveBtn(key);
 }
 function railHide() {
