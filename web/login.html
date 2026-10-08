@@ -4,38 +4,61 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HuntMap — Sign in</title>
+<script>
+(function(){
+  const THEMES = {
+    'midnight-blaze':{ mode:'dark',  bg:'#0f1419', panel:'#1a222b', panel2:'#232d38', line:'#2e3a46', txt:'#e8edf2', dim:'#8fa0b0', accent:'#ff6b35', accent2:'#4ecdc4' },
+    'pine-shadow':   { mode:'dark',  bg:'#0e1512', panel:'#16221c', panel2:'#1f3027', line:'#31463a', txt:'#e6efe9', dim:'#8fa899', accent:'#e07a3f', accent2:'#5da58a' },
+    'sagebrush':     { mode:'dark',  bg:'#131511', panel:'#1d211a', panel2:'#272e24', line:'#3a4436', txt:'#eceee4', dim:'#98a28a', accent:'#c98a3d', accent2:'#8fae72' },
+    'river-bottom':  { mode:'dark',  bg:'#0e1317', panel:'#172028', panel2:'#202c36', line:'#324353', txt:'#e5edf3', dim:'#8aa0b2', accent:'#5f9ea0', accent2:'#d9a05b' },
+    'timber':        { mode:'dark',  bg:'#15120e', panel:'#221d16', panel2:'#2e2820', line:'#453c30', txt:'#efe9e0', dim:'#a79a87', accent:'#b3541e', accent2:'#7d9c6a' },
+    'granite':       { mode:'dark',  bg:'#101214', panel:'#1b1f23', panel2:'#252b31', line:'#384149', txt:'#e6eaee', dim:'#93a1ad', accent:'#a67c52', accent2:'#6f94b8' },
+    'morning-camp':  { mode:'light', bg:'#f4f1ea', panel:'#faf8f2', panel2:'#ece8dd', line:'#d8d2c2', txt:'#2b2a24', dim:'#77745f', accent:'#b3541e', accent2:'#4a7a63' },
+    'aspen-grove':   { mode:'light', bg:'#f2f4ee', panel:'#f9fbf5', panel2:'#e7ecdf', line:'#d0d8c6', txt:'#262e24', dim:'#6d7964', accent:'#7d9c6a', accent2:'#b3541e' },
+    'high-plains':   { mode:'light', bg:'#f5f2ec', panel:'#fbf9f4', panel2:'#ece5d7', line:'#d9d0bd', txt:'#332e26', dim:'#807663', accent:'#a6703f', accent2:'#5f8fa0' },
+    'snowline':      { mode:'light', bg:'#f2f4f6', panel:'#fafbfc', panel2:'#e6e9ed', line:'#ccd3db', txt:'#252a30', dim:'#6d7984', accent:'#c05a2e', accent2:'#4c7a95' },
+  };
+  window.HM_THEMES = THEMES;
+  const t = THEMES[localStorage.getItem('hm-theme') || 'midnight-blaze'] || THEMES['midnight-blaze'];
+  const r = document.documentElement.style;
+  for (const [k, v] of Object.entries(t)) if (k !== 'mode') r.setProperty('--' + k, v);
+  document.documentElement.style.setProperty('--panel2', t.panel2);
+  document.documentElement.dataset.themeMode = t.mode;
+  document.documentElement.style.setProperty('color-scheme', t.mode === 'light' ? 'light' : 'dark');
+})();
+</script>
 <style>
-  :root { color-scheme: dark; }
+  :root { color-scheme: dark; } /* overridden by theme script */
   * { box-sizing: border-box; }
   body {
     font-family: system-ui, -apple-system, sans-serif;
-    background: linear-gradient(160deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);
-    color: #e2e8f0; min-height: 100vh; margin: 0;
+    background: linear-gradient(160deg,var(--bg) 0%,var(--panel) 60%,var(--bg) 100%);
+    color: var(--txt); min-height: 100vh; margin: 0;
     display: flex; align-items: center; justify-content: center; padding: 20px;
   }
   .card {
-    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
     padding: 32px; width: 100%; max-width: 400px;
     box-shadow: 0 20px 60px rgba(0,0,0,.5);
   }
   .logo { text-align: center; margin-bottom: 24px; }
   .logo .icon { font-size: 44px; }
   .logo h1 { margin: 8px 0 4px; font-size: 24px; color: #f1f5f9; }
-  .logo p { margin: 0; color: #94a3b8; font-size: 14px; }
-  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #0f172a; border-radius: 10px; padding: 4px; }
+  .logo p { margin: 0; color: var(--dim); font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--bg); border-radius: 10px; padding: 4px; }
   .tabs button {
     flex: 1; padding: 10px; border: 0; border-radius: 8px; background: transparent;
-    color: #94a3b8; font-size: 15px; cursor: pointer; transition: all .15s;
+    color: var(--dim); font-size: 15px; cursor: pointer; transition: all .15s;
   }
   .tabs button.active { background: #0f766e; color: #fff; font-weight: 600; }
   form { display: none; flex-direction: column; gap: 12px; }
   form.active { display: flex; }
   input {
-    background: #0f172a; border: 1px solid #334155; color: #f1f5f9;
+    background: var(--bg); border: 1px solid var(--line); color: #f1f5f9;
     padding: 12px 14px; border-radius: 8px; font-size: 15px; width: 100%;
   }
   input:focus { outline: 2px solid #0f766e; border-color: transparent; }
-  label { font-size: 13px; color: #94a3b8; margin-bottom: -6px; }
+  label { font-size: 13px; color: var(--dim); margin-bottom: -6px; }
   .btn {
     background: #0f766e; color: #fff; border: 0; padding: 13px; border-radius: 8px;
     font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px;
@@ -45,10 +68,10 @@
   .msg { padding: 12px; border-radius: 8px; font-size: 14px; display: none; line-height: 1.4; }
   .msg.error { background: #7f1d1d33; color: #fca5a5; border: 1px solid #7f1d1d; }
   .msg.ok { background: #14532d33; color: #86efac; border: 1px solid #14532d; }
-  .swap { text-align: center; font-size: 13px; color: #94a3b8; margin-top: 16px; }
-  .swap a { color: #5eead4; cursor: pointer; text-decoration: none; }
-  .fine { font-size: 12px; color: #64748b; text-align: center; margin-top: 20px; }
-  .fine a { color: #94a3b8; }
+  .swap { text-align: center; font-size: 13px; color: var(--dim); margin-top: 16px; }
+  .swap a { color: var(--accent2); cursor: pointer; text-decoration: none; }
+  .fine { font-size: 12px; color: var(--dim); text-align: center; margin-top: 20px; }
+  .fine a { color: var(--dim); }
 </style>
 </head>
 <body>
@@ -73,18 +96,18 @@
     <input id="li_pw" type="password" autocomplete="current-password" required>
     <button class="btn" type="submit" id="loginBtn">Sign in</button>
     <div style="text-align:center;margin-top:10px">
-      <a id="forgotLink" style="color:#5eead4;font-size:13px;cursor:pointer;text-decoration:none">Forgot password?</a>
+      <a id="forgotLink" style="color:var(--accent2);font-size:13px;cursor:pointer;text-decoration:none">Forgot password?</a>
     </div>
   </form>
 
   <form id="formForgot">
-    <p style="color:#94a3b8;font-size:13px;line-height:1.5;margin:0 0 12px">
+    <p style="color:var(--dim);font-size:13px;line-height:1.5;margin:0 0 12px">
       Enter your account email and we'll send you a reset link (valid 1 hour).</p>
     <label for="fg_email">Email</label>
     <input id="fg_email" type="email" autocomplete="email" required>
     <button class="btn" type="submit" id="forgotBtn">Email me a reset link</button>
     <div style="text-align:center;margin-top:10px">
-      <a id="forgotBack" style="color:#5eead4;font-size:13px;cursor:pointer;text-decoration:none">← Back to sign in</a>
+      <a id="forgotBack" style="color:var(--accent2);font-size:13px;cursor:pointer;text-decoration:none">← Back to sign in</a>
     </div>
   </form>
 

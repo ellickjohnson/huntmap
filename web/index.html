@@ -114,12 +114,6 @@
   border-right:1px solid var(--line); box-shadow:4px 0 24px rgba(0,0,0,.35);
   display:flex; flex-direction:column; transition:transform .2s ease; }
 #sidePanel.hidden { transform:translateX(-100%); pointer-events:none; }
-#panelToggleFloat { position:absolute; top:12px; left:12px; z-index:12; width:44px; height:44px;
-  border-radius:10px; border:1px solid var(--line); background:color-mix(in srgb, var(--panel) 94%, transparent);
-  color:var(--txt); font-size:18px; cursor:pointer; backdrop-filter:blur(8px);
-  box-shadow:0 4px 16px rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center;
-  transition: all .2s; }
-#panelToggleFloat:hover { border-color:var(--accent2); }
 #railNav { display:flex; flex-direction:column; gap:1px; padding:8px 6px 4px; border-bottom:1px solid var(--line);
   overflow-y:auto; flex-shrink:0; }
 .railBtn { display:flex; flex-direction:column; align-items:center; gap:4px;
@@ -167,24 +161,29 @@
   /* popup contrast fix (burn area + land popups): explicit dark bg / bright text */
   .maplibregl-popup { z-index: 20; }
   .maplibregl-popup-content {
-    background: #10171e !important; color: #f2f7fb !important;
-    border: 1px solid #33414e; border-radius: 10px; padding: 10px 14px;
+    background: var(--panel) !important; color: var(--txt) !important;
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
     box-shadow: 0 8px 30px rgba(0,0,0,.5); font-size: 12.5px; line-height: 1.55;
     min-width: 160px;
   }
-  .maplibregl-popup-content strong { color: #ffc79e; font-size: 13px; }
-  .maplibregl-popup-content span { color: #cfdce6; }
-  .maplibregl-popup-tip { border-top-color: #10171e !important; border-bottom-color: #10171e !important; }
+  .maplibregl-popup-content strong { color: var(--accent2); font-size: 13px; }
+  .maplibregl-popup-content span { color: var(--dim); }
+  .maplibregl-popup-tip { border-top-color: var(--panel) !important; border-bottom-color: var(--panel) !important; border-left-color: var(--panel) !important; border-right-color: var(--panel) !important; }
   .maplibregl-popup-close-button { color: #cfdce6 !important; font-size: 18px; padding: 2px 8px !important; }
 
   .railBtn.bot-btn { padding: 7px 4px 5px; }
   .railBtn.bot-btn .ic { font-size: 17px; }
   .railBtn.bot-btn .lbl { font-size: 8.5px; }
+  .themeOpt { display:flex; align-items:center; gap:8px; background:var(--panel2); border:1px solid var(--line);
+    border-radius:8px; padding:6px 8px; color:var(--txt); font-size:11px; cursor:pointer; text-align:left; }
+  .themeOpt:hover { border-color:var(--accent2); }
+  .themeOpt.on { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .themeOpt i { width:26px; height:18px; border-radius:5px; flex-shrink:0; border:1px solid rgba(0,0,0,.2); }
+  .themeOpt span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 </style>
 </head>
 <body>
 <div id="map"></div>
-<button id="panelToggleFloat" title="Menu">☰</button>
 <div id="sidePanel">
   <div class="panel-header" style="border-bottom:1px solid var(--line)">
     <h1 style="font-size:11px;text-align:center;width:100%">Elk<span>HuntMap</span> 🦌</h1>
@@ -273,7 +272,7 @@
       <div class="field" style="align-items:flex-start">
         <label id="markerSectionHead" style="cursor:pointer;user-select:none">Markers <span id="markerCollapseArrow" style="display:inline-block;transition:transform .15s">▼</span></label>
         <div id="markerSection" style="flex:1">
-          <div style="font-size:11px;color:#8fa3c8;margin-bottom:6px">Drag an icon onto the map to place it 👇 (or use ➕ click)</div>
+          <div style="font-size:11px;color:var(--dim);margin-bottom:6px">Drag an icon onto the map to place it 👇 (or use ➕ click)</div>
           <div class="toggles" id="dragPalette" style="margin-bottom:6px">
             <span class="chip dragmk" draggable="true" data-dk="camp">🏕️</span>
             <span class="chip dragmk" draggable="true" data-dk="sighted">👁️</span>
@@ -295,11 +294,11 @@
             <span class="chip on" data-mk="trailhead">🥾 Trailhead</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center">
-            <button id="addMarkerBtn" style="flex:1;padding:6px;border-radius:6px;border:1px solid #33507a;background:#1b3a5c;color:#dbe7ff;cursor:pointer;font-size:12px">➕ Add marker (click map)</button>
-            <button id="gpxExportBtn" title="Download all waypoints as GPX (Garmin/onX compatible)" style="padding:6px 10px;border-radius:6px;border:1px solid #33507a;background:#1b3a5c;color:#dbe7ff;cursor:pointer;font-size:12px">GPX ⤓</button>
+            <button id="addMarkerBtn" style="flex:1;padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer;font-size:12px">➕ Add marker (click map)</button>
+            <button id="gpxExportBtn" title="Download all waypoints as GPX (Garmin/onX compatible)" style="padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer;font-size:12px">GPX ⤓</button>
           </div>
-          <div id="addMarkerBar" style="display:none;margin-top:6px;padding:8px;border:1px solid #33507a;border-radius:8px;background:#12213a">
-            <div style="font-size:11px;color:#8fa3c8;margin-bottom:4px">Click the map to place, then:</div>
+          <div id="addMarkerBar" style="display:none;margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)">
+            <div style="font-size:11px;color:var(--dim);margin-bottom:4px">Click the map to place, then:</div>
             <div class="toggles" id="markerKindPick" style="margin-bottom:6px">
               <span class="chip" data-k="camp">🏕️</span>
               <span class="chip" data-k="sighted">👁️</span>
@@ -310,10 +309,10 @@
               <span class="chip" data-k="water">💧</span>
               <span class="chip" data-k="trailhead">🥾</span>
             </div>
-            <input id="markerName" placeholder="Name (optional)" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:5px;border-radius:6px;border:1px solid #33507a;background:#0d1b2e;color:#dbe7ff;font-size:12px"/>
+            <input id="markerName" placeholder="Name (optional)" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:5px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12px"/>
             <div style="display:flex;gap:6px">
               <button id="markerSave" style="flex:1;padding:6px;border-radius:6px;border:none;background:#0f766e;color:#fff;cursor:pointer;font-size:12px">Save</button>
-              <button id="markerCancel" style="flex:1;padding:6px;border-radius:6px;border:1px solid #33507a;background:transparent;color:#8fa3c8;cursor:pointer;font-size:12px">Cancel</button>
+              <button id="markerCancel" style="flex:1;padding:6px;border-radius:6px;border:1px solid #33507a;background:transparent;color:var(--dim);cursor:pointer;font-size:12px">Cancel</button>
             </div>
           </div>
           <div id="markerList" style="margin-top:8px;max-height:160px;overflow-y:auto"></div>
@@ -353,6 +352,32 @@
 
 <script type="module">
 const maplibregl = window.maplibregl;
+
+// ---------------- themes ----------------
+const THEMES = {
+  'midnight-blaze':{ name:'Midnight Blaze',  mode:'dark',  bg:'#0f1419', panel:'#1a222b', panel2:'#232d38', line:'#2e3a46', txt:'#e8edf2', dim:'#8fa0b0', accent:'#ff6b35', accent2:'#4ecdc4' },
+  'pine-shadow':   { name:'Pine Shadows',    mode:'dark',  bg:'#0e1512', panel:'#16221c', panel2:'#1f3027', line:'#31463a', txt:'#e6efe9', dim:'#8fa899', accent:'#e07a3f', accent2:'#5da58a' },
+  'sagebrush':     { name:'Sagebrush',       mode:'dark',  bg:'#131511', panel:'#1d211a', panel2:'#272e24', line:'#3a4436', txt:'#eceee4', dim:'#98a28a', accent:'#c98a3d', accent2:'#8fae72' },
+  'river-bottom':  { name:'River Bottom',    mode:'dark',  bg:'#0e1317', panel:'#172028', panel2:'#202c36', line:'#324353', txt:'#e5edf3', dim:'#8aa0b2', accent:'#5f9ea0', accent2:'#d9a05b' },
+  'timber':        { name:'Timber',          mode:'dark',  bg:'#15120e', panel:'#221d16', panel2:'#2e2820', line:'#453c30', txt:'#efe9e0', dim:'#a79a87', accent:'#b3541e', accent2:'#7d9c6a' },
+  'granite':       { name:'Granite',         mode:'dark',  bg:'#101214', panel:'#1b1f23', panel2:'#252b31', line:'#384149', txt:'#e6eaee', dim:'#93a1ad', accent:'#a67c52', accent2:'#6f94b8' },
+  'morning-camp':  { name:'Morning Camp',    mode:'light', bg:'#f4f1ea', panel:'#faf8f2', panel2:'#ece8dd', line:'#d8d2c2', txt:'#2b2a24', dim:'#77745f', accent:'#b3541e', accent2:'#4a7a63' },
+  'aspen-grove':   { name:'Aspen Grove',     mode:'light', bg:'#f2f4ee', panel:'#f9fbf5', panel2:'#e7ecdf', line:'#d0d8c6', txt:'#262e24', dim:'#6d7964', accent:'#7d9c6a', accent2:'#b3541e' },
+  'high-plains':   { name:'High Plains',     mode:'light', bg:'#f5f2ec', panel:'#fbf9f4', panel2:'#ece5d7', line:'#d9d0bd', txt:'#332e26', dim:'#807663', accent:'#a6703f', accent2:'#5f8fa0' },
+  'snowline':      { name:'Snowline',        mode:'light', bg:'#f2f4f6', panel:'#fafbfc', panel2:'#e6e9ed', line:'#ccd3db', txt:'#252a30', dim:'#6d7984', accent:'#c05a2e', accent2:'#4c7a95' },
+};
+function applyTheme(id) {
+  const t = THEMES[id] || THEMES['midnight-blaze'];
+  const r = document.documentElement.style;
+  r.setProperty('--bg', t.bg); r.setProperty('--panel', t.panel); r.setProperty('--panel2', t.panel2);
+  r.setProperty('--line', t.line); r.setProperty('--txt', t.txt); r.setProperty('--dim', t.dim);
+  r.setProperty('--accent', t.accent); r.setProperty('--accent2', t.accent2);
+  document.documentElement.style.colorScheme = t.mode === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.themeMode = t.mode;
+  localStorage.setItem('hm-theme', id);
+}
+const _savedTheme = localStorage.getItem('hm-theme') || 'midnight-blaze';
+applyTheme(_savedTheme);
 
 // ---------------- basemaps ----------------
 const STREETS_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
@@ -874,10 +899,48 @@ const BUILDERS = {
     if (sec) { sec.style.display = ''; sec.style.flex = 'none'; body.appendChild(sec); }
   },
   railTools: body => {
-    const w = document.createElement('div');
-    w.style.cssText = 'font-size:11px;color:#8fa3c8;padding:4px 2px';
-    w.textContent = 'Weather forecast per unit coming soon';
-    body.appendChild(w);
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+    const ttl = document.createElement('div');
+    ttl.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim)';
+    ttl.textContent = 'Theme';
+    const modeRow = document.createElement('div');
+    modeRow.className = 'seg';
+    modeRow.innerHTML = `<button data-tmode="dark">🌙 Dark</button><button data-tmode="light">☀️ Light</button>`;
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:5px';
+    const mkSwatch = (id, t) => {
+      const b = document.createElement('button');
+      b.className = 'themeOpt';
+      b.dataset.tid = id;
+      b.title = t.name;
+      b.innerHTML = `<i style="background:linear-gradient(135deg, ${t.bg} 45%, ${t.accent} 45%, ${t.accent} 62%, ${t.accent2} 62%)"></i><span>${t.name}</span>`;
+      return b;
+    };
+    Object.entries(THEMES).forEach(([id, t]) => grid.appendChild(mkSwatch(id, t)));
+    wrap.appendChild(ttl);
+    wrap.appendChild(modeRow);
+    wrap.appendChild(grid);
+    body.appendChild(wrap);
+
+    const markSel = () => {
+      grid.querySelectorAll('.themeOpt').forEach(b => b.classList.toggle('on', b.dataset.tid === localStorage.getItem('hm-theme')));
+      modeRow.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.tmode === document.documentElement.dataset.themeMode));
+    };
+    modeRow.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const mode = b.dataset.tmode;
+      const cur = localStorage.getItem('hm-theme') || 'midnight-blaze';
+      const id = THEMES[cur] && THEMES[cur].mode === mode ? cur : Object.keys(THEMES).find(k => THEMES[k].mode === mode);
+      applyTheme(id);
+      markSel();
+    });
+    grid.addEventListener('click', e => {
+      const b = e.target.closest('.themeOpt'); if (!b) return;
+      applyTheme(b.dataset.tid);
+      markSel();
+    });
+    markSel();
   },
   railProfile: body => {
     if (!window._signedIn) {
@@ -979,12 +1042,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') railHide(); 
 const panelEl = document.getElementById('sidePanel');
 function setPanelVisible(v) {
   panelEl.classList.toggle('hidden', !v);
-  const t = document.getElementById('panelToggleFloat');
-  t.style.opacity = v ? '0' : '1';
-  t.style.pointerEvents = v ? 'none' : 'auto';
 }
 document.getElementById('panelToggle').addEventListener('click', () => setPanelVisible(false));
-document.getElementById('panelToggleFloat').addEventListener('click', () => setPanelVisible(true));
 setPanelVisible(true);
 
 // clicking outside the panel (on the map) closes the open section
@@ -1045,7 +1104,7 @@ function renderDetail(p) {
 }
 
 // ---- collapsible sections (mobile-friendly) ----
-function buildSec(title, innerHtml, open = true) {
+function buildSec(title, innerHtml, open = false) {
   const tpl = document.getElementById('tpl-sec');
   const el = tpl.content.firstElementChild.cloneNode(true);
   el.querySelector('.sec-title').textContent = title;
@@ -1061,9 +1120,12 @@ function renderSections(statsHtml, pred, rerenderHistory) {
   const wrap = document.createElement('div');
   wrap.appendChild(buildSec(`${selectedYear} stats`, `<div id="dStats">${statsHtml}</div>`));
 
-  // trend & forecast section (history chart + crossover box live inside dHist render)
-  const trendSec = buildSec('Trend &amp; forecast', `<div id="dHist"></div>`);
-  wrap.appendChild(trendSec);
+  // history chart (year picker bars + success line)
+  wrap.appendChild(buildSec('History chart', `<div id="dHist"></div>`));
+  // trend & forecast section — computed trend stats + crossover projection
+  wrap.appendChild(buildSec('Trend & forecast', `<div id="dTrend"></div>`));
+  // species harvest breakdown
+  wrap.appendChild(buildSec('Species harvest breakdown', `<div id="dSpecies"></div>`));
 
   // residency section (in-state vs out-of-state, limited licenses)
   const r = RESIDENCY && (RESIDENCY[selectedGmu] || RESIDENCY[String(selectedGmu)]);
@@ -1081,7 +1143,7 @@ function renderSections(statsHtml, pred, rerenderHistory) {
       impact = `<div style="margin-top:6px;color:var(--dim);font-size:10px">⚠️ 2028 rule: uniform 75/25 R/NR — this unit's NR share (${nr}%) drops, freeing tags for residents.</div>`;
     }
     wrap.appendChild(buildColSec('Residents vs nonresidents (limited draw)',
-      rows2.map(([k, v]) => `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('') + impact, true));
+      rows2.map(([k, v]) => `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('') + impact, false));
   }
 
   const prev = document.getElementById('dSectionsWrap');
@@ -1096,28 +1158,19 @@ function buildColSec(title, innerHtml, open = true) {
 
 function renderHistory() {
   const el = document.getElementById('dHist');
-  if (!HISTORY || !selectedGmu || !HISTORY[selectedGmu]) { el.innerHTML = ''; return; }
+  const tEl = document.getElementById('dTrend');
+  const spEl = document.getElementById('dSpecies');
+  const empty = '<div style="padding:6px;color:var(--dim);font-size:11px">Harvest history not available for this unit yet.</div>';
+  const noData = (!HISTORY || !selectedGmu || !HISTORY[selectedGmu]);
+  if (el) el.innerHTML = noData ? empty : '';
+  if (tEl) renderTrend(tEl);
+  if (spEl) renderSpecies(spEl);
+  if (noData) return;
   const hist = HISTORY[selectedGmu];
   const years = Object.keys(hist).sort();
   const maxTotal = Math.max(...years.map(y => hist[y].total), 1);
   const maxHunt = Math.max(...years.map(y => hist[y].hunters), 1);
   const maxSuccess = Math.max(...years.map(y => hist[y].success), 1);
-
-  // Calculate correlation: when hunters go down, does success go up?
-  let hunterTrend = 'stable', successTrend = 'stable', correlation = '';
-  if (years.length >= 3) {
-    const hValues = years.map(y => hist[y].hunters);
-    const sValues = years.map(y => hist[y].success);
-    const hSlope = simpleSlope(hValues);
-    const sSlope = simpleSlope(sValues);
-    hunterTrend = hSlope > 5 ? '↑ rising' : hSlope < -5 ? '↓ falling' : '→ stable';
-    successTrend = sSlope > 1 ? '↑ rising' : sSlope < -1 ? '↓ falling' : '→ stable';
-    // Inverse correlation check
-    const pearson = pearsonCorr(hValues, sValues);
-    if (pearson < -0.4) correlation = '📉 <strong>Inverse pattern:</strong> Fewer hunters → higher success rate';
-    else if (pearson > 0.4) correlation = '📈 <strong>Positive pattern:</strong> More hunters → higher success rate';
-    else correlation = '➡️ <strong>No clear pattern</strong> between hunter count and success rate';
-  }
 
   const mkBars = (key, max, cls) => years.map(y =>
     `<div class="b ${+y === selectedYear ? 'on' : ''}" data-y="${y}"
@@ -1132,44 +1185,17 @@ function renderHistory() {
     return `${x},${yVal}`;
   }).join(' ');
 
-  // Species breakdown bars
-  const speciesColors = { bulls: '#ff6b35', cows: '#4ecdc4', calves: '#facc15' };
-  const speciesLabels = { bulls: 'Bulls', cows: 'Cows', calves: 'Calves' };
-  let speciesHtml = '';
-  for (const sp of ['bulls', 'cows', 'calves']) {
-    const maxSp = Math.max(...years.map(y => hist[y][sp]), 1);
-    speciesHtml += `
-      <div class="species-row">
-        <span class="species-label" style="color:${speciesColors[sp]}">${speciesLabels[sp]}</span>
-        <div class="species-bars">
-          ${years.map(y => `<div class="b ${+y === selectedYear ? 'on' : ''}" data-y="${y}" data-sp="${sp}"
-             title="${y}: ${hist[y][sp]} ${speciesLabels[sp].toLowerCase()} harvested"
-             style="flex:1"><i style="height:${Math.max(2, Math.round(hist[y][sp] / maxSp * 28))}px; background:${speciesColors[sp]}"></i></div>`).join('')}
-        </div>
-      </div>`;
-  }
-
   el.innerHTML = `
     <div class="hist-title">Tap a year — updates detail + map</div>
-
-    <div class="trend-summary" style="margin-bottom:12px;padding:10px;background:var(--panel2);border-radius:8px;font-size:12px">
-      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
-        <span>Hunters: <strong>${hunterTrend}</strong></span>
-        <span>Success rate: <strong>${successTrend}</strong></span>
-      </div>
-      <div style="color:var(--dim)">${correlation}</div>
-    </div>
-
     <div class="legend2" style="margin-bottom:6px">
       <span><i style="background:var(--accent2)"></i>Elk harvested (total)</span>
       <span><i style="background:#8a6d3f"></i>Hunters</span>
       <span><i style="background:var(--accent)"></i>Success rate %</span>
     </div>
-    
+
     <div class="bars wrap" style="position:relative;height:46px">${mkBars('total', maxTotal, '')}</div>
     <div class="bars wrap hunters" style="height:34px">${mkBars('hunters', maxHunt, 'hunters')}</div>
     <div class="wrap" style="position:relative">
-    <!-- Success rate line overlay: sits over the bars above (absolute within .wrap) -->
     <svg class="success-line" style="position:absolute;top:-80px;left:0;width:100%;height:80px;pointer-events:none" viewBox="0 0 300 80" preserveAspectRatio="none">
       <defs>
         <linearGradient id="successGrad" x1="0%" y1="100%" x2="0%" y2="0%">
@@ -1189,21 +1215,6 @@ function renderHistory() {
     </div>
     <div style="display:flex; gap:6px; margin-top:4px" class="bars-labels">
       ${years.map(y => `<span style="flex:1; text-align:center; font-size:9px; color:${+y === selectedYear ? 'var(--accent2)' : 'var(--dim)'}">${y.slice(2)}</span>`).join('')}</div>
-
-    <!-- Crossover panel: hunters↓ / success↑ forecast -->
-    ${PRED && PRED[selectedGmu] ? renderCrossover(PRED[selectedGmu]) : ''}
-
-    <!-- Species breakdown -->
-    <div class="hist-title" style="margin-top:16px">Species Harvest Breakdown</div>
-    <div class="legend2" style="margin-bottom:6px">
-      <span><i style="background:#ff6b35"></i>Bulls</span>
-      <span><i style="background:#4ecdc4"></i>Cows</span>
-      <span><i style="background:#facc15"></i>Calves</span>
-    </div>
-    ${speciesHtml}
-    <div style="display:flex; gap:6px; margin-top:4px" class="bars-labels">
-      ${years.map(y => `<span style="flex:1; text-align:center; font-size:9px; color:${+y === selectedYear ? 'var(--accent2)' : 'var(--dim)'}">${y.slice(2)}</span>`).join('')}</div>
-
     <style>
       .species-row { display:flex; align-items:flex-end; gap:8px; margin-bottom:4px; height:32px; }
       .species-label { width:40px; font-size:10px; font-weight:600; flex-shrink:0; }
@@ -1216,6 +1227,84 @@ function renderHistory() {
   `;
 
   el.querySelectorAll('.b').forEach(bEl => bEl.addEventListener('click', () => {
+    selectedYear = +bEl.dataset.y;
+    stampSuccessYear();
+    renderHistory();
+    const p = UNITS.features.find(f => f.properties.gmuid === selectedGmu)?.properties;
+    if (p) renderDetail(p);
+    ensureUnitLayers();
+  }));
+}
+
+// ---- Trend & forecast section: computed trends + inverse correlation + crossover projection ----
+function renderTrend(tEl) {
+  const pred = (PRED && (PRED[selectedGmu] || PRED[String(selectedGmu)])) || null;
+  let inner = '';
+  if (!HISTORY || !HISTORY[selectedGmu]) {
+    inner = '<div style="padding:6px;color:var(--dim);font-size:11px">No harvest history — trend can\'t be computed.</div>';
+  } else {
+    const hist = HISTORY[selectedGmu];
+    const years = Object.keys(hist).sort();
+    const hValues = years.map(y => hist[y].hunters);
+    const sValues = years.map(y => hist[y].success);
+    const hSlope = simpleSlope(hValues);
+    const sSlope = simpleSlope(sValues);
+    const hunterTrend = hSlope > 5 ? '↑ rising' : hSlope < -5 ? '↓ falling' : '→ stable';
+    const successTrend = sSlope > 1 ? '↑ rising' : sSlope < -1 ? '↓ falling' : '→ stable';
+    const pearson = pearsonCorr(hValues, sValues);
+    let correlation = '➡️ <strong>No clear pattern</strong> between hunter count and success rate';
+    if (pearson < -0.4) correlation = '📉 <strong>Inverse pattern:</strong> Fewer hunters → higher success rate';
+    else if (pearson > 0.4) correlation = '📈 <strong>Positive pattern:</strong> More hunters → higher success rate';
+    const first = hist[years[0]], last = hist[years[years.length - 1]];
+    const hDelta = first.hunters ? Math.round((last.hunters - first.hunters) / first.hunters * 100) : 0;
+    inner = `
+      <div style="margin-bottom:8px;padding:10px;background:var(--panel2);border-radius:8px;font-size:12px">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:6px">
+          <span>Hunters: <strong>${hunterTrend}</strong><span style="color:var(--dim)"> (${hDelta > 0 ? '+' : ''}${hDelta}% over ${years.length} yrs)</span></span>
+          <span>Success rate: <strong>${successTrend}</strong></span>
+        </div>
+        <div style="color:var(--dim)">${correlation}</div>
+      </div>`;
+  }
+  if (pred) inner += renderCrossover(pred);
+  tEl.innerHTML = inner;
+}
+
+// ---- Species harvest breakdown section ----
+function renderSpecies(spEl) {
+  if (!HISTORY || !HISTORY[selectedGmu]) {
+    spEl.innerHTML = '<div style="padding:6px;color:var(--dim);font-size:11px">No species breakdown available for this unit.</div>';
+    return;
+  }
+  const hist = HISTORY[selectedGmu];
+  const years = Object.keys(hist).sort();
+  const speciesColors = { bulls: '#ff6b35', cows: '#4ecdc4', calves: '#facc15' };
+  const speciesLabels = { bulls: 'Bulls', cows: 'Cows', calves: 'Calves' };
+  let speciesHtml = '';
+  for (const sp of ['bulls', 'cows', 'calves']) {
+    const maxSp = Math.max(...years.map(y => hist[y][sp]), 1);
+    speciesHtml += `
+      <div class="species-row">
+        <span class="species-label" style="color:${speciesColors[sp]}">${speciesLabels[sp]}</span>
+        <div class="species-bars">
+          ${years.map(y => `<div class="b ${+y === selectedYear ? 'on' : ''}" data-y="${y}" data-sp="${sp}"
+             title="${y}: ${hist[y][sp]}">
+             <i style="height:${Math.max(2, Math.round(hist[y][sp] / maxSp * 30))}px; background:${speciesColors[sp]}"></i>
+           </div>`).join('')}
+        </div>
+      </div>`;
+  }
+  spEl.innerHTML = `
+    <div class="legend2" style="margin-bottom:6px">
+      <span><i style="background:#ff6b35"></i>Bulls</span>
+      <span><i style="background:#4ecdc4"></i>Cows</span>
+      <span><i style="background:#facc15"></i>Calves</span>
+    </div>
+    ${speciesHtml}
+    <div style="display:flex; gap:6px; margin-top:4px" class="bars-labels">
+      ${years.map(y => `<span style="flex:1; text-align:center; font-size:9px; color:${+y === selectedYear ? 'var(--accent2)' : 'var(--dim)'}">${y.slice(2)}</span>`).join('')}</div>
+  `;
+  spEl.querySelectorAll('.b').forEach(bEl => bEl.addEventListener('click', () => {
     selectedYear = +bEl.dataset.y;
     stampSuccessYear();
     renderHistory();
@@ -1388,7 +1477,7 @@ function updateMarkerLayer() {
         `<br><button onclick="deleteMarker(${p.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>`;
       new maplibregl.Popup({ offset: 12 })
         .setLngLat(e.features[0].geometry.coordinates)
-        .setHTML(html + `<br><button onclick="editMarker(${p.id})" style="margin-top:6px;font-size:12px;padding:4px 10px;border:1px solid #33507a;border-radius:6px;background:#1b3a5c;color:#dbe7ff;cursor:pointer">✏️ Edit / move</button>`).addTo(map);
+        .setHTML(html + `<br><button onclick="editMarker(${p.id})" style="margin-top:6px;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer">✏️ Edit / move</button>`).addTo(map);
       window._lastMarkerClick = { lngLat: e.lngLat, props: p };
     });
     map.on('mouseenter', 'markers-dots', () => map.getCanvas().style.cursor = 'pointer');
@@ -1447,12 +1536,12 @@ window.deleteMarker = deleteMarker;
 
 function renderMarkerList() {
   const el = document.getElementById('markerList');
-  if (!markers.length) { el.innerHTML = '<div style="font-size:11px;color:#8fa3c8">No markers yet — click "Add marker" then click the map.</div>'; return; }
+  if (!markers.length) { el.innerHTML = '<div style="font-size:11px;color:var(--dim)">No markers yet — click "Add marker" then click the map.</div>'; return; }
   el.innerHTML = markers.map(m =>
-    `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px;color:#dbe7ff">
+    `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px;color:var(--txt)">
        <span>${MK_EMOJI[m.kind] || '📍'}</span>
        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.name || m.kind}</span>
-       <button onclick="deleteMarker(${m.id})" style="background:none;border:none;color:#8fa3c8;cursor:pointer;font-size:11px">✕</button>
+       <button onclick="deleteMarker(${m.id})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px">✕</button>
      </div>`).join('');
 }
 
@@ -1556,13 +1645,13 @@ function openMarkerEditor(pos, existing, clientX, clientY) {
   const kindsRow = Object.entries(MK_EMOJI).map(([k, em]) =>
     `<span class="chip mk-edit-kind ${((existing && existing.kind) || pos.kind) === k ? 'on' : ''}" data-k="${k}" style="cursor:pointer;font-size:15px;padding:5px 7px">${em}</span>`).join('');
   dlg.innerHTML = `
-    <div style="font-size:12px;font-weight:600;color:#8fa3c8;margin-bottom:8px">${isEdit ? 'Edit marker' : 'New marker'} <span style="float:right;cursor:pointer" id="mkEdX">✕</span></div>
+    <div style="font-size:12px;font-weight:600;color:var(--dim);margin-bottom:8px">${isEdit ? 'Edit marker' : 'New marker'} <span style="float:right;cursor:pointer" id="mkEdX">✕</span></div>
     <div class="toggles" id="mkEdKinds" style="margin-bottom:8px">${kindsRow}</div>
     <input id="mkEdName" placeholder="Name" value="${(existing && existing.name) || ''}"
       style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12px"/>
     <textarea id="mkEdNotes" placeholder="Description — what you saw, gear, access, plans…"
       style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12px;min-height:56px;resize:vertical">${(existing && existing.notes) || ''}</textarea>
-    <div style="font-size:11px;color:#8fa3c8;margin-bottom:8px">
+    <div style="font-size:11px;color:var(--dim);margin-bottom:8px">
       📐 ${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)}
       ${pos.elev ? ' · elev ~' + Math.round(pos.elev * 3.28084) + ' ft' : ''}
     </div>
@@ -1970,6 +2059,12 @@ map.on('load', async () => {
     wireClicks();
     ensureUnitLayers();
     loadMarkers();   // user markers
+    // unit was clicked before data finished loading? re-render it now
+    const dbox = document.getElementById('detail');
+    if (dbox.classList.contains('show') && selectedGmu) {
+      const u = UNITS.features.find(f => f.properties.gmuid === selectedGmu);
+      if (u) renderDetail(u.properties);
+    }
   } catch (err) {
     document.querySelector('.unit-list').innerHTML =
       `<div style="padding:12px;color:#ff6b35;font-size:12px">Failed to load: ${err.message}</div>`;
