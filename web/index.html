@@ -189,6 +189,8 @@
       <div class="toggles">
         <span class="chip" id="terrainChip">⛰️ 3D Terrain</span>
         <span class="chip" id="parcelChip">🟥 Parcels</span>
+        <span class="chip" id="trailsChip">🥾 Trails</span>
+        <span class="chip" id="burnsChip">🔥 Burn areas</span>
         <span class="chip on" id="hotspotChip">🔥 Hotspots</span>
         <span class="chip" id="landChip">🗺️ Public land</span>
         <span class="chip on" id="contourChip">📈 Contours</span>
@@ -382,6 +384,59 @@ const HYBRID_STYLE = {
 // contour toggle: contours are ON in hybrid by default now (no 'none' layout above);
 // the chip only matters on non-hybrid basemaps. Keep applyContours for style re-apply.
 
+// trails (COTREX, CO official ~40k miles) + burn areas (MTBS 1984-2024): same viewport pattern
+const COTREX_Q = 'https://gis.colorado.gov/public/rest/services/OIT/Colorado_State_Basemap/MapServer/40/query';
+const MTBS_Q = 'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MTBS_01/MapServer/63/query';
+let trailsOn = false, burnsOn = false;
+let trailsAbort = null, burnsAbort = null;
+function bboxParams() {
+  const b = map.getBounds();
+  return 'geometry=' + [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map(v => v.toFixed(4)).join(',')
+    + '&geometryType=esriGeometryEnvelope&inSR=4326';
+}
+async function updateTrailBurn(srcId, layerIds, url, signal) {
+  const r = await fetch(url, { signal });
+  if (!r.ok) throw new Error(srcId + ' fetch ' + r.status);
+  const gj = await r.json();
+  if (map.getSource(srcId)) map.getSource(srcId).setData(gj);
+}
+async function refetchToggle(kind) {
+  const on = kind === 'trails' ? trailsOn : burnsOn;
+  if (!on) return;
+  if (kind === 'trails') {
+    if (!map.getSource('trails')) {
+      map.addSource('trails', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      map.addLayer({ id: 'trail-casing', type: 'line', source: 'trails',
+        paint: { 'line-color': '#5b3a1e', 'line-width': ['interpolate', ['linear'], ['zoom'], 11, 2, 15, 4.5], 'line-opacity': 0.7 } });
+      map.addLayer({ id: 'trail-line', type: 'line', source: 'trails',
+        paint: { 'line-color': '#fbbf24', 'line-width': ['interpolate', ['linear'], ['zoom'], 11, 1, 15, 2.5], 'line-opacity': 0.95 } });
+    }
+  } else {
+    if (!map.getSource('burns')) {
+      map.addSource('burns', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      map.addLayer({ id: 'burn-area', type: 'fill', source: 'burns',
+        paint: { 'fill-color': '#171717', 'fill-opacity': 0.28 } });
+      map.addLayer({ id: 'burn-edge', type: 'line', source: 'burns',
+        paint: { 'line-color': '#ea580c', 'line-width': 1.2, 'line-opacity': 0.85 } });
+    }
+  }
+  const isT = kind === 'trails';
+  const base = isT ? COTREX_Q : MTBS_Q;
+  const fields = isT ? 'name,type,surface' : 'fire_name,year,acres,fire_type';
+  const cap = 1500;
+  const url = base + '?where=1%3D1&' + bboxParams() + '&outFields=' + fields +
+    '&outSR=4326&f=geojson&resultRecordCount=' + cap;
+  const ab = isT ? (trailsAbort = new AbortController()) : (burnsAbort = new AbortController());
+  try {
+    await updateTrailBurn(isT ? 'trails' : 'burns', null, url, ab.signal);
+  } catch (err) { if (err.name !== 'AbortError') console.error(kind, err); }
+}
+let tbTimer = null;
+function scheduleTrailBurn() {
+  if (!trailsOn && !burnsOn) return;
+  clearTimeout(tbTimer);
+  tbTimer = setTimeout(() => { if (trailsOn) refetchToggle('trails'); if (burnsOn) refetchToggle('burns'); }, 450);
+}
 // parcels: Colorado Public Parcels (statewide, 2.6M polygons) fetched per-viewport as GeoJSON
 let parcelsOn = false;
 let parcelAbort = null;
@@ -656,9 +711,9 @@ function setTerrain(on) {
   try {
     if (on) {
       if (!map.getSource('terrain-dem')) map.addSource('terrain-dem', TERRAIN_DEM);
-      map.setTerrain({ source: 'terrain-dem', exaggeration: 2.2 });
+      map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
       // 3D is invisible at top-down: tilt the camera so relief shows
-      map.easeTo({ pitch: 65, duration: 700 });
+      map.easeTo({ pitch: 60, duration: 700 });
     } else {
       map.setTerrain(null);
       map.easeTo({ pitch: 0, duration: 600 });
@@ -745,7 +800,7 @@ function railShow(btn) {
         railBody.appendChild(habitatSeg);
         const chipRow = railChildren.find(k => k.classList && k.classList.contains('toggles') && k.querySelector('#terrainChip'));
         const row2 = document.createElement('div'); row2.className = 'toggles';
-        ['terrainChip','parcelChip','hotspotChip','landChip','contourChip','unitsChip'].forEach(id => {
+        ['terrainChip','parcelChip','trailsChip','burnsChip','hotspotChip','landChip','contourChip','unitsChip'].forEach(id => {
           const el = document.getElementById(id);
           if (el) { row2.appendChild(el); }
         });
@@ -1468,6 +1523,33 @@ parcelChip.addEventListener('click', () => {
   else if (map.getSource('parcels')) map.getSource('parcels').setData({ type: 'FeatureCollection', features: [] });
 });
 map.on('moveend', scheduleParcels);
+const trailsChip = document.getElementById('trailsChip');
+trailsChip.addEventListener('click', () => {
+  trailsOn = !trailsOn;
+  trailsChip.classList.toggle('on', trailsOn);
+  if (trailsOn) refetchToggle('trails');
+  else if (map.getSource('trails')) map.getSource('trails').setData({ type: 'FeatureCollection', features: [] });
+});
+const burnsChip = document.getElementById('burnsChip');
+burnsChip.addEventListener('click', () => {
+  burnsOn = !burnsOn;
+  burnsChip.classList.toggle('on', burnsOn);
+  if (burnsOn) refetchToggle('burns');
+  else if (map.getSource('burns')) map.getSource('burns').setData({ type: 'FeatureCollection', features: [] });
+});
+// burn popups: click a burn polygon -> name/year/acres
+map.on('click', 'burn-area', e => {
+  const f = e.features && e.features[0];
+  if (!f) return;
+  const p = f.properties || {};
+  new maplibregl.Popup({ maxWidth: '260px' })
+    .setLngLat(e.lngLat)
+    .setHTML(`<strong>${p.fire_name || 'Burn'}</strong><br>${p.year || '?'} · ${(+p.acres || 0).toLocaleString()} acres<br>${p.fire_type || ''}`)
+    .addTo(map);
+});
+map.on('mouseenter', 'burn-area', () => map.getCanvas().style.cursor = 'pointer');
+map.on('mouseleave', 'burn-area', () => map.getCanvas().style.cursor = '');
+map.on('moveend', scheduleTrailBurn);
 const contourChip = document.getElementById('contourChip');
 contourChip.addEventListener('click', () => {
   contoursOn = !contoursOn;
@@ -1597,6 +1679,7 @@ map.on('style.load', () => {
   // style switch wipes sources/layers/terrain — rebuild all
   if (terrainOn) setTerrain(true);
   ensureUnitLayers();
+  updateParcels(); if (trailsOn) refetchToggle('trails'); if (burnsOn) refetchToggle('burns');
   updateHotspotLayer();
 });
 map.on('idle', () => {
