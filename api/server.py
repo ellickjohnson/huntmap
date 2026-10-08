@@ -360,6 +360,7 @@ class Handler(SimpleHTTPRequestHandler):
             '/api/admin/settings': lambda: self.api_admin_settings(body),
             '/api/markers': lambda: self.api_markers(body),
             '/api/markers/delete': lambda: self.api_marker_delete(body),
+            '/api/markers/update': lambda: self.api_marker_update(body),
         }
         fn = m.get(path)
         if fn:
@@ -581,6 +582,36 @@ h1{{color:{color};font-size:20px}} p{{line-height:1.5}}
             (u['id'],))]
         con.close()
         self.send_json({'markers': rows})
+
+    def api_marker_update(self, body):
+        u = self.require_auth()
+        if not u:
+            return
+        mid = body.get('id')
+        if not mid:
+            return self.send_json({'error': 'id required'}, 400)
+        sets, vals = [], []
+        for f in ('kind', 'name', 'notes', 'lat', 'lon'):
+            if f in body and body[f] is not None:
+                v = body[f]
+                if f == 'kind':
+                    v = str(v).strip().lower()
+                    if v not in self.MARKER_KINDS:
+                        return self.send_json({'error': f'kind must be one of {", ".join(self.MARKER_KINDS)}'}, 400)
+                if f in ('lat', 'lon'):
+                    v = float(v)
+                elif f in ('name', 'notes'):
+                    v = str(v).strip()[: (120 if f == 'name' else 2000)]
+                sets.append(f'{f}=?')
+                vals.append(v)
+        if not sets:
+            return self.send_json({'error': 'nothing to update'}, 400)
+        con = sqlite3.connect(AUTHDB)
+        sets_s = ', '.join(sets)
+        con.execute(f'UPDATE markers SET {sets_s} WHERE id=? AND user_id=?', (*vals, mid, u['id']))
+        con.commit()
+        con.close()
+        return self.send_json({'ok': True})
 
     def api_marker_delete(self, body):
         u = self.require_auth()

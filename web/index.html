@@ -216,7 +216,18 @@
       <div class="field" style="align-items:flex-start">
         <label id="markerSectionHead" style="cursor:pointer;user-select:none">Markers <span id="markerCollapseArrow" style="display:inline-block;transition:transform .15s">▼</span></label>
         <div id="markerSection" style="flex:1">
-          <div class="toggles" id="markerToggles" style="margin-bottom:6px">
+          <div style="font-size:11px;color:#8fa3c8;margin-bottom:6px">Drag an icon onto the map to place it 👇 (or use ➕ click)</div>
+          <div class="toggles" id="dragPalette" style="margin-bottom:6px">
+            <span class="chip dragmk" draggable="true" data-dk="camp">🏕️</span>
+            <span class="chip dragmk" draggable="true" data-dk="sighted">👁️</span>
+            <span class="chip dragmk" draggable="true" data-dk="harvested">🏹</span>
+            <span class="chip dragmk" draggable="true" data-dk="parked">🚗</span>
+            <span class="chip dragmk" draggable="true" data-dk="waypoint">📍</span>
+            <span class="chip dragmk" draggable="true" data-dk="glassing">🔭</span>
+            <span class="chip dragmk" draggable="true" data-dk="water">💧</span>
+            <span class="chip dragmk" draggable="true" data-dk="trailhead">🥾</span>
+          </div>
+<div class="toggles" id="markerToggles" style="margin-bottom:6px">
             <span class="chip on" data-mk="camp">🏕️ Camp</span>
             <span class="chip on" data-mk="sighted">👁️ Saw elk</span>
             <span class="chip on" data-mk="harvested">🏹 Shot elk</span>
@@ -1256,12 +1267,49 @@ function updateMarkerLayer() {
         `<br><button onclick="deleteMarker(${p.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>`;
       new maplibregl.Popup({ offset: 12 })
         .setLngLat(e.features[0].geometry.coordinates)
-        .setHTML(html).addTo(map);
+        .setHTML(html + `<br><button onclick="editMarker(${p.id})" style="margin-top:6px;font-size:12px;padding:4px 10px;border:1px solid #33507a;border-radius:6px;background:#1b3a5c;color:#dbe7ff;cursor:pointer">✏️ Edit / move</button>`).addTo(map);
+      window._lastMarkerClick = { lngLat: e.lngLat, props: p };
     });
     map.on('mouseenter', 'markers-dots', () => map.getCanvas().style.cursor = 'pointer');
+    map.getCanvas().addEventListener('mousedown', e => {
+      const feats = map.queryRenderedFeatures(e.point, { layers: ['markers-dots'] });
+      if (!feats.length) return;
+      e.preventDefault();
+      dragMove = { id: feats[0].properties.id, sx: e.clientX, sy: e.clientY };
+      const up = async ev => {
+        window.removeEventListener('mouseup', up);
+        const dx = ev.clientX - dragMove.sx, dy = ev.clientY - dragMove.sy;
+        const moved = Math.hypot(dx, dy) > 6;
+        const id = dragMove.id; dragMove = null;
+        map.getCanvas().style.cursor = '';
+        if (!moved) return; // plain click -> existing popup/edit path
+        const rect = map.getCanvas().getBoundingClientRect();
+        const ll = map.unproject([ev.clientX - rect.left, ev.clientY - rect.top]);
+        const mk = markers.find(m => m.id == id);
+        if (!mk) return;
+        mk.lat = ll.lat; mk.lon = ll.lng;
+        updateMarkerLayer();
+        const r2 = await fetch('/api/markers/update', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, lat: ll.lat, lon: ll.lng }),
+        });
+        if (!r2.ok) console.error('marker move failed ' + r2.status);
+      };
+      window.addEventListener('mouseup', up);
+    });
     map.on('mouseleave', 'markers-dots', () => map.getCanvas().style.cursor = '');
   }
 }
+
+window.editMarker = function(id) {
+  const mk = markers.find(m => m.id === id);
+  if (!mk) return;
+  // close any open popup
+  document.querySelectorAll('.maplibregl-popup').forEach(el => el.remove());
+  openMarkerEditor({ lat: mk.lat, lon: mk.lon, kind: mk.kind }, mk,
+    map.project([mk.lon, mk.lat]).x + document.getElementById('map').getBoundingClientRect().left,
+    map.project([mk.lon, mk.lat]).y + document.getElementById('map').getBoundingClientRect().top);
+};
 
 async function deleteMarker(id) {
   await fetch('/api/markers/delete', {
@@ -1339,6 +1387,118 @@ document.getElementById('markerToggles').addEventListener('click', e => {
   updateMarkerLayer();
 });
 
+// ---------------- drag-out placement ----------------
+const dragState = { active: false, kind: null, ghost: null };
+document.getElementById('dragPalette').addEventListener('dragstart', e => {
+  const chip = e.target.closest('.dragmk'); if (!chip) return;
+  dragState.active = true;
+  dragState.kind = chip.dataset.dk;
+  const g = document.createElement('div');
+  g.id = 'dragGhost';
+  g.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;font-size:26px;transform:translate(-50%,-130%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))';
+  g.textContent = MK_EMOJI[dragState.kind] || '📍';
+  document.body.appendChild(g);
+  dragState.ghost = g;
+  e.dataTransfer.setData('text/plain', dragState.kind);
+  e.dataTransfer.effectAllowed = 'copy';
+});
+document.addEventListener('drag', e => {
+  if (dragState.ghost) { dragState.ghost.style.left = e.clientX + 'px'; dragState.ghost.style.top = e.clientY + 'px'; }
+});
+document.addEventListener('dragend', e => {
+  if (dragState.ghost) { dragState.ghost.remove(); dragState.ghost = null; }
+  dragState.active = false;
+});
+const mapCanvas = () => document.querySelector('#map canvas');
+['dragover'].forEach(ev => mapCanvas && document.getElementById('map').addEventListener(ev, e => {
+  if (!dragState.active) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+}));
+document.getElementById('map').addEventListener('drop', e => {
+  if (!dragState.active) return;
+  e.preventDefault();
+  const kind = e.dataTransfer.getData('text/plain') || dragState.kind;
+  const rect = map.getCanvas().getBoundingClientRect();
+  const px = [e.clientX - rect.left, e.clientY - rect.top];
+  const ll = map.unproject(px);
+  dragState.active = false;
+  openMarkerEditor({ lat: ll.lat, lon: ll.lng, kind }, null, e.clientX, e.clientY);
+});
+
+// ---------------- marker editor popup (fresh + edit existing) ----------------
+let editingMarker = null; // marker object if editing
+function openMarkerEditor(pos, existing, clientX, clientY) {
+  const dlg = document.createElement('div');
+  dlg.id = 'markerEditor';
+  dlg.style.cssText = 'position:absolute;z-index:40;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5);padding:12px;width:250px';
+  const isEdit = !!existing;
+  const kindsRow = Object.entries(MK_EMOJI).map(([k, em]) =>
+    `<span class="chip mk-edit-kind ${((existing && existing.kind) || pos.kind) === k ? 'on' : ''}" data-k="${k}" style="cursor:pointer;font-size:15px;padding:5px 7px">${em}</span>`).join('');
+  dlg.innerHTML = `
+    <div style="font-size:12px;font-weight:600;color:#8fa3c8;margin-bottom:8px">${isEdit ? 'Edit marker' : 'New marker'} <span style="float:right;cursor:pointer" id="mkEdX">✕</span></div>
+    <div class="toggles" id="mkEdKinds" style="margin-bottom:8px">${kindsRow}</div>
+    <input id="mkEdName" placeholder="Name" value="${(existing && existing.name) || ''}"
+      style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12px"/>
+    <textarea id="mkEdNotes" placeholder="Description — what you saw, gear, access, plans…"
+      style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12px;min-height:56px;resize:vertical">${(existing && existing.notes) || ''}</textarea>
+    <div style="font-size:11px;color:#8fa3c8;margin-bottom:8px">
+      📐 ${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)}
+      ${pos.elev ? ' · elev ~' + Math.round(pos.elev * 3.28084) + ' ft' : ''}
+    </div>
+    <div style="display:flex;gap:6px">
+      <button id="mkEdSave" style="flex:1;padding:7px;border:none;border-radius:8px;background:#0f766e;color:#fff;cursor:pointer;font-size:12px">${isEdit ? 'Save changes' : 'Save'}</button>
+      <button id="mkEdDel" style="padding:7px 10px;border:1px solid #7f1d1d;border-radius:8px;background:transparent;color:#fca5a5;cursor:pointer;font-size:12px;display:${isEdit ? 'inline-block' : 'none'}">Delete</button>
+    </div>`;
+  document.body.appendChild(dlg);
+  // position near click point (clamped)
+  const r = document.getElementById('map').getBoundingClientRect();
+  dlg.style.position = 'fixed';
+  dlg.style.left = Math.min(Math.max(10, (clientX ?? window.innerWidth / 2) + 10), window.innerWidth - 265) + 'px';
+  dlg.style.top = Math.min(Math.max(10, (clientY ?? window.innerHeight / 2) - 20), window.innerHeight - 260) + 'px';
+  let curKind = (existing && existing.kind) || pos.kind;
+  dlg.querySelector('#mkEdKinds').addEventListener('click', ev => {
+    const c = ev.target.closest('.mk-edit-kind'); if (!c) return;
+    dlg.querySelectorAll('.mk-edit-kind').forEach(x => x.classList.toggle('on', x === c));
+    curKind = c.dataset.k;
+  });
+  dlg.querySelector('#mkEdX').addEventListener('click', () => dlg.remove());
+  dlg.querySelector('#mkEdSave').addEventListener('click', async () => {
+    const name = dlg.querySelector('#mkEdName').value;
+    const notes = dlg.querySelector('#mkEdNotes').value;
+    let elev = pos.elev;
+    if (!elev) { try { elev = queryTerrainElev(pos); } catch (e) { elev = null; } }
+    const elevNote = elev ? `elev ~${Math.round(elev * 3.28084)} ft` : '';
+    const final_notes = [notes, elevNote].filter(Boolean).join(' · ');
+    if (isEdit) {
+      const r2 = await fetch('/api/markers/update', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: existing.id, kind: curKind, name, notes: final_notes }),
+      });
+      if (!r2.ok) { const d = await r2.json().catch(() => ({})); alert(d.error || 'Save failed'); return; }
+    } else {
+      const r2 = await fetch('/api/markers', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add', kind: curKind, lat: pos.lat, lon: pos.lon, name, notes: final_notes }),
+      });
+      if (!r2.ok) { const d = await r2.json().catch(() => ({})); alert(d.error || 'Save failed'); return; }
+    }
+    dlg.remove();
+    loadMarkers();
+  });
+  dlg.querySelector('#mkEdDel').addEventListener('click', async () => {
+    if (!confirm('Delete this marker?')) return;
+    await fetch('/api/markers/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: existing.id }) });
+    dlg.remove();
+    loadMarkers();
+  });
+  setTimeout(() => dlg.querySelector('#mkEdName').focus(), 50);
+}
+function queryTerrainElev(pos) {
+  return map.queryTerrainElevation ? map.queryTerrainElevation([pos.lon, pos.lat]) : null;
+}
+// click existing marker (emoji DOM) to edit; drag to move
+let dragMove = null; // {id, sx, sy} while dragging a saved marker
+const markerDomMap = new Map(); // id -> maplibregl.Marker
 // GPX export
 document.getElementById('gpxExportBtn').addEventListener('click', exportGPX);
 
