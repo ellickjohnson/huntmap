@@ -38,6 +38,11 @@
   *::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--txt) 16%, transparent); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
   *::-webkit-scrollbar-track { background: transparent; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  #slopeLegend { position: fixed; left: 10px; bottom: 10px; z-index: 5; display: none; align-items: center; gap: 3px;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px;
+    font-size: 11px; color: var(--dim); pointer-events: none; }
+  #slopeLegend .sw { width: 14px; height: 9px; border-radius: 2px; display: inline-block; }
+  .chip.dim { opacity: .45; }
   #map { position: absolute; inset: 0; }
   .panel { position: absolute; top: 12px; left: 12px; z-index: 10; width: 340px;
     background: var(--glass-strong); backdrop-filter: blur(var(--glass-blur)) saturate(140%);
@@ -453,6 +458,7 @@
       </div>
       <div class="toggles">
         <span class="chip" id="terrainChip">⛰️ 3D Terrain</span>
+        <span class="chip" id="slopeChip" title="Slope-angle shading">📐 Slope</span>
         <span class="chip" id="parcelChip">🟥 Parcels</span>
         <span class="chip" id="trailsChip">🥾 Trails</span>
         <span class="chip" id="burnsChip">🔥 Burn areas</span>
@@ -1086,7 +1092,7 @@ const BUILDERS = {
   },
   railLayers: body => {
     const row1 = document.createElement('div'); row1.className = 'toggles';
-    ['terrainChip','parcelChip','trailsChip','burnsChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
+    ['terrainChip','parcelChip','trailsChip','burnsChip','slopeChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
     const row2 = document.createElement('div'); row2.className = 'toggles';
     ['hotspotChip','landChip','contourChip'].forEach(id => { const el = document.getElementById(id); if (el) row2.appendChild(el); });
     body.appendChild(row1); body.appendChild(row2);
@@ -2380,6 +2386,189 @@ landChip.addEventListener('click', () => {
   }
 });
 
+// ---------------- slope-angle shading (spec 02, onX parity item #2) ----------------
+const SLOPE_MIN_ZOOM = 11;
+const SLOPE_CLASSES = [
+  [5, null],                 // < 5 deg: fully transparent
+  [15, [76, 175, 80]],       // green  #4caf50
+  [22, [255, 210, 77]],      // yellow #ffd24d
+  [30, [255, 159, 28]],      // orange #ff9f1c
+  [40, [230, 57, 70]],       // red    #e63946
+  [45, [157, 78, 221]],      // purple #9d4edd
+  [Infinity, [59, 130, 246]] // blue   #3b82f6
+];
+let slopeOn = localStorage.getItem('hm-slope') === '1';
+let _slopeWarned = false;
+let _slopeProtoRegistered = false;
+let _emptySlopePng = null;
+const _slopeCache = new Map(); // 'z/x/y' -> Uint8Array png bytes, LRU cap 200
+const slopeChip = document.getElementById('slopeChip');
+const slopeLegend = document.createElement('div');
+slopeLegend.id = 'slopeLegend';
+slopeLegend.innerHTML = [
+  [5, '5\u201315', '#4caf50'], [15, '15\u201322', '#ffd24d'], [22, '22\u201330', '#ff9f1c'],
+  [30, '30\u201340', '#e63946'], [40, '40\u201345', '#9d4edd'], [45, '45+', '#3b82f6'],
+].map(r => `<span class="sw" style="background:${r[2]}"></span><span>${r[1]}</span>`).join('');
+document.body.appendChild(slopeLegend);
+
+function slopeCtxCanvas() {
+  return typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(256, 256)
+    : Object.assign(document.createElement('canvas'), { width: 256, height: 256 });
+}
+function slopeClassRgb(deg) {
+  for (let i = 0; i < SLOPE_CLASSES.length; i++) if (deg < SLOPE_CLASSES[i][0]) return SLOPE_CLASSES[i][1];
+  return SLOPE_CLASSES[SLOPE_CLASSES.length - 1][1];
+}
+function slopeCacheGet(k) {
+  const v = _slopeCache.get(k);
+  if (v !== undefined) { _slopeCache.delete(k); _slopeCache.set(k, v); } // LRU refresh
+  return v;
+}
+function slopeCachePut(k, bytes) {
+  _slopeCache.set(k, bytes);
+  while (_slopeCache.size > 200) {
+    _slopeCache.delete(_slopeCache.keys().next().value); // evict oldest first
+  }
+}
+async function emptySlopeTile() {
+  if (!_emptySlopePng) {
+    const cv = slopeCtxCanvas();
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.clearRect(0, 0, 256, 256);
+    const blob = cv.convertToBlob ? await cv.convertToBlob({ type: 'image/png' })
+      : await new Promise(res => cv.toBlob(res, 'image/png'));
+    _emptySlopePng = new Uint8Array(await blob.arrayBuffer());
+  }
+  return _emptySlopePng.slice().buffer; // fresh copy: maplibre may detach the buffer it receives
+}
+async function slopeTileCtx(blob) {
+  const cv = slopeCtxCanvas();
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  if (typeof createImageBitmap === 'function') {
+    ctx.drawImage(await createImageBitmap(blob), 0, 0);
+  } else {
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = await new Promise((res, rej) => {
+        const i = new Image();
+        i.onload = () => res(i);
+        i.onerror = () => rej(new Error('tile decode failed'));
+        i.src = url;
+      });
+      ctx.drawImage(img, 0, 0);
+    } finally { URL.revokeObjectURL(url); }
+  }
+  return ctx;
+}
+async function slopeTileHandler(params, abortArg) {
+  const key = params.url.slice('slope://'.length); // 'z/x/y'
+  const cached = slopeCacheGet(key);
+  if (cached) return { data: cached.slice().buffer };
+  const parts = key.split('/');
+  const z = +parts[0], x = +parts[1], y = +parts[2];
+  // wire maplibre's abort (AbortSignal in v3, AbortController in v2) + 8s fallback timeout
+  const ctl = new AbortController();
+  const ext = abortArg instanceof AbortSignal ? abortArg : (abortArg && abortArg.signal) || null;
+  let aborted = false;
+  if (ext) {
+    if (ext.aborted) aborted = true;
+    else ext.addEventListener('abort', () => { aborted = true; ctl.abort(); }, { once: true });
+  }
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const url = 'https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/' + z + '/' + x + '/' + y + '.png';
+    const resp = await fetch(url, { signal: ctl.signal });
+    if (!resp.ok) throw new Error('terrain tile HTTP ' + resp.status);
+    const ctx = await slopeTileCtx(await resp.blob());
+    const n = Math.pow(2, z);
+    const latC = Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 0.5) / n))) * 180 / Math.PI;
+    const mpx = 156543.03392 * Math.cos(latC * Math.PI / 180) / n;
+    const src = ctx.getImageData(0, 0, 256, 256);
+    const elev = new Float32Array(256 * 256);
+    for (let i = 0; i < 256 * 256; i++) {
+      const p = i * 4;
+      elev[i] = src.data[p] * 256 + src.data[p + 1] + src.data[p + 2] / 256 - 32768; // terrarium encoding
+    }
+    const out = ctx.createImageData(256, 256);
+    for (let ty = 0; ty < 256; ty++) {
+      const yUp = ty > 0 ? ty - 1 : 0, yDn = ty < 255 ? ty + 1 : 255;
+      const tyO = ty * 256, yUO = yUp * 256, yDO = yDn * 256;
+      for (let tx = 0; tx < 256; tx++) {
+        const xL = tx > 0 ? tx - 1 : 0, xR = tx < 255 ? tx + 1 : 255; // clamp neighbors at tile edges
+        const dzdx = (elev[tyO + xL] - elev[tyO + xR]) / (2 * mpx);
+        const dzdy = (elev[yUO + tx] - elev[yDO + tx]) / (2 * mpx);
+        const deg = Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy)) * 180 / Math.PI;
+        const rgb = slopeClassRgb(deg);
+        const o = (tyO + tx) * 4;
+        if (rgb) { out.data[o] = rgb[0]; out.data[o + 1] = rgb[1]; out.data[o + 2] = rgb[2]; out.data[o + 3] = 255; }
+      }
+    }
+    ctx.putImageData(out, 0, 0);
+    const cvv = ctx.canvas;
+    const blob = cvv.convertToBlob ? await cvv.convertToBlob({ type: 'image/png' })
+      : await new Promise(res => cvv.toBlob(res, 'image/png'));
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    slopeCachePut(key, bytes);
+    return { data: bytes.slice().buffer };
+  } catch (err) {
+    // fast pans / timeouts: overlay stays transparent there, never throw into the tile loop
+    if (!_slopeWarned) { console.warn('slope overlay: tile pipeline failed, further slope warnings suppressed', err); _slopeWarned = true; }
+    try { return { data: await emptySlopeTile() }; }
+    catch (e2) { throw err; }
+  } finally { clearTimeout(timer); }
+}
+function registerSlopeProtocol() {
+  if (_slopeProtoRegistered || typeof maplibregl.addProtocol !== 'function') return;
+  try { maplibregl.addProtocol('slope', slopeTileHandler); _slopeProtoRegistered = true; }
+  catch (err) {
+    if (!_slopeWarned) { console.warn('slope overlay: protocol registration failed', err); _slopeWarned = true; }
+  }
+}
+registerSlopeProtocol(); // global protocol, survives style swaps
+function slopeGateOk() { return map.getZoom() >= SLOPE_MIN_ZOOM; }
+function ensureSlopeLayer() {
+  if (!slopeOn || !slopeGateOk()) return; // gate changed while an idle retry was pending
+  if (!map.isStyleLoaded()) { map.once('idle', ensureSlopeLayer); return; }
+  if (!map.getSource('slope-dem')) {
+    map.addSource('slope-dem', { type: 'raster', tiles: ['slope://{z}/{x}/{y}'], tileSize: 256, minzoom: 11, maxzoom: 15 });
+  }
+  if (!map.getLayer('slope-classes')) {
+    let beforeId;
+    try {
+      const sym = (map.getStyle().layers || []).find(l => l.type === 'symbol');
+      if (sym) beforeId = sym.id; // above basemap rasters, below symbol layers
+    } catch (e) { /* style read race */ }
+    map.addLayer({
+      id: 'slope-classes', type: 'raster', source: 'slope-dem', minzoom: 11,
+      paint: { 'raster-opacity': 0.6, 'raster-resampling': 'nearest' },
+    }, beforeId);
+  }
+  updateSlopeUI();
+}
+function applySlopeGate() {
+  const ok = slopeGateOk();
+  if (slopeOn && ok) ensureSlopeLayer();
+  else if (map.getLayer('slope-classes')) map.removeLayer('slope-classes'); // add/remove per spec: no tile loads below gate
+  updateSlopeUI();
+}
+function updateSlopeUI() {
+  if (!slopeChip) return;
+  slopeChip.classList.toggle('on', slopeOn);
+  const ok = slopeGateOk();
+  slopeChip.classList.toggle('dim', slopeOn && !ok);
+  slopeChip.title = ok ? 'Slope-angle shading' : 'Zoom in to level 11+ for slope shading';
+  slopeLegend.style.display = (slopeOn && ok && map.getLayer('slope-classes')) ? 'flex' : 'none'; // legend only while active
+}
+// chip wiring: direct listener with classList toggle, landChip pattern (NOT layerToggles delegation)
+slopeChip.addEventListener('click', () => {
+  slopeOn = !slopeOn;
+  slopeChip.classList.toggle('on', slopeOn);
+  localStorage.setItem('hm-slope', slopeOn ? '1' : '0');
+  applySlopeGate();
+});
+// zoom gate + basemap switch survival: style.load hook below re-runs this after setStyle wipes
+map.on('moveend', applySlopeGate);
+applySlopeGate();
 // ---------------- search (OSM Nominatim, free) ----------------
 const searchBox = document.getElementById('searchBox');
 const searchResults = document.getElementById('searchResults');
@@ -2472,6 +2661,7 @@ map.on('style.load', () => {
   ensureUnitLayers();
   updateParcels(); if (trailsOn) refetchToggle('trails'); if (burnsOn) refetchToggle('burns');
   updateHotspotLayer();
+  applySlopeGate(); // basemap switch wiped slope source/layer — re-add if toggle on + zoom gate ok
 });
 map.on('idle', () => {
   // safety net: if layers got dropped (style race), re-ensure
