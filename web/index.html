@@ -367,6 +367,18 @@
     .gmu-hover-tip { display:none !important; }
   }
 
+  /* marker-popup weather section (spec 01): collapsed summary row -> expand for the hourly table */
+  .w-sec { margin-top: 6px; }
+  .w-sumline { font-size: 12px; color: var(--txt); cursor: pointer; padding: 3px 0; user-select: none; }
+  .w-sumline .w-chev { color: var(--dim); font-size: 10px; }
+  .w-sumline.loading { color: var(--dim); }
+  .w-sumline.err { color: #f87171; cursor: default; }
+  .w-table { max-height: 190px; overflow-y: auto; margin-top: 4px; border-top: 1px solid var(--line); }
+  .w-table table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+  .w-table th { text-align: left; color: var(--dim); font-weight: 500; padding: 2px 6px; }
+  .w-table td { padding: 2px 6px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .w-arr { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 2px; color: var(--accent2); }
+
   /* toast notifications */
   #toastWrap { position:fixed; bottom:calc(18px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%);
     z-index:100; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
@@ -1773,12 +1785,10 @@ function updateMarkerLayer() {
     window._markersClickWired = true;
     map.on('click', 'markers-dots', e => {
       const p = e.features[0].properties;
-      const html = `<strong>${p.emoji || ''} ${p.name || p.kind}</strong>` +
-        (p.notes ? `<br><span style="font-size:12px">${p.notes}</span>` : '') +
-        `<br><button onclick="deleteMarker(${p.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>`;
-      new maplibregl.Popup({ offset: 12 })
+      const pp = new maplibregl.Popup({ offset: 12 })
         .setLngLat(e.features[0].geometry.coordinates)
-        .setHTML(html + `<br><button onclick="editMarker(${p.id})" style="margin-top:6px;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer">✏️ Edit / move</button>`).addTo(map);
+        .setHTML(markerPopupHTML(p)).addTo(map);
+      wirePopupWeather(pp);
       window._lastMarkerClick = { lngLat: e.lngLat, props: p };
     });
     map.on('mouseenter', 'markers-dots', () => map.getCanvas().style.cursor = 'pointer');
@@ -1819,15 +1829,13 @@ window.gotoMarker = function(id) {
   // close any open popup
   document.querySelectorAll('.maplibregl-popup').forEach(el => el.remove());
   map.easeTo({ center: [mk.lon, mk.lat], zoom: Math.max(map.getZoom(), 12), duration: 700 });
-  const html = `<strong>${MK_EMOJI[mk.kind] || '📍'} ${mk.name || mk.kind}</strong>` +
-    (mk.notes ? `<br><span style="font-size:12px">${mk.notes}</span>` : '') +
-    `<br><button onclick="deleteMarker(${mk.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>` +
-    `<br><button onclick="editMarker(${mk.id})" style="margin-top:6px;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer">✏️ Edit / move</button>`;
+  const html = markerPopupHTML(mk);
   setTimeout(() => {
-    new maplibregl.Popup({ offset: 12 })
+    const pp = new maplibregl.Popup({ offset: 12 })
       .setLngLat([mk.lon, mk.lat])
       .setHTML(html)
       .addTo(map);
+    wirePopupWeather(pp);
   }, 750);
 };
 
@@ -1853,6 +1861,110 @@ async function deleteMarker(id) {
   renderMarkerList();
 }
 window.deleteMarker = deleteMarker;
+
+// ---------------- marker popup (shared builder: click popup + gotoMarker) ----------------
+function escHtml(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ---------------- weather section (spec 01: in-popup, async fill, expandable) ----------------
+function fmtTimeAmPm(hhmm) {
+  const [h, m] = (hhmm || '').split(':').map(Number);
+  if (Number.isNaN(h)) return '—';
+  return `${h % 12 || 12}:${String(m || 0).padStart(2, '0')}${h >= 12 ? 'p' : 'a'}`;
+}
+const TREND_GLYPH = { rising: '⬆︎', falling: '⬇︎', steady: '→' };
+const WMO_MAP = {
+  0: ['☀️', 'Clear sky'], 1: ['🌤️', 'Mostly clear'], 2: ['🌥️', 'Partly cloudy'], 3: ['☁️', 'Overcast'],
+  45: ['🌫️', 'Fog'], 48: ['🌫️', 'Rime fog'],
+  51: ['🌦️', 'Light drizzle'], 53: ['🌦️', 'Drizzle'], 55: ['🌧️', 'Dense drizzle'],
+  56: ['🧊', 'Freezing drizzle'], 57: ['🧊', 'Freezing drizzle'],
+  61: ['🌦️', 'Light rain'], 63: ['🌧️', 'Rain'], 65: ['🌧️', 'Heavy rain'],
+  66: ['🧊', 'Freezing rain'], 67: ['🧊', 'Freezing rain'],
+  71: ['🌨️', 'Light snow'], 73: ['🌨️', 'Snow'], 75: ['❄️', 'Heavy snow'], 77: ['❄️', 'Snow grains'],
+  80: ['🌦️', 'Rain showers'], 81: ['🌦️', 'Rain showers'], 82: ['🌧️', 'Violent showers'],
+  85: ['🌨️', 'Snow showers'], 86: ['🌨️', 'Heavy snow showers'],
+  95: ['⛈️', 'Thunderstorm'], 96: ['⛈️', 'Storm w/ hail'], 99: ['⛈️', 'Storm w/ hail'],
+};
+const wmo = c => WMO_MAP[c] || ['🌡️', '—'];
+
+function weatherSummaryHtml(d) {
+  const c = d.current || {}, dl = (d.daily && d.daily[0]) || {};
+  const temp = c.temp_f != null ? `${Math.round(c.temp_f)}°F` : '—';
+  const wind = c.wind_mph != null ? `${Math.round(c.wind_mph)}mph ${c.wind_dir_txt || ''}` : '—';
+  const trend = TREND_GLYPH[c.pressure_trend] || '';
+  const pres = c.pressure_inhg != null ? `${trend} pressure` : '';
+  const sr = fmtTimeAmPm((dl.sunrise_iso || '').slice(11, 16));
+  const ss = fmtTimeAmPm((dl.sunset_iso || '').slice(11, 16));
+  return `🌡 ${temp} · 💨 ${wind} · ${pres} 🌅 ${sr} / 🌇 ${ss}`;
+}
+
+function renderWeatherTable(box, d) {
+  const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const rows = (d.hourly || []).slice(0, 24).map((r, i) => {
+    const ts = (r.ts || '').slice(11, 17);
+    const hr = fmtTimeAmPm(ts);
+    const dow = DOW[new Date((r.ts || '') + 'Z').getUTCDay()];
+    // Day label on the first row and on midnight crossings (spec: day/hour column)
+    const label = (i === 0 || (i > 0 && ts === '00:00')) ? dow + ' ' : '';
+    const arrow = `<svg class="w-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${r.wind_dir_deg || 0}deg)"><path d="M12 5v14M12 19l-4-4M12 19l4-4"/></svg>`;
+    return `<tr><td>${label}${hr}</td>` +
+      `<td>${r.temp_f != null ? Math.round(r.temp_f) + '°F' : '—'}</td>` +
+      `<td>${r.precip_prob != null ? Math.round(r.precip_prob) + '%' : '—'}</td>` +
+      `<td>${arrow}${r.wind_dir_txt || ''}</td>` +
+      `<td>${r.wind_mph != null ? Math.round(r.wind_mph) + 'mph' : '—'}</td>` +
+      `<td>${r.gust_mph != null ? Math.round(r.gust_mph) + 'mph' : '—'}</td></tr>`;
+  });
+  box.innerHTML =
+    `<table><thead><tr><th>hour</th><th>temp</th><th>precip</th><th>wind</th><th>speed</th><th>gust</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+
+function wirePopupWeather(popup) {
+  const el = popup.getElement();
+  const sec = el && el.querySelector('.w-sec');
+  if (!sec) return;
+  const id = sec.dataset.wmk;
+  const mk = markers.find(mm => mm.id == id);
+  if (!mk) return;
+  fetch(`/api/weather?lat=${Number(mk.lat)}&lon=${Number(mk.lon)}`)
+    .then(r => r.json().then(d => ({ ok: r.ok, d })))
+    .then(({ ok, d }) => {
+      // popup may be gone by the time the response lands
+      if (!document.body.contains(sec)) return;
+      const line = sec.querySelector('.w-sumline');
+      if (!ok) {
+        line.textContent = `⚠️ ${d.error === 'upstream' ? 'weather unavailable' : (d.error || 'weather unavailable')}`;
+        line.classList.add('err');
+        return;
+      }
+      line.classList.remove('loading');
+      line.innerHTML = `${weatherSummaryHtml(d)} <span class="w-chev">▾</span>`;
+      const box = sec.querySelector('.w-table');
+      line.addEventListener('click', () => {
+        if (line.classList.contains('err')) return;
+        if (box.hidden) renderWeatherTable(box, d);
+        box.hidden = !box.hidden;
+      });
+    })
+    .catch(() => {
+      if (!document.body.contains(sec)) return;
+      const line = sec.querySelector('.w-sumline');
+      line.textContent = '⚠️ weather unavailable';
+      line.classList.add('err');
+    });
+}
+
+function markerPopupHTML(m) {
+  const emoji = m.emoji || MK_EMOJI[m.kind] || '📍';
+  const name = escHtml(m.name || m.kind || 'Marker');
+  const notes = m.notes ? `<br><span style="font-size:12px">${escHtml(m.notes)}</span>` : '';
+  return `<strong>${emoji} ${name}</strong>${notes}` +
+    `<br><button onclick="deleteMarker(${m.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>` +
+    `<button onclick="editMarker(${m.id})" style="margin-top:6px;margin-left:4px;font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer">✏️ Edit / move</button>` +
+    `<div class="w-sec" data-wmk="${m.id}"><div class="w-sumline loading">wind &amp; weather ⋯</div><div class="w-table" hidden></div></div>`;
+}
+window.markerPopupHTML = markerPopupHTML;
+window.wirePopupWeather = wirePopupWeather;
 
 function renderMarkerList() {
   const el = document.getElementById('markerList');
