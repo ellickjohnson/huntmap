@@ -43,6 +43,38 @@
     font-size: 11px; color: var(--dim); pointer-events: none; }
   #slopeLegend .sw { width: 14px; height: 9px; border-radius: 2px; display: inline-block; }
   .chip.dim { opacity: .45; }
+  #measureBar { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 12;
+    display: none; align-items: center; gap: 10px; background: var(--glass-strong); backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    border: 1px solid transparent; border-radius: var(--radius-m); box-shadow: var(--shadow-2);
+    outline: 1px solid rgba(255,255,255,.06); outline-offset: -1px; padding: 8px 14px; font-size: 12px; }
+  #measureBar.show { display: flex; animation: sheetIn var(--dur) var(--ease); }
+  #measureTotal { font-weight: 700; font-size: 13px; color: var(--txt); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  #measureGain { color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 11.5px; }
+  #measureHint { color: var(--dim); font-size: 11px; }
+  #measureBar button { font-size: 12px; padding: 4px 10px; border-radius: 7px; border: 1px solid var(--line);
+    background: var(--panel2); color: var(--txt); cursor: pointer; }
+  #measureBar button:hover { border-color: color-mix(in srgb, var(--accent2) 55%, transparent); }
+  #measurePanel { position: absolute; right: 12px; top: 12px; z-index: 10; width: 306px;
+    background: var(--glass-strong); backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    border: 1px solid transparent; border-radius: var(--radius-l); box-shadow: var(--shadow-2);
+    outline: 1px solid rgba(255,255,255,.05); outline-offset: -1px;
+    padding: 0; display: none; max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain;
+    transform-origin: top right; }
+  #measurePanel.show { display: block; animation: sheetIn var(--dur) var(--ease); }
+  #measurePanel .detail-body { padding: 6px 16px 16px; }
+  .m-avg { color: var(--dim); font-size: 11px; margin: 2px 0 6px; }
+  .m-elev-grid { display: flex; gap: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    padding: 6px 0; margin: 4px 0 8px; }
+  .m-elev-cell { flex: 1; text-align: center; }
+  .m-elev-cell .l { font-size: 9.5px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; display: block; }
+  .m-elev-cell .v { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .m-elev-cell .v.gain { color: #4ade80; } .m-elev-cell .v.loss { color: #f87171; }
+  @media (max-width: 780px) {
+    #measurePanel { top: auto; bottom: 0; left: 0; right: 0; width: 100%; border-radius: var(--radius-l) var(--radius-l) 0 0;
+      max-height: 62vh; }
+  }
   #map { position: absolute; inset: 0; }
   .panel { position: absolute; top: 12px; left: 12px; z-index: 10; width: 340px;
     background: var(--glass-strong); backdrop-filter: blur(var(--glass-blur)) saturate(140%);
@@ -166,8 +198,7 @@
   border-right:1px solid transparent; box-shadow:4px 0 24px rgba(0,0,0,.35);
   outline:1px solid rgba(255,255,255,.05); outline-offset:-1px;
   display:flex; flex-direction:column; transition:transform .28s var(--ease); }
-#sidePanel.hidden { transform:translateX(-100%); pointer-events:none; }
-#railNav { display:flex; flex-direction:column; gap:2px; padding:10px 6px 6px; border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent);
+#sidePanel.hidden { transform:translateX(-100%); pointer-events:none; }#railNav { display:flex; flex-direction:column; gap:2px; padding:10px 6px 6px; border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent);
   overflow-y: auto; overscroll-behavior: contain; flex-shrink:0; }
 .railBtn { display:flex; flex-direction:column; align-items:center; gap:4px;
   padding:10px 4px 8px; border-radius:var(--radius-s); border:1px solid transparent;
@@ -459,6 +490,7 @@
       <div class="toggles">
         <span class="chip" id="terrainChip">⛰️ 3D Terrain</span>
         <span class="chip" id="slopeChip" title="Slope-angle shading">📐 Slope</span>
+        <span class="chip" id="measureChip" title="Click-to-draw measuring line with distance + elevation profile">📏 Measure</span>
         <span class="chip" id="parcelChip">🟥 Parcels</span>
         <span class="chip" id="trailsChip">🥾 Trails</span>
         <span class="chip" id="burnsChip">🔥 Burn areas</span>
@@ -565,7 +597,35 @@
 
 </div>
 
+<div id="measureBar">
+      <span id="measureTotal">0 mi</span>
+      <span id="measureGain"></span>
+      <span id="measureHint"></span>
+      <button id="measureUndo" title="Backspace">⌫ Undo</button>
+      <button id="measureFinish" title="Enter">✓ Finish</button>
+      <button id="measureClear" title="Clear line + panel">✕ Clear</button>
+    </div>
+    <div id="measurePanel">
+      <div class="detail-head">
+        <h2 style="font-size:16px">📏 Profile</h2>
+        <div class="db-btns"><button class="close-btn" id="measurePanelClose" title="Close">✕</button></div>
+      </div>
+      <div class="detail-body">
+        <div class="m-avg" id="measureChartMsg">sampling elevation ⋯</div>
+        <div id="measureChartArea" hidden>
+          <div id="measureSvg"></div>
+          <div class="m-elev-grid">
+            <div class="m-elev-cell"><span class="l">Gain</span><span class="v gain" id="measureGainStat">—</span></div>
+            <div class="m-elev-cell"><span class="l">Loss</span><span class="v loss" id="measureLossStat">—</span></div>
+            <div class="m-elev-cell"><span class="l">Min</span><span class="v" id="measureMin">—</span></div>
+            <div class="m-elev-cell"><span class="l">Max</span><span class="v" id="measureMax">—</span></div>
+            <div class="m-elev-cell"><span class="l">Avg</span><span class="v" id="measureAvg">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
 <script type="module">
+
 const maplibregl = window.maplibregl;
 
 // ---------------- themes ----------------
@@ -1006,6 +1066,7 @@ function wireClicks() {
   if (clickWired) return;
   clickWired = true;
   map.on('click', 'gmu-fill', e => {
+    if (window._measureActive) return; // measure mode: clicks draw the line, don't select units
     if (!e.features || !e.features.length) return;
     const uid = e.features[0].properties.gmuid;
     if (selectedGmu === uid) deselectUnit(); else selectUnit(uid);
@@ -1092,7 +1153,7 @@ const BUILDERS = {
   },
   railLayers: body => {
     const row1 = document.createElement('div'); row1.className = 'toggles';
-    ['terrainChip','parcelChip','trailsChip','burnsChip','slopeChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
+    ['terrainChip','parcelChip','trailsChip','burnsChip','slopeChip','measureChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
     const row2 = document.createElement('div'); row2.className = 'toggles';
     ['hotspotChip','landChip','contourChip'].forEach(id => { const el = document.getElementById(id); if (el) row2.appendChild(el); });
     body.appendChild(row1); body.appendChild(row2);
@@ -1790,6 +1851,7 @@ function updateMarkerLayer() {
   if (!window._markersClickWired) {
     window._markersClickWired = true;
     map.on('click', 'markers-dots', e => {
+      if (window._measureActive) return; // measure mode: clicks draw, no marker popup
       const p = e.features[0].properties;
       const pp = new maplibregl.Popup({ offset: 12 })
         .setLngLat(e.features[0].geometry.coordinates)
@@ -2157,6 +2219,7 @@ document.getElementById('gpxExportBtn').addEventListener('click', exportGPX);
 
 // map click while placing
 map.on('click', e => {
+  if (window._measureActive) return; // measure mode: clicks draw the line, no marker placing
   if (!placingMarker && document.getElementById('addMarkerBar').style.display !== 'block') return;
   placingMarker = { lat: e.lngLat.lat, lon: e.lngLat.lng };
   // grab elevation from the DEM (if terrain loaded) for the save payload
@@ -2322,6 +2385,7 @@ burnsChip.addEventListener('click', () => {
 });
 // burn popups: click a burn polygon -> name/year/acres
 map.on('click', 'burn-area', e => {
+  if (window._measureActive) return; // measure mode: no burn popups
   const f = e.features && e.features[0];
   if (!f) return;
   const p = f.properties || {};
@@ -2367,6 +2431,7 @@ function ensureLandLayer() {
   if (!window._landClickWired) {
     window._landClickWired = true;
     map.on('click', 'land-fill', e => {
+      if (window._measureActive) return; // measure mode: no land popups
       const p = e.features[0].properties;
       new maplibregl.Popup({ offset: 8 })
         .setLngLat(e.lngLat)
@@ -2662,6 +2727,7 @@ map.on('style.load', () => {
   updateParcels(); if (trailsOn) refetchToggle('trails'); if (burnsOn) refetchToggle('burns');
   updateHotspotLayer();
   applySlopeGate(); // basemap switch wiped slope source/layer — re-add if toggle on + zoom gate ok
+  applyMeasureVisibility(); // same re-ensure for the measure source/layer
 });
 map.on('idle', () => {
   // safety net: if layers got dropped (style race), re-ensure
@@ -2740,6 +2806,468 @@ else map.once('style.load', () => setTimeout(bootData, 900));
     }
     out.addEventListener('click', async () => { await fetch('/api/logout', {method:'POST'}); location.reload(); });
   } catch (e) { /* auth endpoints missing = old build, ignore */ }
+})();
+</script>
+<!-- measure line + elevation profile (spec 03, onX parity item #3) -->
+<script>
+(function () {
+  'use strict';
+  let map = null;                                   // resolved from window._map (deferred module)
+  const MEASURE_MIN_Z = 11, MEASURE_MAX_Z = 15;     // terrarium tile clamp (spec)
+  const MAX_SAMPLES = 100, MIN_SAMPLES = 40, BATCH = 10;
+  const TILE = 256;
+
+  let measureOn = localStorage.getItem('hm-measure') === '1';
+  let active = null;   // { verts: [[lng,lat],...] } while drawing
+  let done = null;     // { verts, samples, dists, elevs, gain, loss } after finish
+  let _warned = false;
+  let _tileAbort = [];  // AbortControllers of inflight tile fetches
+  let _profileCanceled = false;
+
+  // ---------------- elevation grid fetch (spec-02 discipline: LRU 200, coalesce, abort, 8s) ----------------
+  const gridCache = new Map();   // 'z/x/y' -> { elev: Float32Array(256*256) }
+  const inflight = new Map();
+  function gridGet(k) { const v = gridCache.get(k); if (v) { gridCache.delete(k); gridCache.set(k, v); } return v; }
+  function gridPut(k, v) { gridCache.set(k, v); while (gridCache.size > 200) gridCache.delete(gridCache.keys().next().value); }
+  function decodeCanvas() {
+    return typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(TILE, TILE)
+      : Object.assign(document.createElement('canvas'), { width: TILE, height: TILE });
+  }
+  async function decodeTile(blob) {
+    const cv = decodeCanvas();
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    if (typeof createImageBitmap === 'function') ctx.drawImage(await createImageBitmap(blob), 0, 0);
+    else {
+      const url = URL.createObjectURL(blob);
+      try {
+        const img = await new Promise((res, rej) => {
+          const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('tile decode failed'));
+          i.src = url;
+        });
+        ctx.drawImage(img, 0, 0);
+      } finally { URL.revokeObjectURL(url); }
+    }
+    return ctx;
+  }
+  function abortInflightTiles() { _tileAbort.splice(0).forEach(c => { try { c.abort(); } catch (e) {} }); }
+  function fetchTileGrid(z, x, y) {
+    const key = z + '/' + x + '/' + y;
+    const cached = gridGet(key);
+    if (cached) return Promise.resolve(cached);
+    if (inflight.has(key)) return inflight.get(key);
+    const ctl = new AbortController();
+    _tileAbort.push(ctl);
+    const p = (async () => {
+      const timer = setTimeout(() => ctl.abort(), 8000);
+      try {
+        const resp = await fetch('https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/' + z + '/' + x + '/' + y + '.png', { signal: ctl.signal });
+        if (!resp.ok) throw new Error('tile HTTP ' + resp.status);
+        const ctx = await decodeTile(await resp.blob());
+        const src = ctx.getImageData(0, 0, TILE, TILE);
+        const elev = new Float32Array(TILE * TILE);
+        for (let i = 0; i < TILE * TILE; i++) {
+          const p2 = i * 4;
+          elev[i] = src.data[p2] * 256 + src.data[p2 + 1] + src.data[p2 + 2] / 256 - 32768; // terrarium encoding
+        }
+        const grid = { elev };
+        gridPut(key, grid);
+        return grid;
+      } catch (err) {
+        if (!_warned) { console.warn('measure profile: elevation tile failed, further elevation warnings suppressed', err); _warned = true; }
+        throw err;
+      } finally { clearTimeout(timer); inflight.delete(key); const ix = _tileAbort.indexOf(ctl); if (ix >= 0) _tileAbort.splice(ix, 1); }
+    })();
+    inflight.set(key, p);
+    p.catch(() => {}); // unhandled-rejection guard; callers await their own copy
+    return p;
+  }
+
+  function lngLatToTileF(lng, lat, z) {
+    const n = Math.pow(2, z);
+    return [n * ((lng / 360) + 0.5), n * (0.5 - Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI / 180) / 2)) / (2 * Math.PI))];
+  }
+  // bilinear elevation (m) from a cached grid at fractional pixel coords within the tile
+  function elevAt(grid, fx, fy) {
+    fx = Math.max(0, Math.min(TILE - 1e-6, fx));
+    fy = Math.max(0, Math.min(TILE - 1e-6, fy));
+    const x0 = Math.floor(fx), y0 = Math.floor(fy);
+    const x1 = Math.min(TILE - 1, x0 + 1), y1 = Math.min(TILE - 1, y0 + 1);
+    const dx = fx - x0, dy = fy - y0;
+    const e = grid.elev;
+    return e[y0 * TILE + x0] * (1 - dx) * (1 - dy) + e[y0 * TILE + x1] * dx * (1 - dy) +
+           e[y1 * TILE + x0] * (1 - dx) * dy + e[y1 * TILE + x1] * dx * dy;
+  }
+  // elevation for one (lng,lat): terrain SDK when terrain is on and returns a number, else terrarium
+  async function elevationFor(lng, lat) {
+    try {
+      const r = map.queryTerrainElevation([lng, lat]);
+      if (typeof r === 'number' && isFinite(r)) return r;
+    } catch (e) { /* terrain off / not ready → tile fetch */ }
+    const z = Math.max(MEASURE_MIN_Z, Math.min(MEASURE_MAX_Z, Math.floor(map.getZoom())));
+    const [xf, yf] = lngLatToTileF(lng, lat, z);
+    const x = Math.floor(xf), y = Math.floor(yf);
+    const n = Math.pow(2, z);
+    if (x < 0 || x >= n || y < 0 || y >= n) return null;
+    try {
+      const grid = await fetchTileGrid(z, x, y);
+      // convert tile fraction → fractional pixel coords (0..256) for bilinear sampling
+      return elevAt(grid, (xf - x) * TILE, (yf - y) * TILE);
+    } catch (e) { return null; }
+  }
+
+  // ---------------- geometry ----------------
+  function haversine(a, b) {
+    const R = 6371008.8, rad = Math.PI / 180;
+    const dLat = (b[1] - a[1]) * rad, dLng = (b[0] - a[0]) * rad;
+    const s = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * rad) * Math.cos(b[1] * rad) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(s));
+  }
+  function haversinePath(vs) {
+    let t = 0;
+    for (let i = 1; i < vs.length; i++) t += haversine(vs[i - 1], vs[i]);
+    return t;
+  }
+  function subdivide(verts, spacing) {
+    const out = [[verts[0][0], verts[0][1]]];
+    for (let i = 1; i < verts.length; i++) {
+      const a = verts[i - 1], b = verts[i];
+      const d = haversine(a, b);
+      const nSub = Math.max(0, Math.ceil(d / spacing) - 1);
+      for (let k = 1; k <= nSub; k++) {
+        const t = (k * spacing) / d;
+        out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+      }
+      out.push([b[0], b[1]]);
+    }
+    return out;
+  }
+  // thin to ≤ cap keeping first + last + evenly spaced interior (endpoint must survive the cap)
+  function thin(samples, cap) {
+    if (samples.length <= cap) return samples;
+    const last = samples.length - 1;
+    const step = last / (cap - 1);
+    const out = [];
+    for (let i = 0; i < cap - 1; i++) out.push(samples[Math.round(i * step)]);
+    out.push(samples[last]);
+    return out;
+  }
+  // samples: every vertex kept, subdivided to ≤ spacing toward [MIN, MAX] band (spec)
+  function buildSamples(verts) {
+    const total = haversinePath(verts);
+    if (!(total > 0)) return null;
+    // densest first: total/100 spacing already yields ≥ MIN_SAMPLES for any real line
+    let spacing = total / MAX_SAMPLES;
+    let samples = subdivide(verts, spacing);
+    for (let relax = 0; relax < 20 && samples.length < MIN_SAMPLES && spacing < total; relax++) {
+      spacing /= 2;
+      samples = subdivide(verts, spacing);
+    }
+    return thin(samples, MAX_SAMPLES);
+  }
+
+  // ---------------- DOM ----------------
+  const measureChip = document.getElementById('measureChip');
+  const bar = document.getElementById('measureBar');
+  const panel = document.getElementById('measurePanel');
+  const totalEl = document.getElementById('measureTotal');
+  const gainEl = document.getElementById('measureGain');
+  const hintEl = document.getElementById('measureHint');
+  const btnUndo = document.getElementById('measureUndo');
+  const btnFinish = document.getElementById('measureFinish');
+  const btnClear = document.getElementById('measureClear');
+  const btnPanelClose = document.getElementById('measurePanelClose');
+  const svgEl = document.getElementById('measureSvg');
+  const chartArea = document.getElementById('measureChartArea');
+  const chartMsg = document.getElementById('measureChartMsg');
+  const minEl = document.getElementById('measureMin');
+  const maxEl = document.getElementById('measureMax');
+  const avgEl = document.getElementById('measureAvg');
+  const gainStatEl = document.getElementById('measureGainStat');
+  const lossStatEl = document.getElementById('measureLossStat');
+  // read hm-units live (module button writes localStorage before relabeling → always in sync)
+  const hmUnitsImperial = () => (localStorage.getItem('hm-units') || 'imperial') === 'imperial';
+  const fmtDist = m => hmUnitsImperial() ? (m / 1609.34).toFixed(2) + ' mi' : (m / 1000).toFixed(2) + ' km';
+  const fmtElev = m => hmUnitsImperial() ? Math.round(m * 3.28084).toLocaleString() + ' ft'
+                                         : Math.round(m).toLocaleString() + ' m';
+
+  // ---------------- map source/layers ----------------
+  // one LineString feature per segment with a live-computed label → units toggle relabels cheap
+  function segFeatures() {
+    const feats = [];
+    const vs = (done && done.verts.length >= 2 ? done.verts : (active ? active.verts : []));
+    for (let i = 1; i < vs.length; i++) {
+      feats.push({
+        type: 'Feature',
+        properties: { seg: fmtDist(haversine(vs[i - 1], vs[i])) },
+        geometry: { type: 'LineString', coordinates: [vs[i - 1], vs[i]] },
+      });
+    }
+    vs.forEach(v => feats.push({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: v } }));
+    return feats;
+  }
+  function renderMeasureGeoJSON() {
+    if (!map.getSource('measure-src')) return;
+    map.getSource('measure-src').setData({ type: 'FeatureCollection', features: segFeatures() });
+  }
+  function ensureMeasureLayers(whenReady) {
+    if (!map.isStyleLoaded()) {
+      // don't just wait for 'idle' — the style transaction may be stuck (never idle).
+      // attempt the add now (idempotent; maplibre queues into the pending style), and
+      // STILL re-run on next idle to catch anything the eager attempt missed.
+      map.once('idle', () => ensureMeasureLayers(whenReady));
+    }
+    let beforeId;
+    try {
+      const sym = (map.getStyle().layers || []).find(l => l.type === 'symbol');
+      if (sym) beforeId = sym.id;   // below markers/labels, above basemap rasters
+    } catch (e) { /* style read race */ }
+    try {
+      if (!map.getSource('measure-src')) {
+        map.addSource('measure-src', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      }
+      if (!map.getLayer('measure-line')) {
+        map.addLayer({
+          id: 'measure-line', type: 'line', source: 'measure-src',
+          filter: ['==', ['geometry-type'], 'LineString'],
+          paint: { 'line-color': '#3edbc7', 'line-width': 2, 'line-dasharray': [2, 1.5] },
+        }, beforeId);
+      }
+      if (!map.getLayer('measure-verts')) {
+        map.addLayer({
+          id: 'measure-verts', type: 'circle', source: 'measure-src',
+          filter: ['==', ['geometry-type'], 'Point'],
+          paint: {
+            'circle-radius': 4, 'circle-color': '#3edbc7',
+            'circle-stroke-color': '#151c26', 'circle-stroke-width': 1.5,
+          },
+        });
+      }
+      if (!map.getLayer('measure-labels')) {
+        map.addLayer({
+          id: 'measure-labels', type: 'symbol', source: 'measure-src',
+          filter: ['==', ['geometry-type'], 'LineString'],
+          layout: {
+            'symbol-placement': 'line',
+            'text-field': ['get', 'seg'],
+            'text-size': 11, 'text-offset': [0, -1.1],
+          },
+          paint: {
+            'text-opacity': 0.95,
+            'text-color': '#3edbc7',
+            'text-halo-color': 'rgba(10,14,20,.85)', 'text-halo-width': 1.4,
+          },
+        });
+      }
+    } catch (e) {
+      // never throw into the draw loop; retry on next ensure
+      console.warn('measure layers ensure failed (will retry)', e);
+    }
+    renderMeasureGeoJSON();
+    if (whenReady) whenReady();
+  }
+  function applyMeasureVisibility() {
+    if (!measureOn) {
+      ['measure-line', 'measure-verts', 'measure-labels'].forEach(id => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
+      });
+      bar.classList.remove('show');
+      panel.classList.remove('show');
+      return;
+    }
+    ensureMeasureLayers(() => {
+      ['measure-line', 'measure-verts', 'measure-labels'].forEach(id => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'visible');
+      });
+      updateBar();
+    });
+  }
+  function updateBar() {
+    const vs = active ? active.verts : (done ? done.verts : []);
+    const total = vs.length >= 2 ? haversinePath(vs) : 0;
+    totalEl.textContent = fmtDist(total);
+    gainEl.textContent = (done && done.gain != null) ? `↑${fmtElev(done.gain)} ↓${fmtElev(done.loss)}` : '';
+    hintEl.textContent = active ? (active.verts.length === 1 ? 'add another point' : `${active.verts.length} pts`) : '';
+    bar.classList.toggle('show', measureOn && !!(active || (done && done.verts.length >= 2)));
+  }
+
+  function cancelProfile() { _profileCanceled = true; }
+
+  // ---------------- chip + keyboard ----------------
+  measureChip.addEventListener('click', () => {
+    measureOn = !measureOn;
+    measureChip.classList.toggle('on', measureOn);
+    localStorage.setItem('hm-measure', measureOn ? '1' : '0');
+    if (!measureOn) {
+      cancelProfile();
+      abortInflightTiles();
+      active = null; done = null;
+      renderMeasureGeoJSON();   // drop the drawn line from the source too (no surprise resurrect)
+      panel.classList.remove('show');
+    } else if (window.hmToast) {
+      hmToast('Measure: click to drop points · ⏎ finish · Esc cancel · ⌫ undo', 'info', 4200);
+    }
+    updateBar();
+    applyMeasureVisibility();
+  });
+  document.addEventListener('keydown', e => {
+    if (!measureOn) return;
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      if (done) { panel.classList.remove('show'); return; } // finished line: Esc hides the panel only
+      cancelProfile(); abortInflightTiles();
+      active = null;
+      updateBar(); renderMeasureGeoJSON();
+    }
+    else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); finishLine(); }
+    else if (e.key === 'Backspace') { e.preventDefault(); e.stopPropagation(); undoVert(); }
+  });
+
+  function undoVert() {
+    if (done) return;               // finished line: ✕ clears, no vertex edit after finish (spec)
+    if (!active || !active.verts.length) return;
+    active.verts.pop();
+    updateBar(); renderMeasureGeoJSON();
+  }
+  function clearAll() {
+    cancelProfile();
+    abortInflightTiles();
+    active = null; done = null;
+    renderMeasureGeoJSON();
+    panel.classList.remove('show');
+    updateBar();
+  }
+  function finishLine() {
+    if (!active || active.verts.length < 2) { hmToast('Add at least 2 points to finish', 'info', 2000); return; }
+    const verts = active.verts.map(v => [v[0], v[1]]);
+    // a dblclick-to-finish fires two clicks first — drop consecutive duplicate vertices
+    while (verts.length >= 2 && Math.abs(verts[verts.length - 1][0] - verts[verts.length - 2][0]) < 1e-7 &&
+           Math.abs(verts[verts.length - 1][1] - verts[verts.length - 2][1]) < 1e-7) verts.pop();
+    if (verts.length < 2) { hmToast('Add at least 2 distinct points to finish', 'info', 2200); return; }
+    done = { verts, samples: null, dists: null, elevs: null, gain: null, loss: null };
+    active = null;
+    updateBar(); renderMeasureGeoJSON();
+    hmToast('Line finished: ' + fmtDist(haversinePath(verts)), 'ok', 2400);
+    fetchProfiles(verts);
+  }
+
+  // ---------------- elevation profile build ----------------
+  async function fetchProfiles(verts) {
+    _profileCanceled = false;
+    panel.classList.add('show');
+    chartMsg.style.display = 'block'; chartMsg.textContent = 'sampling elevation ⋯';
+    chartArea.hidden = true;
+    minEl.textContent = '—'; maxEl.textContent = '—'; avgEl.textContent = '—';
+    gainStatEl.textContent = '—'; lossStatEl.textContent = '—';
+    svgEl.innerHTML = '';
+    const samples = buildSamples(verts);
+    if (!samples) { chartMsg.textContent = 'Line too short to profile.'; return; }
+    const dists = [0];
+    for (let i = 1; i < samples.length; i++) dists.push(dists[i - 1] + haversine(samples[i - 1], samples[i]));
+    const results = new Array(samples.length).fill(null);
+    // sequential batches of BATCH concurrent fetches (spec perf guardrail), abortable via Esc/✕
+    for (let i = 0; i < samples.length; i += BATCH) {
+      if (_profileCanceled) return;
+      const vals = await Promise.all(samples.slice(i, i + BATCH).map(s => elevationFor(s[0], s[1])));
+      if (_profileCanceled) return;
+      for (let k = 0; k < vals.length; k++) results[i + k] = vals[k];
+    }
+    chartMsg.style.display = 'none';
+    if (!results.some(v => v != null)) {   // spec: inline unavailable state, distance stays live
+      chartMsg.style.display = 'block';
+      chartMsg.textContent = 'Elevation unavailable (tile fetch failed) — distance readout stays live.';
+      updateBar();
+      return;
+    }
+    drawProfile(samples, dists, results);
+  }
+  function drawProfile(samples, dists, elevs) {
+    done.samples = samples; done.dists = dists; done.elevs = elevs;
+    const validIdx = elevs.map((v, i) => (v == null ? -1 : i)).filter(i => i >= 0);
+    const vs = validIdx.map(i => elevs[i]);
+    const vmin = Math.min(...vs), vmax = Math.max(...vs);
+    let gain = 0, loss = 0;
+    for (let i = 1; i < validIdx.length; i++) {
+      const a = elevs[validIdx[i - 1]], b = elevs[validIdx[i]];
+      if (a == null || b == null) continue; // null gap: skip the delta
+      const d = b - a;
+      if (d > 0) gain += d; else loss -= d;
+    }
+    done.gain = gain; done.loss = loss;
+    updateBar();
+    const W = Math.max(chartArea.clientWidth || 274, 200), H = 170;
+    const padL = 42, padR = 8, padT = 12, padB = 22;
+    const maxD = dists[validIdx[validIdx.length - 1]] || 1;
+    const span = Math.max(vmax - vmin, 30);
+    const X = d => padL + (d / maxD) * (W - padL - padR);
+    const Y = e => padT + (1 - (e - vmin) / span) * (H - padT - padB);
+    let path = '';
+    validIdx.forEach((i, k) => { path += (k ? 'L' : 'M') + X(dists[i]).toFixed(1) + ' ' + Y(elevs[i]).toFixed(1); });
+    const last = validIdx[validIdx.length - 1], first = validIdx[0];
+    const areaPath = path + `L${X(dists[last]).toFixed(1)} ${(H - padB).toFixed(1)}L${X(dists[first]).toFixed(1)} ${(H - padB).toFixed(1)}Z`;
+    const elevTicks = [vmin, (vmin + vmax) / 2, vmax].map(t => Math.round(t));
+    svgEl.innerHTML =
+      `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+        <path d="${areaPath}" fill="currentColor" opacity="0.18" style="color:var(--accent2)"></path>
+        <path d="${path}" fill="none" stroke="var(--accent2)" stroke-width="1.5"></path>
+        ${elevTicks.map(t => `<line x1="${padL}" y1="${Y(t).toFixed(1)}" x2="${W - padR}" y2="${Y(t).toFixed(1)}" stroke="rgba(148,166,184,.18)" stroke-dasharray="2 3"/><text x="2" y="${(Y(t) + 3.5).toFixed(1)}" fill="var(--dim)" font-size="9.5" font-family="Inter,sans-serif">${fmtElev(t)}</text>`).join('')}
+        ${[0, maxD / 2, maxD].map(d => (d === 0
+          ? `<text x="${padL}" y="${H - 8}" fill="var(--dim)" font-size="9.5" font-family="Inter,sans-serif" text-anchor="start">0</text>`
+          : `<text x="${X(d).toFixed(1)}" y="${H - 8}" fill="var(--dim)" font-size="9.5" font-family="Inter,sans-serif" text-anchor="${d === maxD ? 'end' : 'middle'}">${fmtDist(d)}</text>`)).join('')}
+      </svg>`;
+    minEl.textContent = fmtElev(vmin);
+    maxEl.textContent = fmtElev(vmax);
+    avgEl.textContent = fmtElev(vs.reduce((s, v) => s + v, 0) / vs.length);
+    gainStatEl.textContent = fmtElev(gain);
+    lossStatEl.textContent = fmtElev(loss);
+    chartMsg.style.display = 'none';
+    chartArea.hidden = false;
+  }
+
+  // ---------------- map interaction (wired once the map exists) ----------------
+  function wireMapInteraction() {
+    map.on('click', e => {
+      if (!measureOn) return;
+      if (done) return;               // finished line: clicks don't extend it; ✕ clears
+      const v = [e.lngLat.lng, e.lngLat.lat];
+      if (active && active.verts.length) {
+        const pv = active.verts[active.verts.length - 1];
+        if (Math.abs(pv[0] - v[0]) < 1e-7 && Math.abs(pv[1] - v[1]) < 1e-7) return; // dblclick dup guard
+      }
+      if (!active) active = { verts: [] };
+      active.verts.push(v);
+      updateBar(); renderMeasureGeoJSON();
+    });
+    map.on('dblclick', e => { if (!measureOn) return; e.preventDefault(); finishLine(); });
+  }
+
+  btnFinish.addEventListener('click', finishLine);
+  btnUndo.addEventListener('click', undoVert);
+  btnClear.addEventListener('click', clearAll);
+  btnPanelClose.addEventListener('click', () => { panel.classList.remove('show'); });
+
+  // ---------------- units relabel + map wiring (module owns map + _reapplyUnits, deferred) ----------------
+  // expose live measure state for the marker-popup/placing click guards elsewhere in this file
+  Object.defineProperty(window, '_measureActive', { get: () => measureOn });
+
+  // The map lives in the deferred module script above; wire once window._map exists AND the
+  // module has published its _reapplyUnits hook (both happen after module eval).
+  // setTimeout retry (NOT rAF: rAF never fires in backgrounded/headless tabs).
+  (function wireMap() {
+    const m = window._map;
+    if (!m || typeof m.getLayer !== 'function' || !window._reapplyUnits) { setTimeout(wireMap, 120); return; }
+    map = m;
+    wireMapInteraction();
+    // units relabel: wrap AFTER the module published its hook (spec: live relabel, geometry untouched)
+    const _origReapply = window._reapplyUnits;
+    window._reapplyUnits = function () {
+      _origReapply && _origReapply();
+      renderMeasureGeoJSON();                                  // seg distance labels
+      if (done && done.elevs) drawProfile(done.samples, done.dists, done.elevs); // chart axes + readouts
+      updateBar();
+    };
+    if (measureOn) measureChip.classList.add('on');   // hm-measure light-on at boot
+    applyMeasureVisibility();
+  })();
 })();
 </script>
 <div id="toastWrap" aria-live="polite"></div>
