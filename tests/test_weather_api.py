@@ -115,11 +115,13 @@ def get(path, sid=None):
         req.add_header('Cookie', f'huntmap_session={sid}')
     try:
         resp = urlopen(req, timeout=10)
-        return resp.status, json.loads(resp.read().decode())
+        with resp:
+            return resp.status, json.loads(resp.read().decode())
     except Exception as e:
         from urllib.error import HTTPError
         if isinstance(e, HTTPError):
-            raw = e.read().decode()
+            with e:
+                raw = e.read().decode()
             try:
                 return e.code, json.loads(raw)
             except Exception:
