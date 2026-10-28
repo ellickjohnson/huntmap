@@ -16,7 +16,7 @@ from email.mime.text import MIMEText
 from email.utils import formataddr
 from http import cookies as http_cookies
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-from urllib.parse import parse_qs, quote, urlparse
+from urllib.parse import parse_qs, quote, urlencode, urlparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))          # api/ (repo) or /app (container)
 ROOT = HERE if os.path.isdir(os.path.join(HERE, 'web')) else os.path.dirname(HERE)
@@ -276,6 +276,72 @@ EMAILCHANGE_TMPL = '''<div style="font-family:sans-serif;max-width:480px;margin:
 </div>'''''
 
 
+# ---------- weather (Open-Meteo proxy; keyless) ----------
+
+OPEN_METEO_URL_DEFAULT = 'https://api.open-meteo.com/v1/forecast'
+WEATHER_TIMEOUT_DEFAULT = 15.0
+WEATHER_CURRENT = ('temperature_2m,apparent_temperature,weather_code,'
+                   'wind_speed_10m,wind_direction_10m,wind_gusts_10m')
+WEATHER_HOURLY = 'wind_speed_10m,wind_direction_10m,wind_gusts_10m'   # hourly = wind fields only
+WEATHER_DAILY = ('weather_code,temperature_2m_max,temperature_2m_min,'
+                 'precipitation_sum,sunrise,sunset')
+
+
+def fetch_weather(lat, lon):
+    """Server-side proxy to Open-Meteo. Returns (status_code, payload_dict).
+
+    Never raises: upstream failures (HTTP 4xx/5xx, timeout, non-JSON) are
+    translated to a 502 with {'error': ...} so the client shows its inline
+    error state. lat/lon are pre-validated by the route; they only ever enter
+    the URL as query parameters on the fixed host (no user-controlled URL parts).
+    The upstream URL is read per-call (not import time) so tests can inject a
+    stub host via HUNTMAP_OPEN_METEO_URL.
+    """
+    import urllib.error as _ue
+    import urllib.request as _ur
+    url_base = os.environ.get('HUNTMAP_OPEN_METEO_URL', OPEN_METEO_URL_DEFAULT)
+    timeout = float(os.environ.get('HUNTMAP_WEATHER_TIMEOUT', WEATHER_TIMEOUT_DEFAULT))
+    url = url_base + '?' + urlencode({
+        'latitude': lat, 'longitude': lon,
+        'current': WEATHER_CURRENT, 'hourly': WEATHER_HOURLY, 'daily': WEATHER_DAILY,
+        'forecast_days': 8, 'timezone': 'auto',
+    })
+    req = _ur.Request(url, headers={'User-Agent': 'HuntMap/1.0 (+https://huntmap.ellickjohnson.net)'})
+    try:
+        raw = _ur.urlopen(req, timeout=timeout).read()
+        data = json.loads(raw)
+    except _ue.HTTPError as e:
+        reason = ''
+        try:
+            body = json.loads(e.read() or b'{}')
+            if isinstance(body, dict):
+                reason = body.get('reason') or ('upstream rejected the request' if body.get('error') else '')
+        except Exception:
+            pass
+        reason = reason or str(e)
+        return 502, {'error': 'Weather service error: %s' % reason}
+    except (_ue.URLError, OSError, ValueError) as e:   # timeout / network / non-JSON
+        detail = getattr(e, 'reason', None) or e
+        return 502, {'error': 'Weather service unavailable (%s)' % detail}
+    out = {}
+    for key in ('latitude', 'longitude', 'elevation', 'timezone', 'timezone_abbreviation',
+                'utc_offset_seconds'):
+        if key in data:
+            out[key] = data[key]
+    cur = data.get('current') or {}
+    out['current'] = {k: cur[k] for k in
+                      ('time', 'temperature_2m', 'apparent_temperature', 'weather_code',
+                       'wind_speed_10m', 'wind_direction_10m', 'wind_gusts_10m') if k in cur}
+    hourly = data.get('hourly') or {}
+    out['hourly'] = {k: hourly[k] for k in
+                     ('time', 'wind_speed_10m', 'wind_direction_10m', 'wind_gusts_10m') if k in hourly}
+    daily = data.get('daily') or {}
+    out['daily'] = {k: daily[k] for k in
+                    ('time', 'weather_code', 'temperature_2m_max', 'temperature_2m_min',
+                     'precipitation_sum', 'sunrise', 'sunset') if k in daily}
+    return 200, out
+
+
 # ---------- HTTP ----------
 
 class Handler(SimpleHTTPRequestHandler):
@@ -420,6 +486,7 @@ class Handler(SimpleHTTPRequestHandler):
             '/api/ai/chat': lambda: self.api_ai_chat(body),
             '/api/ai/chat/history': lambda: self.api_ai_chat_history(),
             '/api/ai/chat/clear': lambda: self.api_ai_chat_clear(),
+            '/api/weather': lambda: self.api_weather(query),
         }
         fn = m.get(path)
         if fn:
@@ -427,6 +494,23 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_json({'error': 'Not found'}, 404)
 
     # endpoints ------------------------------------------------------------
+    def api_weather(self, query):
+        """GET /api/weather?lat=&lon= — signed-in proxy to Open-Meteo."""
+        qs = parse_qs(query)
+
+        def val(k):
+            return (qs.get(k) or [''])[0]
+
+        try:
+            lat = float(val('lat'))
+            lon = float(val('lon'))
+        except ValueError:
+            return self.send_json({'error': 'Invalid lat/lon'}, 400)
+        if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+            return self.send_json({'error': 'Coordinates out of range'}, 400)
+        status, payload = fetch_weather(lat, lon)
+        self.send_json(payload, status)
+
     def serve_units(self):
         rows = []
         try:
