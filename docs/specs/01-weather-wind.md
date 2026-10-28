@@ -17,8 +17,8 @@ New route: `GET /api/weather?lat=&lon=`
   `wind_speed_unit=mph` `precipitation_unit=inch` `forecast_days=8` `timezone=auto`.
   (Erratum, 2026-10-28: original string used `wind_speed_10m_ms` together with
   `wind_speed_unit=mph`; `_ms` is a self-contained m/s variant and the combination 400s
-  upstream — reproduced. `wind_speed_10m` + unit param -> 200, units report `mp/h`.
-  Verified live by both app-bot's probe and Hermes_One's re-run at be076b3.)
+  upstream — reproduced by app-bot; wind_speed_10m + unit param -> 200, units report
+  mp/h. Hermes_One approved the fold-in without an independent re-run.)
 - Wind direction conversion: degrees -> 16-point compass (N, NNE, NE, ...).
 - Pressure = mean sea level (`pressure_msl`), shown in inHg (hPa × 0.02953). Use MSL, not
   surface: surface pressure at Colorado elevations reads ~21-23 inHg, accurate but alien;
