@@ -16,7 +16,7 @@ import unittest
 from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler
 from urllib.request import Request, urlopen
 
-REPO = '/opt/data/.scratch/huntmap'
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, 'api'))
 
 TMP = tempfile.mkdtemp(prefix='weather_test_')
@@ -262,3 +262,7 @@ class WeatherAPI(unittest.TestCase):
         status2, _ = get('/api/weather?lat=38.9000&lon=-107.1000', _ctx['sid'])
         self.assertEqual((status1, status2), (200, 200))
         self.assertEqual(STUB_STATE['hits'], 1)
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

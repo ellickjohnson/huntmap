@@ -1900,10 +1900,15 @@ function weatherSummaryHtml(d) {
 }
 
 function renderWeatherTable(box, d) {
-  const rows = (d.hourly || []).slice(0, 24).map(r => {
-    const hr = fmtTimeAmPm((r.ts || '').slice(11, 16));
+  const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const rows = (d.hourly || []).slice(0, 24).map((r, i) => {
+    const ts = (r.ts || '').slice(11, 17);
+    const hr = fmtTimeAmPm(ts);
+    const dow = DOW[new Date((r.ts || '') + 'Z').getUTCDay()];
+    // Day label on the first row and on midnight crossings (spec: day/hour column)
+    const label = (i === 0 || (i > 0 && ts === '00:00')) ? dow + ' ' : '';
     const arrow = `<svg class="w-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${r.wind_dir_deg || 0}deg)"><path d="M12 5v14M12 19l-4-4M12 19l4-4"/></svg>`;
-    return `<tr><td>${hr}</td>` +
+    return `<tr><td>${label}${hr}</td>` +
       `<td>${r.temp_f != null ? Math.round(r.temp_f) + '°F' : '—'}</td>` +
       `<td>${r.precip_prob != null ? Math.round(r.precip_prob) + '%' : '—'}</td>` +
       `<td>${arrow}${r.wind_dir_txt || ''}</td>` +
