@@ -367,35 +367,17 @@
     .gmu-hover-tip { display:none !important; }
   }
 
-  /* weather panel */
-  .w-loading, .w-err { padding: 20px 0; font-size: 13px; color: var(--dim); text-align: center; }
-  .w-err { color: #f87171; }
-  .w-err span { opacity: .8; }
-  .w-cur { display: flex; gap: 12px; align-items: center; padding: 10px 0 6px; }
-  .w-cur .ic { font-size: 36px; line-height: 1; }
-  .w-temp { font-size: 27px; font-weight: 700; line-height: 1.15; }
-  .w-desc { font-size: 12px; color: var(--dim); }
-  .w-curstats { margin-left: auto; font-size: 12px; min-width: 120px; }
-  .w-curstats div { display: flex; justify-content: space-between; gap: 14px; padding: 2px 0; }
-  .w-curstats .k { color: var(--dim); }
-  .w-days { display: flex; gap: 4px; overflow-x: auto; margin: 8px 0 8px; padding-bottom: 2px; }
-  .w-day { flex: 0 0 auto; min-width: 48px; background: var(--panel2); border: 1px solid transparent; border-radius: 9px;
-    padding: 5px 4px; font-size: 10.5px; color: var(--dim); cursor: pointer; text-align: center; line-height: 1.35; }
-  .w-day .wi { font-size: 14px; display: block; }
-  .w-day .hi { color: var(--txt); }
-  .w-day.on { border-color: var(--accent2); color: var(--txt);
-    background: color-mix(in srgb, var(--accent2) 14%, transparent); }
-  .w-rows-cap { font-size: 11px; color: var(--dim); margin: 2px 0 4px; }
-  .w-hrow { display: grid; grid-template-columns: 48px 52px 1fr 62px; align-items: center; gap: 6px;
-    font-size: 12px; padding: 4px 6px; border-bottom: 1px solid var(--line); }
-  .w-hrow:last-child { border-bottom: none; }
-  .w-hrow .t { color: var(--dim); font-variant-numeric: tabular-nums; }
-  .w-hrow .dir { display: flex; align-items: center; gap: 5px; }
-  .w-hrow .warr { display: inline-block; color: var(--accent2); font-size: 12px; width: 12px; text-align: center; }
-  .w-hrow .g { color: var(--dim); text-align: right; font-variant-numeric: tabular-nums; }
-  .w-hrow .s { font-variant-numeric: tabular-nums; }
-  .w-hrow.now { background: color-mix(in srgb, var(--accent2) 10%, transparent); border-radius: 6px; }
-  .w-sun { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--dim); padding-top: 9px; flex-wrap: wrap; }
+  /* marker-popup weather section (spec 01): collapsed summary row -> expand for the hourly table */
+  .w-sec { margin-top: 6px; }
+  .w-sumline { font-size: 12px; color: var(--txt); cursor: pointer; padding: 3px 0; user-select: none; }
+  .w-sumline .w-chev { color: var(--dim); font-size: 10px; }
+  .w-sumline.loading { color: var(--dim); }
+  .w-sumline.err { color: #f87171; cursor: default; }
+  .w-table { max-height: 190px; overflow-y: auto; margin-top: 4px; border-top: 1px solid var(--line); }
+  .w-table table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+  .w-table th { text-align: left; color: var(--dim); font-weight: 500; padding: 2px 6px; }
+  .w-table td { padding: 2px 6px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .w-arr { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin-right: 2px; color: var(--accent2); }
 
   /* toast notifications */
   #toastWrap { position:fixed; bottom:calc(18px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%);
@@ -565,18 +547,6 @@
     <div class="hist" id="dHist"></div>
     <div class="hot-note" id="dHot"></div>
   </div>
-</div>
-<div class="detail" id="weatherPanel">
-  <div class="detail-head" id="wDrag">
-    <div style="flex:1">
-      <h2 id="wTitle" style="font-size:16px">Weather</h2>
-      <div id="wSub" style="font-size:11px;color:var(--dim);margin-top:2px"></div>
-    </div>
-    <div class="db-btns">
-      <button class="close-btn" id="wClose" title="Close">✕</button>
-    </div>
-  </div>
-  <div class="detail-body" id="wBody"></div>
 </div>
 <template id="tpl-sec">
   <div class="sec" data-open="1">
@@ -1409,7 +1379,6 @@ function selectUnit(uid) {
     `${p.county || ''} · herd ${p.elk_dau || '—'} · ${UNITS_FMT.area(+p.sq_miles || 0)}`;
   renderDetail(p);
   document.getElementById('detail').classList.add('show');
-  document.getElementById('weatherPanel').classList.remove('show');
   ensureUnitLayers();
   loadHotspots(uid);
   const c = centroidOf(u);
@@ -1816,9 +1785,10 @@ function updateMarkerLayer() {
     window._markersClickWired = true;
     map.on('click', 'markers-dots', e => {
       const p = e.features[0].properties;
-      new maplibregl.Popup({ offset: 12 })
+      const pp = new maplibregl.Popup({ offset: 12 })
         .setLngLat(e.features[0].geometry.coordinates)
         .setHTML(markerPopupHTML(p)).addTo(map);
+      wirePopupWeather(pp);
       window._lastMarkerClick = { lngLat: e.lngLat, props: p };
     });
     map.on('mouseenter', 'markers-dots', () => map.getCanvas().style.cursor = 'pointer');
@@ -1861,10 +1831,11 @@ window.gotoMarker = function(id) {
   map.easeTo({ center: [mk.lon, mk.lat], zoom: Math.max(map.getZoom(), 12), duration: 700 });
   const html = markerPopupHTML(mk);
   setTimeout(() => {
-    new maplibregl.Popup({ offset: 12 })
+    const pp = new maplibregl.Popup({ offset: 12 })
       .setLngLat([mk.lon, mk.lat])
       .setHTML(html)
       .addTo(map);
+    wirePopupWeather(pp);
   }, 750);
 };
 
@@ -1895,20 +1866,14 @@ window.deleteMarker = deleteMarker;
 function escHtml(s) {
   return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-function markerPopupHTML(m) {
-  const emoji = m.emoji || MK_EMOJI[m.kind] || '📍';
-  const name = escHtml(m.name || m.kind || 'Marker');
-  const notes = m.notes ? `<br><span style="font-size:12px">${escHtml(m.notes)}</span>` : '';
-  const btn = (onclick, label) =>
-    `<button onclick="${onclick}" style="margin-top:6px;font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer">${label}</button>`;
-  return `<strong>${emoji} ${name}</strong>${notes}` +
-    `<br><button onclick="deleteMarker(${m.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>` +
-    btn(`editMarker(${m.id})`, '✏️ Edit / move') +
-    btn(`openWeather(${m.id})`, '🌤️ Weather');
-}
-window.markerPopupHTML = markerPopupHTML;
 
-// ---------------- weather panel (Open-Meteo via /api/weather) ----------------
+// ---------------- weather section (spec 01: in-popup, async fill, expandable) ----------------
+function fmtTimeAmPm(hhmm) {
+  const [h, m] = (hhmm || '').split(':').map(Number);
+  if (Number.isNaN(h)) return '—';
+  return `${h % 12 || 12}:${String(m || 0).padStart(2, '0')}${h >= 12 ? 'p' : 'a'}`;
+}
+const TREND_GLYPH = { rising: '⬆︎', falling: '⬇︎', steady: '→' };
 const WMO_MAP = {
   0: ['☀️', 'Clear sky'], 1: ['🌤️', 'Mostly clear'], 2: ['🌥️', 'Partly cloudy'], 3: ['☁️', 'Overcast'],
   45: ['🌫️', 'Fog'], 48: ['🌫️', 'Rime fog'],
@@ -1922,120 +1887,79 @@ const WMO_MAP = {
   95: ['⛈️', 'Thunderstorm'], 96: ['⛈️', 'Storm w/ hail'], 99: ['⛈️', 'Storm w/ hail'],
 };
 const wmo = c => WMO_MAP[c] || ['🌡️', '—'];
-const COMPASS16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-const compass16 = d => COMPASS16[Math.round(d / 22.5) % 16];
-const wFmt = {
-  temp: c => unitsImperial ? `${Math.round(c * 9 / 5 + 32)}°F` : `${Math.round(c)}°C`,
-  speed: k => unitsImperial ? `${Math.round(k * 0.621371)} mph` : `${Math.round(k)} km/h`,
-  precip: mm => unitsImperial ? `${(mm * 0.0393701).toFixed(2)}"` : `${(+mm).toFixed(1)} mm`,
-};
-// moon phase, computed client-side (no dep): lunar age from known new Moon 2000-01-06 18:14 UT
-function moonPhase(dateStr) {
-  const synodic = 29.53058867;
-  const d = new Date(dateStr + 'T12:00:00Z');
-  const age = (((d - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % synodic + synodic) % synodic;
-  const phases = [['🌑', 'New Moon'], ['🌒', 'Waxing crescent'], ['🌓', 'First quarter'], ['🌔', 'Waxing gibbous'],
-    ['🌕', 'Full Moon'], ['🌖', 'Waning gibbous'], ['🌗', 'Last quarter'], ['🌘', 'Waning crescent']];
-  return phases[Math.round(age / synodic * 8) % 8];
+
+function weatherSummaryHtml(d) {
+  const c = d.current || {}, dl = (d.daily && d.daily[0]) || {};
+  const temp = c.temp_f != null ? `${Math.round(c.temp_f)}°F` : '—';
+  const wind = c.wind_mph != null ? `${Math.round(c.wind_mph)}mph ${c.wind_dir_txt || ''}` : '—';
+  const trend = TREND_GLYPH[c.pressure_trend] || '';
+  const pres = c.pressure_inhg != null ? `${trend} pressure` : '';
+  const sr = fmtTimeAmPm((dl.sunrise_iso || '').slice(11, 16));
+  const ss = fmtTimeAmPm((dl.sunset_iso || '').slice(11, 16));
+  return `🌡 ${temp} · 💨 ${wind} · ${pres} 🌅 ${sr} / 🌇 ${ss}`;
 }
 
-let _wData = null, _wDay = 0;
-
-function renderWeatherError(msg) {
-  document.getElementById('wBody').innerHTML =
-    `<div class="w-err">⚠️ Weather unavailable<br><span>${escHtml(msg)}</span></div>`;
+function renderWeatherTable(box, d) {
+  const rows = (d.hourly || []).slice(0, 24).map(r => {
+    const hr = fmtTimeAmPm((r.ts || '').slice(11, 16));
+    const arrow = `<svg class="w-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${r.wind_dir_deg || 0}deg)"><path d="M12 5v14M12 19l-4-4M12 19l4-4"/></svg>`;
+    return `<tr><td>${hr}</td>` +
+      `<td>${r.temp_f != null ? Math.round(r.temp_f) + '°F' : '—'}</td>` +
+      `<td>${r.precip_prob != null ? Math.round(r.precip_prob) + '%' : '—'}</td>` +
+      `<td>${arrow}${r.wind_dir_txt || ''}</td>` +
+      `<td>${r.wind_mph != null ? Math.round(r.wind_mph) + 'mph' : '—'}</td>` +
+      `<td>${r.gust_mph != null ? Math.round(r.gust_mph) + 'mph' : '—'}</td></tr>`;
+  });
+  box.innerHTML =
+    `<table><thead><tr><th>hour</th><th>temp</th><th>precip</th><th>wind</th><th>speed</th><th>gust</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
 }
 
-// Open-Meteo (timezone=auto) returns destination-local day/hour strings + full 24h blocks
-// starting at 00:00, so day N = hourly slice [N*24, N*24+24).
-function renderWeather() {
-  const d = _wData || {}, cur = d.current || {}, daily = d.daily || {}, hourly = d.hourly || {};
-  const days = daily.time || [];
-  const hi = daily.weather_code || [], hmax = daily.temperature_2m_max || [], pr = daily.precipitation_sum || [];
-  const [ic, desc] = wmo(cur.weather_code);
-  const dirNow = compass16(cur.wind_direction_10m || 0);
-  const nowHour = (cur.time || '').slice(0, 13);   // "2026-10-28T12"
-  let html = `<div class="w-cur">
-    <div class="ic">${ic}</div>
-    <div>
-      <div class="w-temp">${cur.temperature_2m != null ? wFmt.temp(cur.temperature_2m) : '—'}</div>
-      <div class="w-desc">${desc}</div>
-      ${d.timezone_abbreviation ? `<div style="font-size:11px;color:var(--dim)">TZ ${escHtml(d.timezone_abbreviation)}</div>` : ''}
-    </div>
-    <div class="w-curstats">
-      <div><span class="k">Feels</span><span>${cur.apparent_temperature != null ? wFmt.temp(cur.apparent_temperature) : '—'}</span></div>
-      <div><span class="k">Wind</span><span>${wFmt.speed(cur.wind_speed_10m || 0)} ${dirNow}</span></div>
-      <div><span class="k">Gusts</span><span>${wFmt.speed(cur.wind_gusts_10m || 0)}</span></div>
-    </div>
-  </div>`;
-  if (days.length) {
-    html += '<div class="w-days">' + days.map((t, i) => {
-      const lbl = new Date(t + 'T12:00:00Z').toLocaleDateString('en', { weekday: 'short' });
-      return `<button class="w-day${i === _wDay ? ' on' : ''}" data-wday="${i}">
-        ${i === 0 ? 'Today' : lbl}<span class="wi">${wmo(hi[i])[0]}</span>
-        <span class="hi">${hmax[i] != null ? wFmt.temp(hmax[i]) : '—'}</span>` +
-        (pr[i] ? `<div>${wFmt.precip(pr[i])}</div>` : '') + '</button>';
-    }).join('') + '</div>';
-  }
-  const start = _wDay * 24;
-  if (hourly.time && hourly.time.length) {
-    const end = Math.min(start + 24, hourly.time.length);
-    const cap = _wDay === 0 ? 'Today' : (days[_wDay] || '').slice(5);   // MM-DD
-    html += `<div class="w-rows-cap">${cap} — hourly wind · gusts</div>`;
-    for (let i = start; i < end; i++) {
-      const dir = hourly.wind_direction_10m[i] || 0;
-      html += `<div class="w-hrow${hourly.time[i].slice(0, 13) === nowHour ? ' now' : ''}">
-        <span class="t">${hourly.time[i].slice(11, 16)}</span>
-        <span class="dir"><i class="warr" style="transform:rotate(${dir + 180}deg)">▲</i>${compass16(dir)}</span>
-        <span class="s">${hourly.wind_speed_10m[i] != null ? wFmt.speed(hourly.wind_speed_10m[i]) : '—'}</span>
-        <span class="g">g ${hourly.wind_gusts_10m[i] != null ? wFmt.speed(hourly.wind_gusts_10m[i]) : '—'}</span>
-      </div>`;
-    }
-  }
-  const dayIdx = Math.min(_wDay, Math.max(0, days.length - 1));
-  const sunrise = (daily.sunrise || [])[dayIdx], sunset = (daily.sunset || [])[dayIdx];
-  const [mic, mname] = days.length ? moonPhase(days[dayIdx]) : ['', '—'];
-  html += `<div class="w-sun">
-    <span>🌅 ${sunrise ? sunrise.slice(11, 16) : '—'}</span>
-    <span>🌇 ${sunset ? sunset.slice(11, 16) : '—'}</span>
-    <span>${mic} ${mname}</span>
-  </div>`;
-  document.getElementById('wBody').innerHTML = html;
+function wirePopupWeather(popup) {
+  const el = popup.getElement();
+  const sec = el && el.querySelector('.w-sec');
+  if (!sec) return;
+  const id = sec.dataset.wmk;
+  const mk = markers.find(mm => mm.id == id);
+  if (!mk) return;
+  fetch(`/api/weather?lat=${Number(mk.lat)}&lon=${Number(mk.lon)}`)
+    .then(r => r.json().then(d => ({ ok: r.ok, d })))
+    .then(({ ok, d }) => {
+      // popup may be gone by the time the response lands
+      if (!document.body.contains(sec)) return;
+      const line = sec.querySelector('.w-sumline');
+      if (!ok) {
+        line.textContent = `⚠️ ${d.error === 'upstream' ? 'weather unavailable' : (d.error || 'weather unavailable')}`;
+        line.classList.add('err');
+        return;
+      }
+      line.classList.remove('loading');
+      line.innerHTML = `${weatherSummaryHtml(d)} <span class="w-chev">▾</span>`;
+      const box = sec.querySelector('.w-table');
+      line.addEventListener('click', () => {
+        if (line.classList.contains('err')) return;
+        if (box.hidden) renderWeatherTable(box, d);
+        box.hidden = !box.hidden;
+      });
+    })
+    .catch(() => {
+      if (!document.body.contains(sec)) return;
+      const line = sec.querySelector('.w-sumline');
+      line.textContent = '⚠️ weather unavailable';
+      line.classList.add('err');
+    });
 }
 
-async function openWeather(id) {
-  const mk = markers.find(m => m.id == id);
-  if (!mk) { if (window.hmToast) hmToast('Marker not found', 'error'); return; }
-  _wDay = 0; _wData = null;
-  document.getElementById('detail').classList.remove('show');
-  document.querySelectorAll('.maplibregl-popup').forEach(el => el.remove());
-  const el = document.getElementById('weatherPanel');
-  document.getElementById('wTitle').textContent = `${MK_EMOJI[mk.kind] || '📍'} ${mk.name || mk.kind}`;
-  // marker coords only — never the grid-snapped echo from Open-Meteo
-  document.getElementById('wSub').textContent = `${+Number(mk.lat).toFixed(5)}, ${+Number(mk.lon).toFixed(5)}`;
-  document.getElementById('wBody').innerHTML = '<div class="w-loading">Loading weather…</div>';
-  el.classList.add('show');
-  try {
-    const r = await fetch(`/api/weather?lat=${Number(mk.lat)}&lon=${Number(mk.lon)}`);
-    const dd = await r.json().catch(() => ({}));
-    if (!r.ok) { renderWeatherError(dd.error || `HTTP ${r.status}`); return; }
-    _wData = dd;
-    renderWeather();
-  } catch (e) {
-    renderWeatherError('network error');
-  }
+function markerPopupHTML(m) {
+  const emoji = m.emoji || MK_EMOJI[m.kind] || '📍';
+  const name = escHtml(m.name || m.kind || 'Marker');
+  const notes = m.notes ? `<br><span style="font-size:12px">${escHtml(m.notes)}</span>` : '';
+  return `<strong>${emoji} ${name}</strong>${notes}` +
+    `<br><button onclick="deleteMarker(${m.id})" style="margin-top:6px;padding:3px 8px;font-size:11px;background:#7f1d1d;color:#fff;border:none;border-radius:4px;cursor:pointer">Delete</button>` +
+    `<button onclick="editMarker(${m.id})" style="margin-top:6px;margin-left:4px;font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--txt);cursor:pointer">✏️ Edit / move</button>` +
+    `<div class="w-sec" data-wmk="${m.id}"><div class="w-sumline loading">wind &amp; weather ⋯</div><div class="w-table" hidden></div></div>`;
 }
-window.openWeather = openWeather;
-
-// wire panel controls once
-document.getElementById('wClose').addEventListener('click', () =>
-  document.getElementById('weatherPanel').classList.remove('show'));
-document.getElementById('wBody').addEventListener('click', e => {
-  const b = e.target.closest('[data-wday]');
-  if (!b) return;
-  _wDay = +b.dataset.wday;
-  renderWeather();
-});
+window.markerPopupHTML = markerPopupHTML;
+window.wirePopupWeather = wirePopupWeather;
 
 function renderMarkerList() {
   const el = document.getElementById('markerList');
@@ -2354,9 +2278,6 @@ window._reapplyUnits = () => {
     const u = UNITS.features.find(f => String(f.properties.gmuid) === String(selectedGmu));
     if (u) selectUnit(u.properties.gmuid);
   }
-  // weather panel re-renders in the new units (block loads later in this script)
-  if (typeof _wData === 'undefined') return;
-  if (_wData) renderWeather();
 };
 const UNITS_FMT = {
   area: mi2 => unitsImperial ? `${Math.round(mi2).toLocaleString()} mi²` : `${Math.round(mi2 * 2.58999).toLocaleString()} km²`,

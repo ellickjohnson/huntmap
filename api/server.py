@@ -279,24 +279,61 @@ EMAILCHANGE_TMPL = '''<div style="font-family:sans-serif;max-width:480px;margin:
 # ---------- weather (Open-Meteo proxy; keyless) ----------
 
 OPEN_METEO_URL_DEFAULT = 'https://api.open-meteo.com/v1/forecast'
-WEATHER_TIMEOUT_DEFAULT = 15.0
-WEATHER_CURRENT = ('temperature_2m,apparent_temperature,weather_code,'
-                   'wind_speed_10m,wind_direction_10m,wind_gusts_10m')
-WEATHER_HOURLY = 'wind_speed_10m,wind_direction_10m,wind_gusts_10m'   # hourly = wind fields only
-WEATHER_DAILY = ('weather_code,temperature_2m_max,temperature_2m_min,'
-                 'precipitation_sum,sunrise,sunset')
+WEATHER_TIMEOUT_DEFAULT = 10.0
+WEATHER_CACHE_TTL = 600        # spec: 10-min in-memory cache
+WEATHER_CACHE_MAX = 200        # spec: max 200 entries
+WEATHER_CACHE = {}
+# params per docs/specs/01-weather-wind.md (erratum: wind_speed_10m + wind_speed_unit=mph;
+# _ms variant 400s combined with the unit param, reproduced by app-bot)
+WEATHER_CURRENT = ('temperature_2m,apparent_temperature,precipitation,weather_code,'
+                   'wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl')
+WEATHER_HOURLY = ('temperature_2m,precipitation_probability,weather_code,'
+                  'wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl')
+WEATHER_DAILY = 'sunrise,sunset'
+_COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW',
+            'WSW', 'W', 'WNW', 'NW', 'NNW']
+
+
+def weather_cache_clear():
+    WEATHER_CACHE.clear()
+
+
+def _compass16(deg):
+    return _COMPASS[int(round((deg or 0) / 22.5)) % 16]
+
+
+def _pressure_trend(hourly, idx):
+    """±3h mean window around the current slot; deadband 0.05 hPa for float noise."""
+    ps = hourly.get('pressure_msl') or []
+    if idx < 3 or idx + 3 >= len(ps):
+        return ''
+    prev = (ps[idx - 3] + ps[idx - 2] + ps[idx - 1]) / 3.0
+    nxt = (ps[idx + 1] + ps[idx + 2] + ps[idx + 3]) / 3.0
+    d = nxt - prev
+    if abs(d) < 0.05:
+        return 'steady'
+    return 'rising' if d > 0 else 'falling'
 
 
 def fetch_weather(lat, lon):
-    """Server-side proxy to Open-Meteo. Returns (status_code, payload_dict).
+    """Server-side proxy to Open-Meteo (spec 01 @96814c0). Returns (status, payload).
 
-    Never raises: upstream failures (HTTP 4xx/5xx, timeout, non-JSON) are
-    translated to a 502 with {'error': ...} so the client shows its inline
-    error state. lat/lon are pre-validated by the route; they only ever enter
-    the URL as query parameters on the fixed host (no user-controlled URL parts).
-    The upstream URL is read per-call (not import time) so tests can inject a
-    stub host via HUNTMAP_OPEN_METEO_URL.
+    Trimmed response shape:
+      { current: {temp_f, feels_f, precip, code, wind_mph, wind_dir_txt, wind_dir_deg,
+                  gust_mph, pressure_inhg, pressure_trend},
+        hourly: [{ts, temp_f, precip_prob, code, wind_mph, wind_dir_txt, wind_dir_deg,
+                  gust_mph}... up to 48, starting next hour],
+        daily: [{sunrise_iso, sunset_iso}...8], tz: <string> }
+    Cache: in-memory, key = 0.01°-rounded coords, TTL 10 min, max 200 entries.
+    Upstream failure (HTTP 4xx/5xx, timeout, non-JSON) -> 502 {'error': 'upstream'};
+    the detail goes to the server log, not the client (spec contract).
     """
+    cache_key = (round(lat, 2), round(lon, 2))
+    now = time.time()
+    hit = WEATHER_CACHE.get(cache_key)
+    if hit and hit[0] > now:
+        return 200, hit[1]
+
     import urllib.error as _ue
     import urllib.request as _ur
     url_base = os.environ.get('HUNTMAP_OPEN_METEO_URL', OPEN_METEO_URL_DEFAULT)
@@ -304,6 +341,7 @@ def fetch_weather(lat, lon):
     url = url_base + '?' + urlencode({
         'latitude': lat, 'longitude': lon,
         'current': WEATHER_CURRENT, 'hourly': WEATHER_HOURLY, 'daily': WEATHER_DAILY,
+        'temperature_unit': 'fahrenheit', 'wind_speed_unit': 'mph', 'precipitation_unit': 'inch',
         'forecast_days': 8, 'timezone': 'auto',
     })
     req = _ur.Request(url, headers={'User-Agent': 'HuntMap/1.0 (+https://huntmap.ellickjohnson.net)'})
@@ -311,35 +349,70 @@ def fetch_weather(lat, lon):
         raw = _ur.urlopen(req, timeout=timeout).read()
         data = json.loads(raw)
     except _ue.HTTPError as e:
-        reason = ''
+        detail = ''
         try:
-            body = json.loads(e.read() or b'{}')
-            if isinstance(body, dict):
-                reason = body.get('reason') or ('upstream rejected the request' if body.get('error') else '')
+            detail = e.read()[:200].decode('utf-8', 'ignore')
         except Exception:
             pass
-        reason = reason or str(e)
-        return 502, {'error': 'Weather service error: %s' % reason}
-    except (_ue.URLError, OSError, ValueError) as e:   # timeout / network / non-JSON
-        detail = getattr(e, 'reason', None) or e
-        return 502, {'error': 'Weather service unavailable (%s)' % detail}
-    out = {}
-    for key in ('latitude', 'longitude', 'elevation', 'timezone', 'timezone_abbreviation',
-                'utc_offset_seconds'):
-        if key in data:
-            out[key] = data[key]
+        print(f'weather upstream failure: HTTP {e.code} {detail}', flush=True)
+        return 502, {'error': 'upstream'}
+    except (_ue.URLError, OSError, ValueError) as e:
+        print(f'weather upstream failure: {getattr(e, "reason", None) or e}', flush=True)
+        return 502, {'error': 'upstream'}
+
     cur = data.get('current') or {}
-    out['current'] = {k: cur[k] for k in
-                      ('time', 'temperature_2m', 'apparent_temperature', 'weather_code',
-                       'wind_speed_10m', 'wind_direction_10m', 'wind_gusts_10m') if k in cur}
     hourly = data.get('hourly') or {}
-    out['hourly'] = {k: hourly[k] for k in
-                     ('time', 'wind_speed_10m', 'wind_direction_10m', 'wind_gusts_10m') if k in hourly}
     daily = data.get('daily') or {}
-    out['daily'] = {k: daily[k] for k in
-                    ('time', 'weather_code', 'temperature_2m_max', 'temperature_2m_min',
-                     'precipitation_sum', 'sunrise', 'sunset') if k in daily}
-    return 200, out
+    times = hourly.get('time') or []
+
+    # index of the current slot (Open-Meteo current.time lands on a grid hour)
+    ct = (cur.get('time') or '')[:13]
+    idx = 0
+    for i, t in enumerate(times):
+        if t[:13] == ct and ct:
+            idx = i
+            break
+
+    def series(name):
+        vals = hourly.get(name) or []
+        return vals + [None] * (len(times) - len(vals))
+
+    start = min(idx + 1, len(times))
+    rows = []
+    for i in range(start, min(start + 48, len(times))):
+        wd = series('wind_direction_10m')[i]
+        rows.append({'ts': times[i],
+                     'temp_f': series('temperature_2m')[i],
+                     'precip_prob': series('precipitation_probability')[i],
+                     'code': series('weather_code')[i],
+                     'wind_mph': series('wind_speed_10m')[i],
+                     'wind_dir_txt': _compass16(wd),
+                     'wind_dir_deg': wd,
+                     'gust_mph': series('wind_gusts_10m')[i]})
+
+    pm = cur.get('pressure_msl')
+    payload = {
+        'current': {
+            'temp_f': cur.get('temperature_2m'),
+            'feels_f': cur.get('apparent_temperature'),
+            'precip': cur.get('precipitation'),
+            'code': cur.get('weather_code'),
+            'wind_mph': cur.get('wind_speed_10m'),
+            'wind_dir_txt': _compass16(cur.get('wind_direction_10m')),
+            'wind_dir_deg': cur.get('wind_direction_10m'),
+            'gust_mph': cur.get('wind_gusts_10m'),
+            'pressure_inhg': round(pm * 0.02953, 2) if pm is not None else None,
+            'pressure_trend': _pressure_trend(hourly, idx),
+        },
+        'hourly': rows,
+        'daily': [{'sunrise_iso': s, 'sunset_iso': t} for s, t in
+                  zip(daily.get('sunrise') or [], daily.get('sunset') or [])][:8],
+        'tz': data.get('timezone'),
+    }
+    if len(WEATHER_CACHE) >= WEATHER_CACHE_MAX:
+        weather_cache_clear()  # TTL'd entries anyway; simple cap per spec (200)
+    WEATHER_CACHE[cache_key] = (now + WEATHER_CACHE_TTL, payload)
+    return 200, payload
 
 
 # ---------- HTTP ----------
