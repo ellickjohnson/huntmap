@@ -198,7 +198,8 @@
   border-right:1px solid transparent; box-shadow:4px 0 24px rgba(0,0,0,.35);
   outline:1px solid rgba(255,255,255,.05); outline-offset:-1px;
   display:flex; flex-direction:column; transition:transform .28s var(--ease); }
-#sidePanel.hidden { transform:translateX(-100%); pointer-events:none; }#railNav { display:flex; flex-direction:column; gap:2px; padding:10px 6px 6px; border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent);
+#sidePanel.hidden { transform:translateX(-100%); pointer-events:none; }
+#railNav { display:flex; flex-direction:column; gap:2px; padding:10px 6px 6px; border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent);
   overflow-y: auto; overscroll-behavior: contain; flex-shrink:0; }
 .railBtn { display:flex; flex-direction:column; align-items:center; gap:4px;
   padding:10px 4px 8px; border-radius:var(--radius-s); border:1px solid transparent;
@@ -3111,9 +3112,12 @@ else map.once('style.load', () => setTimeout(bootData, 900));
   });
   document.addEventListener('keydown', e => {
     if (!measureOn) return;
+    const t = e.target;
+    const inField = t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]');
+    if (inField) return; // typing in a field: text-editing keys must reach the field
     if (e.key === 'Escape') {
+      if (done) { panel.classList.remove('show'); return; } // finished line: Esc hides the panel only, no stopProp — nothing to protect
       e.stopPropagation();
-      if (done) { panel.classList.remove('show'); return; } // finished line: Esc hides the panel only
       cancelProfile(); abortInflightTiles();
       active = null;
       updateBar(); renderMeasureGeoJSON();
