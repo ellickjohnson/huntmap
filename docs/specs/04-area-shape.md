@@ -30,7 +30,10 @@ Repo facts this builds on (verified @ main = spec-03 branch base):
    documented. R = 6371008.8 m. Output acres = m² × 0.000247105; hectares =
    m² × 0.0001. Sanity gate: Colorado GMUs are 100k–1000k acres — the readout
    must land in plausible ranges for known shapes (unit test: a 1°×1° square
-   at 39°N ≈ 5,893 mi² ≈ 3.77M acres ±1%).
+   at 38.5–39.5°N = 9,608,779,498 m² ≈ 3,710.0 mi² ≈ 2,374,381 acres ±1%;
+   39–40°N = 9,540,512,136 m² ≈ 3,683.6 mi² ≈ 2,357,512 ac. NOTE: an earlier
+   draft of this spec carried 5,893 mi² / 3.77M ac — that figure is 58.8% high
+   and FAILS this gate; do not test against it).
 3. **Rendering: reuse the measure-* source/layers family** with new ids
    `area-src` / `area-fill` (fill-opacity 0.25, `--accent2`, same beforeId
    positioning) / `area-outline` (dashed, 2px) / `area-verts` (circle) /
