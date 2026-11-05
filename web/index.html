@@ -666,6 +666,7 @@ applyTheme(_savedTheme);
 const STREETS_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 const SATELLITE_STYLE = {
   version: 8,
+  glyphs: 'https://tiles.basemaps.cartocdn.com/v/20261026-01/fonts/{fontstack}/{range}.pbf',
   sources: {
     gmaps: {
       type: 'raster',
@@ -689,6 +690,7 @@ const SATELLITE_STYLE = {
 };
 const TOPO_STYLE = {
   version: 8,
+  glyphs: 'https://tiles.basemaps.cartocdn.com/v/20261026-01/fonts/{fontstack}/{range}.pbf',
   sources: {
     opentopo: {
       type: 'raster',
@@ -713,6 +715,7 @@ const TOPO_STYLE = {
 };
 const HYBRID_STYLE = {
   version: 8,
+  glyphs: 'https://tiles.basemaps.cartocdn.com/v/20261026-01/fonts/{fontstack}/{range}.pbf',
   sources: {
     gmaps: {
       type: 'raster',
@@ -1810,19 +1813,11 @@ async function loadMarkers() {
 }
 
 function updateMarkerLayer() {
-  const paint = () => {
-    if (!map.getSource('markers-src')) return;
-    const visible = markers.filter(m => markerKindsOn.has(m.kind));
-    map.getSource('markers-src').setData({
-      type: 'FeatureCollection',
-      features: visible.map(m => ({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [m.lon, m.lat] },
-        properties: { id: m.id, name: m.name || '', notes: m.notes || '', emoji: MK_EMOJI[m.kind] || '📍' },
-      })),
-    });
-  };
-  if (!map.isStyleLoaded()) { map.once('idle', paint); return; }
+  // Cold-boot safe: a style that is not loaded yet means addSource/addLayer would
+  // throw, so retry the WHOLE function on idle. The old version scheduled a
+  // paint-only closure here that returned early when markers-src was absent,
+  // which made the source unreachable until a basemap swap re-ran this function.
+  if (!map.isStyleLoaded()) { map.once('idle', updateMarkerLayer); return; }
   const visible = markers.filter(m => markerKindsOn.has(m.kind));
   const fc = {
     type: 'FeatureCollection',
@@ -1832,6 +1827,7 @@ function updateMarkerLayer() {
       properties: { id: m.id, name: m.name || '', notes: m.notes || '', emoji: MK_EMOJI[m.kind] || '📍' },
     })),
   };
+  // ensure source, then layer, per-piece and idempotently
   if (!map.getSource('markers-src')) {
     map.addSource('markers-src', { type: 'geojson', data: fc });
   } else {

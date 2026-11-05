@@ -430,9 +430,15 @@ class Handler(SimpleHTTPRequestHandler):
 
     def end_headers(self):
         # Called by super().send_* — add cache headers for large static data
-        if self.path and any(self.path.endswith(t) for t in self.GZ_TYPES):
+        path = urlparse(self.path or '').path
+        if path and any(path.endswith(t) for t in self.GZ_TYPES):
             self.send_header('Cache-Control', f'public, max-age={self.CACHE_SECONDS}')
             self.send_header('Vary', 'Accept-Encoding')
+        elif path == '' or path == '/' or path.endswith('.html'):
+            # HTML roots: never let the browser guess freshness (heuristic caching
+            # served stale pages after deploys and read as "the deploy didn't land").
+            # no-cache still allows conditional revalidation -> cheap 304.
+            self.send_header('Cache-Control', 'no-cache')
         super().end_headers()
 
     # helpers -------------------------------------------------------------
