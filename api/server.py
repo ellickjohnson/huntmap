@@ -1148,9 +1148,18 @@ h1{{color:{color};font-size:20px}} p{{line-height:1.5}}
                     (u['id'], kind, str(it.get('name') or '')[:120],
                      str(it.get('notes') or '')[:2000], lat, lon, ts))
                 inserted += 1
-            # tracks: simplified polylines, deduped on name + vertex count + first point
-            t_seen = {(r['name'], r['points']) for r in con.execute(
-                'SELECT name, points FROM tracks WHERE user_id=?', (u['id'],))}
+            # tracks: simplified polylines. Deduped on name + both endpoints, NOT the
+            # vertex count: a track exported as GPX and re-imported comes back with the
+            # simplified vertex count, so counting vertices would duplicate it.
+            t_seen = set()
+            for r in con.execute('SELECT name, geojson FROM tracks WHERE user_id=?', (u['id'],)):
+                try:
+                    co = json.loads(r['geojson'])['coordinates']
+                except (ValueError, KeyError, TypeError):
+                    continue
+                if co:
+                    t_seen.add((r['name'], round(co[0][0], 4), round(co[0][1], 4),
+                                round(co[-1][0], 4), round(co[-1][1], 4)))
             t_inserted = t_skipped = t_invalid = 0
             for tr in tracks:
                 if not isinstance(tr, dict):
@@ -1174,10 +1183,12 @@ h1{{color:{color};font-size:20px}} p{{line-height:1.5}}
                     continue
                 name = str(tr.get('name') or 'Track')[:120]
                 pts = int(tr.get('points') or len(clean))
-                if (name, pts) in t_seen:
+                sig = (name, round(clean[0][0], 4), round(clean[0][1], 4),
+                       round(clean[-1][0], 4), round(clean[-1][1], 4))
+                if sig in t_seen:
                     t_skipped += 1
                     continue
-                t_seen.add((name, pts))
+                t_seen.add(sig)
                 color = str(tr.get('color') or '#FF6B1A')[:9]
                 ts = tr.get('created_at')
                 if not isinstance(ts, int) or ts < 946684800 or ts > now + 31536000:

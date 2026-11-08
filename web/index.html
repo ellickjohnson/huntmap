@@ -1517,9 +1517,12 @@ function updateTrackLayer() {
         id: 'tracks-line', type: 'line', source: 'tracks-src',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': ['get', 'color'],
+          // Imported tracks render in the blaze accent so they belong to the app,
+          // not to whatever palette onX happened to export (usually cyan). The
+          // original colour stays in tracks.color for future use.
+          'line-color': '#FF6B1A',
           'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.4, 13, 2.6],
-          'line-opacity': 0.8,
+          'line-opacity': 0.9,
         },
       }, before);
     }
@@ -2034,11 +2037,21 @@ function exportGPX() {
     const ele = m.elev ? `<ele>${m.elev}</ele>` : '';
     return `  <wpt lat="${m.lat}" lon="${m.lon}">${ele}<name>${esc(m.name || m.kind)}</name><sym>Flag, Blue</sym><type>${esc(m.kind)}</type></wpt>`;
   }).join('\n');
-  const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="HuntMap" xmlns="http://www.topografix.com/GPX/1/1">\n${wpts}\n</gpx>`;
+  // tracks: colour travels in <extensions> so a re-import keeps it, and the vertex
+  // count is NOT written as a custom field (dedupe uses name + endpoints instead).
+  const trks = tracks.map(t => {
+    const pts = (t.geojson && t.geojson.coordinates) || [];
+    if (pts.length < 2) return '';
+    const trkpts = pts.map(c => `      <trkpt lat="${c[1].toFixed(6)}" lon="${c[0].toFixed(6)}"/>`).join('\n');
+    return `  <trk>\n    <name>${esc(t.name || 'Track')}</name>\n` +
+           `    <extensions><color>${esc(t.color || '#FF6B1A')}</color></extensions>\n` +
+           `    <trkseg>\n${trkpts}\n    </trkseg>\n  </trk>`;
+  }).filter(Boolean).join('\n');
+  const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="HuntMap" xmlns="http://www.topografix.com/GPX/1/1">\n${wpts}${trks ? '\n' + trks : ''}\n</gpx>`;
   const blob = new Blob([gpx], { type: 'application/gpx+xml' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'huntmap-waypoints.gpx';
+  a.download = tracks.length ? 'huntmap-waypoints-and-tracks.gpx' : 'huntmap-waypoints.gpx';
   a.click();
   URL.revokeObjectURL(a.href);
 }
