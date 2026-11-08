@@ -72,7 +72,7 @@ void main(){
 
   // index contours every 5th line: heavier, warmer
   float isIndex = 1.0 - step(0.5, mod(floor(g), 5.0));
-  float ink = mix(0.30, 1.0, isIndex);
+  float ink = mix(0.42, 1.0, isIndex);
 
   // depth: valleys recede, crests catch light
   float shade = smoothstep(0.15, 0.95, h);
