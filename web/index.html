@@ -15,6 +15,7 @@
 <link href="/css/huntmap.css" rel="stylesheet"/>
 <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
 <script src="/js/hm-icons-boot.js"></script>
+<script src="/js/hm-markers.js"></script>
 
 <script src="/js/hm-theme.js"></script>
 </head>
@@ -1434,6 +1435,7 @@ async function loadMarkers() {
   } catch (e) { console.warn('loadMarkers:', e); }
 }
 
+window.updateMarkerLayer = function () { return updateMarkerLayer(); }; // debug/verification handle
 function updateMarkerLayer() {
   const paint = () => {
     if (!map.getSource('markers-src')) return;
@@ -1447,7 +1449,21 @@ function updateMarkerLayer() {
       })),
     });
   };
-  if (!map.isStyleLoaded()) { map.once('idle', updateMarkerLayer); return; }
+  /* Never gate on map 'idle' or isStyleLoaded(): both stay false while a basemap
+     tile is stalled, which silently kept markers off the map on bad connections.
+     Attempt the work and retry only if MapLibre says the style isn't ready. */
+  const armRetry = () => {
+    if (window._mkWaitArmed) return;
+    window._mkWaitArmed = true;
+    const retry = () => {
+      window._mkWaitArmed = false;
+      window._mkRetries = (window._mkRetries || 0) + 1;
+      if (window._mkRetries < 300) updateMarkerLayer();
+    };
+    map.once('style.load', retry);
+    clearTimeout(window._mkRetry);
+    window._mkRetry = setTimeout(retry, 350);
+  };
   const visible = markers.filter(m => markerKindsOn.has(m.kind));
   const fc = {
     type: 'FeatureCollection',
@@ -1457,19 +1473,30 @@ function updateMarkerLayer() {
       properties: { id: m.id, kind: m.kind, name: m.name || '', notes: m.notes || '', emoji: MK_EMOJI[m.kind] || '📍' },
     })),
   };
-  if (!map.getSource('markers-src')) {
-    map.addSource('markers-src', { type: 'geojson', data: fc });
-  } else {
-    map.getSource('markers-src').setData(fc);
+  try {
+    if (!map.getSource('markers-src')) {
+      map.addSource('markers-src', { type: 'geojson', data: fc });
+    } else {
+      map.getSource('markers-src').setData(fc);
+    }
+    if (!map.getLayer('markers-dots')) {
+      map.addLayer({
+        id: 'markers-dots', type: 'symbol', source: 'markers-src',
+        layout: markerSymbolLayout(),
+        paint: { 'icon-opacity': 1, 'text-opacity': 0.95 },
+      });
+    }
+  } catch (e) {
+    armRetry();   // style object not ready (stalled tile / slow style) — retry shortly
+    return;
   }
-  if (!map.getLayer('markers-dots')) {
-    map.addLayer({
-      id: 'markers-dots', type: 'symbol', source: 'markers-src',
-      layout: markerSymbolLayout(),
-      paint: { 'icon-opacity': 1, 'text-opacity': 0.95 },
-    });
-    if (!map.hasImage('mk-camp')) buildMarkerSprites().then(() => {
-      if (map.getLayer('markers-dots')) map.setLayoutProperty('markers-dots', 'layout', markerSymbolLayout());
+  /* Sprites arrive async; then swap the emoji fallback for real icons.
+     NB: setLayoutProperty(id, 'layout', {...}) throws in this MapLibre build
+     ("Cannot read properties of undefined (reading 'value')") — set each
+     layout key on its own instead. */
+  if (!window._mkSprites) {
+    buildMarkerSprites().then(() => {
+      applyMarkerLayout('markers-dots', markerSymbolLayout());
     });
   }
   // popup on click
@@ -2401,30 +2428,45 @@ else map.once('style.load', () => setTimeout(bootData, 900));
 /* ---------------- UI shell: boot splash + contour shader ---------------- */
 function markerSymbolLayout() {
   if (window._mkSprites) {
-    return { 'icon-image': ['concat', 'mk-', ['get', 'kind']], 'icon-size': 0.5,
-             'icon-allow-overlap': true, 'icon-ignore-placement': true };
+    return {
+      'icon-image': ['concat', 'mk-', ['get', 'kind']],
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.44, 11, 0.62, 15, 0.78],
+      'icon-anchor': 'bottom',
+      'icon-allow-overlap': true, 'icon-ignore-placement': true,
+    };
   }
   return { 'text-field': ['get', 'emoji'], 'text-size': 16, 'text-allow-overlap': true };
 }
+function applyMarkerLayout(id, layout) {
+  if (!map.getLayer(id)) return;
+  Object.entries(layout).forEach(([k, v]) => {
+    try { map.setLayoutProperty(id, k, v); } catch (e) { console.warn('layout', id, k, e.message); }
+  });
+}
 
+/* Filled badge sprites from js/hm-markers.js — one per kind plus a selected
+   variant, so selection is a sprite swap instead of a filter chain. */
 async function buildMarkerSprites() {
-  const css = getComputedStyle(document.documentElement);
-  const panel = css.getPropertyValue('--panel').trim() || '#111714';
-  const accent = css.getPropertyValue('--accent').trim() || '#FF6B1A';
-  const ink = css.getPropertyValue('--txt').trim() || '#E9EEEA';
-  const paths = window.HM_ICONS || {};
-  await Promise.all(Object.keys(MK_EMOJI).map(kind => new Promise(resolve => {
-    const inner = paths[window.HM_KIND_ICON[kind]] || paths.pin || '';
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24">'
-      + '<circle cx="12" cy="12" r="10.7" fill="' + panel + '" stroke="' + accent + '" stroke-width="1.2"/>'
-      + '<g fill="none" stroke="' + ink + '" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"'
-      + ' transform="translate(12,12) scale(0.60) translate(-12,-12)">' + inner + '</g></svg>';
-    const img = new Image();
-    img.onload = () => { try { if (!map.hasImage('mk-' + kind)) map.addImage('mk-' + kind, img, { pixelRatio: 2 }); } catch (e) {} resolve(); };
-    img.onerror = () => resolve();
-    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  })));
-  window._mkSprites = true;
+  if (!window.hmMarkerSprite) { window._mkSprites = false; return; }
+  const jobs = [];
+  Object.keys(MK_EMOJI).forEach(kind => {
+    [[], [{ selected: true }]].forEach((opts, i) => {
+      const name = 'mk-' + kind + (i ? '-sel' : '');
+      if (map.hasImage(name)) return;
+      jobs.push(new Promise(resolve => {
+        const s = window.hmMarkerSprite(kind, opts[0] || {});
+        const img = new Image();
+        img.onload = () => {
+          try { if (!map.hasImage(name)) map.addImage(name, img, { pixelRatio: 2 }); } catch (e) {}
+          resolve();
+        };
+        img.onerror = () => resolve();
+        img.src = s.url;
+      }));
+    });
+  });
+  await Promise.all(jobs);
+  window._mkSprites = jobs.length >= 0;
 }
 
 /* brand plate + boot splash get the contour field */

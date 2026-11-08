@@ -1,0 +1,44 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>marker sprites</title>
+<style>
+  body{background:#0B0F0D;color:#E9EEEA;font:13px/1.4 system-ui;margin:0;padding:24px}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9AA8A1;margin:26px 0 10px}
+  .row{display:flex;gap:22px;align-items:flex-end;flex-wrap:wrap}
+  .cell{text-align:center}
+  .cell img{display:block}
+  .lbl{font-size:10px;color:#9AA8A1;margin-top:6px;letter-spacing:.06em;text-transform:uppercase}
+  .light{background:#F2EFE6;color:#1B1A17;padding:18px;border-radius:10px;margin-top:8px}
+  .light .lbl{color:#5A564E}
+  .map{background:#11160F url() ;height:130px;border-radius:10px;margin-top:8px;
+       background-image:linear-gradient(115deg,#141a12,#1d2419 40%,#252d20 70%,#171d14)}
+</style></head>
+<body>
+<h2>markers · 44×56 at 2x (as rendered on the map)</h2>
+<div class="row" id="big"></div>
+<h2>markers · actual map size (44px tall)</h2>
+<div class="row" id="small"></div>
+<h2>on a light basemap</h2>
+<div class="light"><div class="row" id="light"></div></div>
+<h2>on a dark map patch</h2>
+<div class="map"><div class="row" id="dark" style="padding:10px"></div></div>
+<script src="/js/hm-markers.js"></script>
+<script>
+const kinds = Object.keys(window.HM_MARKER_KINDS);
+function fill(el, scale, opts) {
+  el.innerHTML = kinds.map(k => {
+    const s = window.hmMarkerSprite(k, opts || {});
+    const def = window.HM_MARKER_KINDS[k];
+    return `<div class="cell"><img src="${s.url}" style="width:${44*scale}px;height:${56*scale}px">
+            <div class="lbl">${k}</div></div>`;
+  }).join('');
+}
+fill(document.getElementById('big'), 1.5);
+fill(document.getElementById('small'), 1);
+fill(document.getElementById('light'), 1);
+fill(document.getElementById('dark'), 1);
+// selected variant
+const sel = window.hmMarkerSprite('harvested', { selected: true });
+document.getElementById('dark').insertAdjacentHTML('beforeend',
+  `<div class="cell"><img src="${sel.url}" style="width:44px;height:56px"><div class="lbl">selected</div></div>`);
+</script>
+</body></html>
