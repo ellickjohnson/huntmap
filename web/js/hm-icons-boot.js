@@ -40,6 +40,7 @@ const ICONS = {
   /* ui atoms */
   plus:       '<path d="M12 5v14"/><path d="M5 12h14"/>',
   download:   '<path d="M12 3.5v11.5"/><path d="m7.5 11 4.5 4.5 4.5-4.5"/><path d="M4.5 20.5h15"/>',
+  upload:     '<path d="M12 20.5V9"/><path d="m7.5 13 4.5-4.5 4.5 4.5"/><path d="M4.5 3.5h15"/>',
   check:      '<path d="M20 6.5 9.2 17.3 4 12.1"/>',
   x:          '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   chevronDown:'<path d="m6 9 6 6 6-6"/>',

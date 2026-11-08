@@ -15,9 +15,11 @@
 <link href="/css/huntmap.css" rel="stylesheet"/>
 <link href="/css/hm-points.css" rel="stylesheet"/>
 <link href="/css/hm-plan.css" rel="stylesheet"/>
+<link href="/css/hm-import.css" rel="stylesheet"/>
 <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
 <script src="/js/hm-icons-boot.js"></script>
 <script src="/js/hm-markers.js"></script>
+<script src="/js/hm-gpx.js"></script>
 <script src="/js/hm-points.js"></script>
 <script src="/js/hm-plan.js"></script>
 
@@ -196,6 +198,13 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg>GPX
             </button>
           </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+            <button id="gpxImportBtn" class="btn" style="flex:1" title="Import waypoints from a GPX file (onX, Garmin, Gaia, CalTopo)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-upload"/></svg>Import GPX
+            </button>
+            <input type="file" id="gpxFile" accept=".gpx,application/gpx+xml,text/xml" style="display:none">
+          </div>
+          <div id="gpxPreview"></div>
           <div id="addMarkerBar" style="display:none;margin-top:8px;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)">
             <div style="font-size:11px;color:var(--dim);margin-bottom:6px">Click the map to place it, then pick a kind:</div>
             <div class="toggles" id="markerKindPick" style="margin-bottom:7px">
@@ -215,6 +224,7 @@
             </div>
           </div>
           <div id="markerList" style="margin-top:8px;max-height:170px;overflow-y:auto;overscroll-behavior:contain"></div>
+          <div id="trackList" style="margin-top:6px;max-height:190px;overflow-y:auto;overscroll-behavior:contain"></div>
         </div>
       </div>
     </div>
@@ -821,6 +831,7 @@ const BUILDERS = {
     if (head) head.style.display = 'none';
     if (sec) { sec.style.display = ''; sec.style.flex = 'none'; body.appendChild(sec); }
     if (typeof loadMarkers === 'function') loadMarkers();  // refresh list each time popup opens
+    if (typeof loadTracks === 'function') loadTracks();
   },
   railAI: body => {
     body.innerHTML = `
@@ -1454,7 +1465,74 @@ async function loadMarkers() {
   } catch (e) { console.warn('loadMarkers:', e); }
 }
 
+/* ---------------- imported GPX tracks (polylines) ---------------- */
+let tracks = [];
+let tracksOn = true;
+
+async function loadTracks() {
+  try {
+    const r = await fetch('/api/tracks');
+    if (!r.ok) return;
+    const d = await r.json();
+    tracks = d.tracks || [];
+    renderTrackList();
+    try { updateTrackLayer(); } catch (e) { console.warn('track layer', e); }
+  } catch (e) { console.warn('loadTracks:', e); }
+}
+window.hmReloadTracks = loadTracks;
+
+function updateTrackLayer() {
+  if (!map || typeof map.addSource !== 'function') return;
+  const fc = {
+    type: 'FeatureCollection',
+    features: (tracksOn ? tracks : []).map(t => ({
+      type: 'Feature',
+      properties: { id: t.id, name: t.name || '', color: t.color || '#FF6B1A' },
+      geometry: t.geojson,
+    })),
+  };
+  try {
+    if (!map.getSource('tracks-src')) {
+      map.addSource('tracks-src', { type: 'geojson', data: fc });
+    } else {
+      map.getSource('tracks-src').setData(fc);
+    }
+    // Casing first: onX exports tracks in cyan/black, which disappears on a dark
+    // basemap. A dark halo under the coloured core keeps any colour legible.
+    if (!map.getLayer('tracks-casing')) {
+      const before = map.getLayer('markers-dots') ? 'markers-dots' : undefined;
+      map.addLayer({
+        id: 'tracks-casing', type: 'line', source: 'tracks-src',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': 'rgba(0,0,0,0.55)',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 8, 3.4, 13, 5.0],
+          'line-opacity': 0.9,
+        },
+      }, before);
+    }
+    if (!map.getLayer('tracks-line')) {
+      const before = map.getLayer('markers-dots') ? 'markers-dots' : undefined;
+      map.addLayer({
+        id: 'tracks-line', type: 'line', source: 'tracks-src',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.4, 13, 2.6],
+          'line-opacity': 0.8,
+        },
+      }, before);
+    }
+  } catch (e) {
+    // style not ready (stalled tile / mid style swap) — retry without gating on isStyleLoaded
+    clearTimeout(window._trkRetry);
+    window._trkRetry = setTimeout(() => { try { updateTrackLayer(); } catch (e2) {} }, 400);
+  }
+}
+window.updateTrackLayer = () => updateTrackLayer();
+
 window.updateMarkerLayer = function () { return updateMarkerLayer(); }; // debug/verification handle
+window.hmReloadMarkers = loadMarkers;   // GPX import calls this after a bulk insert
 function updateMarkerLayer() {
   const paint = () => {
     if (!map.getSource('markers-src')) return;
@@ -1718,6 +1796,45 @@ function renderMarkerList() {
   el.querySelectorAll('[data-mkid]').forEach(row => {
     row.addEventListener('click', () => window.gotoMarker(parseInt(row.dataset.mkid)));
   });
+}
+
+function renderTrackList() {
+  const el = document.getElementById('trackList');
+  if (!el) return;
+  if (!tracks.length) { el.innerHTML = ''; return; }
+  const total = tracks.reduce((s, t) => s + (t.distance_m || 0), 0);
+  el.innerHTML =
+    `<div class="tk-head">Tracks <b>${tracks.length}</b> · ${(total / 1609.34).toFixed(1)} mi` +
+    `<label class="tk-toggle"><input type="checkbox" id="trackToggle" ${tracksOn ? 'checked' : ''}> show</label></div>` +
+    tracks.map(t => `<div class="mk-row tk-row" data-trk="${t.id}">
+       <span class="tk-swatch" style="background:${t.color || '#FF6B1A'}"></span>
+       <span class="mk-name">${t.name || 'Track'}</span>
+       <span class="tk-meta">${((t.distance_m || 0) / 1609.34).toFixed(1)} mi</span>
+       <button class="mk-del" title="Delete" onclick="event.stopPropagation();deleteTrack(${t.id})">✕</button>
+     </div>`).join('');
+  el.querySelectorAll('[data-trk]').forEach(row => {
+    row.addEventListener('click', () => zoomToTrack(parseInt(row.dataset.trk)));
+  });
+  const tg = el.querySelector('#trackToggle');
+  if (tg) tg.addEventListener('change', () => { tracksOn = tg.checked; updateTrackLayer(); });
+}
+
+function zoomToTrack(id) {
+  const t = tracks.find(x => x.id === id);
+  if (!t || !t.geojson || !t.geojson.coordinates.length) return;
+  const b = new maplibregl.LngLatBounds();
+  t.geojson.coordinates.forEach(c => b.extend(c));
+  map.fitBounds(b, { padding: 60, maxZoom: 14 });
+}
+
+async function deleteTrack(id) {
+  try {
+    await fetch('/api/tracks', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id }),
+    });
+  } catch (e) { /* ignore */ }
+  loadTracks();
 }
 
 // placing flow
@@ -2401,6 +2518,7 @@ map.on('style.load', () => {
   updateHotspotLayer();
   applySlopeGate(); // basemap switch wiped slope source/layer — re-add if toggle on + zoom gate ok
   if (window.applyMeasureVisibility) window.applyMeasureVisibility(); // same re-ensure for the measure source/layer
+  updateTrackLayer();   // imported GPX polylines
 });
 map.on('idle', () => {
   // safety net: if layers got dropped (style race), re-ensure
@@ -2430,6 +2548,7 @@ async function bootData() {
     wireClicks();
     ensureUnitLayers();
     loadMarkers();   // user markers
+    loadTracks();    // imported GPX polylines
     renderUnitList(); // populate list immediately (no viewport change needed)
     // unit was clicked before data finished loading? re-render it now
     const dbox = document.getElementById('detail');

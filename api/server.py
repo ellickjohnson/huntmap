@@ -91,6 +91,17 @@ def init_authdb():
         created_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_markers_user ON markers(user_id);
+    CREATE TABLE IF NOT EXISTS tracks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        name TEXT,
+        color TEXT,               -- #rrggbb
+        geojson TEXT NOT NULL,    -- {"type":"LineString","coordinates":[[lon,lat],...]}
+        points INTEGER,           -- original vertex count before simplification
+        distance_m REAL,
+        created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_tracks_user ON tracks(user_id);
     CREATE TABLE IF NOT EXISTS user_profiles (
         user_id INTEGER PRIMARY KEY,
         residency TEXT NOT NULL DEFAULT 'res',   -- res | nr
@@ -569,6 +580,7 @@ class Handler(SimpleHTTPRequestHandler):
             '/api/users/update': lambda: self.api_user_update(body),
             '/api/admin/settings': lambda: self.api_admin_settings(body),
             '/api/markers': lambda: self.api_markers(body),
+            '/api/tracks': lambda: self.api_tracks(body),
             '/api/markers/delete': lambda: self.api_marker_delete(body),
             '/api/markers/update': lambda: self.api_marker_update(body),
             '/api/forgot': lambda: self.api_forgot(body),
@@ -1092,6 +1104,96 @@ h1{{color:{color};font-size:20px}} p{{line-height:1.5}}
             return
         con = sqlite3.connect(AUTHDB)
         con.row_factory = sqlite3.Row
+        if body and body.get('action') == 'import':
+            # Bulk import (GPX from onX / Garmin / Gaia). Deduped on kind + ~11 m grid
+            # so re-importing the same file twice does not double every pin.
+            items = body.get('markers') or []
+            tracks = body.get('tracks') or []
+            if not isinstance(items, list) or not isinstance(tracks, list):
+                con.close()
+                return self.send_json({'error': 'markers and tracks must be lists'}, 400)
+            if len(items) > 2000:
+                con.close()
+                return self.send_json({'error': 'too many markers in one import (max 2000)'}, 400)
+            seen = {(r['kind'], round(r['lat'], 4), round(r['lon'], 4))
+                    for r in con.execute('SELECT kind, lat, lon FROM markers WHERE user_id=?', (u['id'],))}
+            now = int(time.time())
+            inserted = skipped = invalid = 0
+            for it in items:
+                if not isinstance(it, dict):
+                    invalid += 1
+                    continue
+                kind = str(it.get('kind') or 'waypoint').strip().lower()
+                if kind not in self.MARKER_KINDS:
+                    invalid += 1
+                    continue
+                try:
+                    lat, lon = float(it['lat']), float(it['lon'])
+                except (KeyError, TypeError, ValueError):
+                    invalid += 1
+                    continue
+                if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+                    invalid += 1
+                    continue
+                key = (kind, round(lat, 4), round(lon, 4))
+                if key in seen:
+                    skipped += 1
+                    continue
+                seen.add(key)
+                ts = it.get('created_at')
+                if not isinstance(ts, int) or ts < 946684800 or ts > now + 31536000:
+                    ts = now
+                con.execute(
+                    'INSERT INTO markers (user_id,kind,name,notes,lat,lon,created_at) VALUES (?,?,?,?,?,?,?)',
+                    (u['id'], kind, str(it.get('name') or '')[:120],
+                     str(it.get('notes') or '')[:2000], lat, lon, ts))
+                inserted += 1
+            # tracks: simplified polylines, deduped on name + vertex count + first point
+            t_seen = {(r['name'], r['points']) for r in con.execute(
+                'SELECT name, points FROM tracks WHERE user_id=?', (u['id'],))}
+            t_inserted = t_skipped = t_invalid = 0
+            for tr in tracks:
+                if not isinstance(tr, dict):
+                    t_invalid += 1
+                    continue
+                geo = tr.get('geojson') or {}
+                coords = geo.get('coordinates') if isinstance(geo, dict) else None
+                if not isinstance(coords, list) or len(coords) < 2:
+                    t_invalid += 1
+                    continue
+                clean = []
+                for c in coords:
+                    try:
+                        lon, lat = float(c[0]), float(c[1])
+                    except (TypeError, ValueError, IndexError):
+                        continue
+                    if -180 <= lon <= 180 and -90 <= lat <= 90:
+                        clean.append([round(lon, 6), round(lat, 6)])
+                if len(clean) < 2:
+                    t_invalid += 1
+                    continue
+                name = str(tr.get('name') or 'Track')[:120]
+                pts = int(tr.get('points') or len(clean))
+                if (name, pts) in t_seen:
+                    t_skipped += 1
+                    continue
+                t_seen.add((name, pts))
+                color = str(tr.get('color') or '#FF6B1A')[:9]
+                ts = tr.get('created_at')
+                if not isinstance(ts, int) or ts < 946684800 or ts > now + 31536000:
+                    ts = now
+                con.execute(
+                    'INSERT INTO tracks (user_id,name,color,geojson,points,distance_m,created_at)'
+                    ' VALUES (?,?,?,?,?,?,?)',
+                    (u['id'], name, color,
+                     json.dumps({'type': 'LineString', 'coordinates': clean}, separators=(',', ':')),
+                     pts, float(tr.get('distance_m') or 0), ts))
+                t_inserted += 1
+            con.commit()
+            con.close()
+            return self.send_json({'ok': True, 'inserted': inserted, 'skipped': skipped,
+                                   'invalid': invalid, 'tracks_inserted': t_inserted,
+                                   'tracks_skipped': t_skipped, 'tracks_invalid': t_invalid})
         if body and body.get('action') == 'add':
             kind = (body.get('kind') or '').strip().lower()
             if kind not in self.MARKER_KINDS:
@@ -1116,6 +1218,31 @@ h1{{color:{color};font-size:20px}} p{{line-height:1.5}}
             (u['id'],))]
         con.close()
         self.send_json({'markers': rows})
+
+    def api_tracks(self, body):
+        """List the user's imported tracks, or delete one."""
+        u = self.require_auth()
+        if not u:
+            return
+        con = sqlite3.connect(AUTHDB)
+        con.row_factory = sqlite3.Row
+        if body and body.get('action') == 'delete':
+            tid = body.get('id')
+            if not tid:
+                con.close()
+                return self.send_json({'error': 'id required'}, 400)
+            con.execute('DELETE FROM tracks WHERE id=? AND user_id=?', (tid, u['id']))
+            con.commit()
+            con.close()
+            return self.send_json({'ok': True})
+        rows = []
+        for r in con.execute('SELECT id,name,color,geojson,points,distance_m,created_at'
+                             ' FROM tracks WHERE user_id=? ORDER BY created_at DESC', (u['id'],)):
+            d = dict(r)
+            d['geojson'] = json.loads(d['geojson'])
+            rows.append(d)
+        con.close()
+        self.send_json({'tracks': rows})
 
     def api_marker_update(self, body):
         u = self.require_auth()
