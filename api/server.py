@@ -515,7 +515,10 @@ class Handler(SimpleHTTPRequestHandler):
             code = (qs.get('code') or [''])[0]
             kind = (qs.get('kind') or ['verify'])[0]
             return self.do_verify(code, kind)
-        if u.path in self.PUBLIC_GET or u.path.startswith('/login') or u.path.startswith('/admin') or u.path in self.PUBLIC_DATA:
+        # public static assets: styles, scripts, icons — needed to render the login page itself
+        if (u.path in self.PUBLIC_GET or u.path.startswith('/login') or u.path.startswith('/admin')
+                or u.path.startswith('/css/') or u.path.startswith('/js/')
+                or u.path in self.PUBLIC_DATA):
             return super().do_GET()
         # everything else requires login
         if not self.me():
