@@ -2420,9 +2420,9 @@ async function buildMarkerSprites() {
 (function mountShaders() {
   try {
     const brand = document.getElementById('brandCanvas');
-    if (brand) mountContour(brand, { scale: 1.5, strength: 0.5, density: 12 });
+    if (brand) mountContour(brand, { scale: 1.5, strength: 0.45, density: 12 });
     const boot = document.getElementById('bootCanvas');
-    if (boot) mountContour(boot, { scale: 2.6, strength: 0.75, density: 24 });
+    if (boot) mountContour(boot, { scale: 2.6, strength: 0.58, density: 24 });
   } catch (e) { console.warn('contour:', e); }
   const b = document.getElementById('boot');
   if (!b) return;

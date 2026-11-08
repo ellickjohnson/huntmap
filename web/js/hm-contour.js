@@ -80,7 +80,7 @@ void main(){
   // vignette keeps the centre readable and the corners quiet
   float vig = smoothstep(1.35, 0.15, length((uv - 0.5) * vec2(1.35, 1.0)));
 
-  vec3 col = mix(u_line, u_hot, shade * 0.85);
+  vec3 col = mix(u_line, u_hot, shade * 0.50);
   float a = line * ink * u_strength * vig;
 
   // fine grain so flat areas are never plasticky
