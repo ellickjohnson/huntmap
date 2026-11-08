@@ -1,0 +1,85 @@
+/* ============================================================
+   PLAN panel styling — decision rows.
+   ============================================================ */
+
+.pl-wrap { display: flex; flex-direction: column; gap: 10px; }
+
+.pl-head { display: flex; flex-direction: column; gap: 8px; }
+.pl-sum {
+  font-size: 12px; color: var(--txt2); line-height: 1.55;
+  border: 1px solid var(--line); border-radius: var(--radius-m);
+  background: var(--panel2); padding: 10px 11px;
+}
+.pl-sum b { color: var(--txt); font-family: var(--font-mono, monospace); }
+.pl-sum span { color: var(--txt3); font-size: 11.5px; }
+
+.pl-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pl-filters .pt-seg { flex: 0 0 128px; }
+.pl-chk {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10.5px; color: var(--txt3); letter-spacing: .04em; text-transform: uppercase;
+  cursor: pointer;
+}
+.pl-chk input { accent-color: var(--accent); }
+
+.pl-list { display: flex; flex-direction: column; gap: 2px; }
+.pl-grp {
+  font-family: var(--font-mono, monospace); font-size: 9.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--txt3);
+  padding: 12px 2px 5px; border-bottom: 1px solid var(--line);
+}
+.pl-grp:first-child { padding-top: 2px; }
+
+.pl-row {
+  display: grid; grid-template-columns: 34px 1fr auto auto; align-items: center; gap: 9px;
+  padding: 8px 4px; border-bottom: 1px solid var(--line);
+  cursor: pointer; transition: background .12s ease;
+}
+.pl-row:hover { background: var(--hover, rgba(255,255,255,.04)); }
+.pl-u {
+  font-family: var(--font-mono, monospace); font-size: 13px; font-weight: 600;
+  color: var(--txt); text-align: center; font-variant-numeric: tabular-nums;
+}
+.pl-mid { min-width: 0; }
+.pl-t { font-size: 11.5px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-sub { font-size: 10px; color: var(--txt3); margin-top: 2px; }
+.pl-tag {
+  font-family: var(--font-mono, monospace); font-size: 8.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--bg); background: var(--txt3);
+  border-radius: 3px; padding: 1px 4px; vertical-align: 1px;
+}
+.pl-su, .pl-od { text-align: right; display: flex; flex-direction: column; gap: 1px; }
+.pl-su b, .pl-od b {
+  font-family: var(--font-mono, monospace); font-size: 12.5px; color: var(--txt);
+  font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+.pl-od b { color: var(--accent); }
+.pl-su span, .pl-od span {
+  font-size: 8.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--txt3);
+}
+.pl-up { color: var(--accent2, #58C8A8); font-size: 9px; }
+.pl-dn { color: #E08A6A; font-size: 9px; }
+.pl-empty { font-size: 11.5px; color: var(--txt3); padding: 10px 2px; }
+.pl-hint { color: var(--txt3); font-size: 10.5px; font-style: italic; }
+
+.pl-row.open { background: var(--panel2); }
+.pl-why {
+  grid-column: 1 / -1;
+  display: flex; flex-direction: column; gap: 5px;
+  margin: 6px 0 2px; padding: 9px 10px;
+  border-left: 2px solid var(--accent);
+  background: var(--bg);
+  border-radius: 0 6px 6px 0;
+  cursor: default;
+}
+.pl-why-row { display: grid; grid-template-columns: 58px 1fr; gap: 8px; font-size: 11px; color: var(--txt2); line-height: 1.5; }
+.pl-why-row b { color: var(--txt); font-weight: 600; }
+.pl-k {
+  font-family: var(--font-mono, monospace); font-size: 8.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--txt3); padding-top: 2px;
+}
+.pl-why-foot {
+  margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--line);
+  font-size: 10.5px; color: var(--txt3); line-height: 1.5;
+}
+.pl-why-foot b { color: var(--txt2); font-family: var(--font-mono, monospace); }

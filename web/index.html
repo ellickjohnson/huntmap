@@ -13,9 +13,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet"/>
 <link href="/css/huntmap.css" rel="stylesheet"/>
+<link href="/css/hm-points.css" rel="stylesheet"/>
+<link href="/css/hm-plan.css" rel="stylesheet"/>
 <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
 <script src="/js/hm-icons-boot.js"></script>
 <script src="/js/hm-markers.js"></script>
+<script src="/js/hm-points.js"></script>
+<script src="/js/hm-plan.js"></script>
 
 <script src="/js/hm-theme.js"></script>
 </head>
@@ -43,6 +47,10 @@
   </div>
 
   <nav id="railNav" aria-label="Map tools">
+    <button class="railBtn" id="railPlan" title="Where to hunt">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compass"/></svg></span>
+      <span class="lbl">Plan</span>
+    </button>
     <button class="railBtn" id="railMap" title="Map style">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-map"/></svg></span>
       <span class="lbl">Map</span>
@@ -725,7 +733,8 @@ function setTerrain(on) {
 // ---------------- left panel controller: sections switch inside the panel ----------------
 
 const SECTION_DEFS = [
-  { key: 'railMap',     icon: '🗺️', title: 'Map style' },
+  { key: 'railPlan',    icon: '', title: 'Where to hunt' },
+  { key: 'railMap',     icon: '', title: 'Map style' },
   { key: 'railLayers',  icon: '📚', title: 'Layers' },
   { key: 'railSearch',  icon: '🔍', title: 'Search' },
   { key: 'railMarkers', icon: '📍', title: 'Markers' },
@@ -874,6 +883,9 @@ const BUILDERS = {
       }
     }).catch(() => addMsg('assistant', md('Could not load history.')));
   },
+  railPlan: body => {
+    if (window.hmPlanPanel) body.appendChild(window.hmPlanPanel());
+  },
   railProfile: body => {
     if (!window._signedIn) {
       body.innerHTML = '<div style="font-size:13px;color:var(--dim);padding:8px 0">Not signed in. <a href="/login.html" style="color:#5eead4">Sign in</a> to manage your profile.</div>';
@@ -895,6 +907,12 @@ const BUILDERS = {
       <button class="panelBtn wide" id="pfPwBtn"><span>🔑</span><span>Change password</span></button>
     `;
     body.appendChild(wrap);
+    /* draw points sit above the account fields — they are the thing you open
+       this panel for once your account is set up */
+    if (window.hmPointsCard) {
+      body.insertBefore(window.hmPointsCard(), body.firstChild);
+      body.insertBefore(document.createElement('div'), wrap);
+    }
     const show = (txt, kind) => {
       const m = wrap.querySelector('#pfMsg');
       m.textContent = txt; m.className = 'pmsg ' + kind; m.style.display = 'block';
@@ -1063,6 +1081,7 @@ map.on('dragstart', () => { if (!placingActive()) railHide(); });
 map.on('zoomstart', () => { if (!placingActive() && menu.classList.contains('open')) railHide(); });
 
 // ---------------- selection & detail ----------------
+window.focusUnit = uid => selectUnit(uid); // plan rows jump to a unit
 function selectUnit(uid) {
   selectedGmu = uid;
   const u = UNITS.features.find(f => f.properties.gmuid === uid);
@@ -2404,6 +2423,9 @@ async function bootData() {
       UNITS.features.forEach(f => { const d = PRED[f.properties.gmuid]; if (d) f.properties.crossover_score = d.crossover_score; });
     }
     stampSuccessYear();
+    // exposed so the plan panel can cite real history instead of asking for it again
+    window.HARVEST_HISTORY = HISTORY;
+    window.HM_PRED = PRED;
     UNITS.features.forEach(f => { f.properties._c = centroidOf(f); });
     wireClicks();
     ensureUnitLayers();

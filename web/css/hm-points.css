@@ -1,0 +1,75 @@
+/* ============================================================
+   Draw-points card (profile) — balance, residency, event log.
+   Events are the source of truth: applied +1, drew = balance
+   zeroed, bought +1, adjust = set to a known balance.
+   ============================================================ */
+
+.pt-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--panel2);
+  padding: 12px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pt-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+}
+.pt-title {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--txt3);
+}
+.pt-bal { display: flex; align-items: baseline; gap: 5px; }
+.pt-bal b {
+  font-family: var(--font-mono, monospace);
+  font-size: 22px; line-height: 1; color: var(--txt);
+  font-variant-numeric: tabular-nums;
+}
+.pt-bal span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--txt3); }
+
+.pt-seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.pt-seg button {
+  flex: 1; appearance: none; border: 0; background: transparent; cursor: pointer;
+  padding: 7px 4px; color: var(--txt3);
+  font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  transition: background .15s var(--ease, ease), color .15s var(--ease, ease);
+}
+.pt-seg button + button { border-left: 1px solid var(--line); }
+.pt-seg button:hover { color: var(--txt); background: var(--hover, rgba(255,255,255,.04)); }
+.pt-seg button.on { background: var(--accent); color: #14100C; font-weight: 600; }
+
+.pt-form { display: grid; grid-template-columns: 74px 1fr; gap: 6px; }
+.pt-form select, .pt-form input {
+  width: 100%; background: var(--bg); color: var(--txt);
+  border: 1px solid var(--line); border-radius: 7px; padding: 7px 8px;
+  font-family: inherit; font-size: 12px;
+}
+.pt-form .pt-wide { grid-column: 1 / -1; }
+.pt-add {
+  grid-column: 1 / -1; appearance: none; border: 0; cursor: pointer;
+  background: var(--accent); color: #14100C; border-radius: 7px;
+  padding: 9px; font-weight: 600; font-size: 12px; letter-spacing: .02em;
+}
+.pt-add:hover { filter: brightness(1.08); }
+.pt-add:disabled { opacity: .5; cursor: default; }
+
+.pt-list { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
+.pt-ev {
+  display: grid; grid-template-columns: 40px 1fr auto 20px; align-items: center; gap: 8px;
+  padding: 6px 2px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--txt2);
+}
+.pt-ev:first-child { border-top: 0; }
+.pt-ev .yr { font-family: var(--font-mono, monospace); color: var(--txt3); font-size: 10.5px; }
+.pt-ev .d { font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; }
+.pt-ev .d.pos { color: var(--accent2, #58C8A8); }
+.pt-ev .d.neg { color: #E08A6A; }
+.pt-ev button {
+  appearance: none; border: 0; background: transparent; color: var(--txt3);
+  cursor: pointer; font-size: 13px; line-height: 1; padding: 2px;
+}
+.pt-ev button:hover { color: #E08A6A; }
+.pt-empty { font-size: 11.5px; color: var(--txt3); padding: 4px 0; }
+.pt-note { font-size: 10.5px; color: var(--txt3); line-height: 1.5; }
+.pt-note b { color: var(--txt2); font-weight: 600; }

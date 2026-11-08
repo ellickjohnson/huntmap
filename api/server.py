@@ -91,6 +91,23 @@ def init_authdb():
         created_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_markers_user ON markers(user_id);
+    CREATE TABLE IF NOT EXISTS user_profiles (
+        user_id INTEGER PRIMARY KEY,
+        residency TEXT NOT NULL DEFAULT 'res',   -- res | nr
+        weapon TEXT NOT NULL DEFAULT 'rifle',    -- rifle | archery | muzzleloader
+        species TEXT NOT NULL DEFAULT 'elk'
+    );
+    CREATE TABLE IF NOT EXISTS point_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        species TEXT NOT NULL DEFAULT 'elk',
+        year INTEGER NOT NULL,
+        kind TEXT NOT NULL,          -- applied | drew | purchased | adjust
+        points INTEGER NOT NULL,     -- signed delta applied to the balance
+        note TEXT,
+        created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_points_user ON point_events(user_id, species);
     CREATE TABLE IF NOT EXISTS ai_chat (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -563,6 +580,10 @@ class Handler(SimpleHTTPRequestHandler):
             '/api/ai/chat/history': lambda: self.api_ai_chat_history(),
             '/api/ai/chat/clear': lambda: self.api_ai_chat_clear(),
             '/api/weather': lambda: self.api_weather(query),
+            '/api/points': lambda: self.api_points(body),
+            '/api/points/delete': lambda: self.api_points_delete(body),
+            '/api/profile/prefs': lambda: self.api_profile_prefs(body),
+            '/api/drawodds': lambda: self.api_drawodds(query),
         }
         fn = m.get(path)
         if fn:
@@ -570,6 +591,117 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_json({'error': 'Not found'}, 404)
 
     # endpoints ------------------------------------------------------------
+    # ---- draw points -----------------------------------------------------
+    POINT_KINDS = {'applied', 'drew', 'purchased', 'adjust'}
+
+    def _profile(self, con, uid):
+        row = con.execute('select residency, weapon, species from user_profiles where user_id=?',
+                          (uid,)).fetchone()
+        if not row:
+            con.execute('insert into user_profiles (user_id, residency, weapon, species) values (?,?,?,?)',
+                        (uid, 'res', 'rifle', 'elk'))
+            con.commit()
+            return {'residency': 'res', 'weapon': 'rifle', 'species': 'elk'}
+        return {'residency': row[0], 'weapon': row[1], 'species': row[2]}
+
+    def api_profile_prefs(self, body):
+        """Update residency / weapon / primary species."""
+        u = self.require_auth()
+        if not u:
+            return
+        con = sqlite3.connect(AUTHDB)
+        self._profile(con, u['id'])
+        for k, allowed in (('residency', ('res', 'nr')), ('weapon', ('rifle', 'archery', 'muzzleloader'))):
+            v = (body.get(k) or '').strip().lower()
+            if v:
+                if v not in allowed:
+                    con.close()
+                    return self.send_json({'error': f'{k} must be one of {", ".join(allowed)}'}, 400)
+                con.execute(f'update user_profiles set {k}=? where user_id=?', (v, u['id']))
+        sp = (body.get('species') or '').strip().lower()
+        if sp:
+            con.execute('update user_profiles set species=? where user_id=?', (sp, u['id']))
+        con.commit()
+        prof = self._profile(con, u['id'])
+        con.close()
+        self.send_json({'ok': True, 'profile': prof})
+
+    def api_points(self, body):
+        """GET  -> balances + event history.  POST {action:'add'} -> log an event."""
+        u = self.require_auth()
+        if not u:
+            return
+        con = sqlite3.connect(AUTHDB)
+        con.row_factory = sqlite3.Row
+        prof = self._profile(con, u['id'])
+        if body and body.get('action') == 'add':
+            kind = (body.get('kind') or '').strip().lower()
+            if kind not in self.POINT_KINDS:
+                con.close()
+                return self.send_json({'error': f'kind must be one of {", ".join(sorted(self.POINT_KINDS))}'}, 400)
+            species = (body.get('species') or prof['species']).strip().lower()[:24]
+            try:
+                year = int(body.get('year'))
+            except (TypeError, ValueError):
+                con.close()
+                return self.send_json({'error': 'year is required'}, 400)
+            if not (1990 <= year <= 2100):
+                con.close()
+                return self.send_json({'error': 'year out of range'}, 400)
+            have = con.execute('select coalesce(sum(points),0) from point_events where user_id=? and species=?',
+                               (u['id'], species)).fetchone()[0]
+            if kind in ('applied', 'purchased'):
+                pts = 1
+            elif kind == 'drew':
+                pts = -have          # drawing a limited tag zeroes the balance
+            else:                     # adjust: body.points is the true balance
+                try:
+                    pts = int(body.get('points')) - have
+                except (TypeError, ValueError):
+                    con.close()
+                    return self.send_json({'error': 'points required for adjust'}, 400)
+            con.execute('insert into point_events (user_id, species, year, kind, points, note, created_at) values (?,?,?,?,?,?,?)',
+                        (u['id'], species, year, kind, pts, (body.get('note') or '')[:200], int(time.time())))
+            con.commit()
+
+        balances = {r[0]: r[1] for r in con.execute(
+            'select species, sum(points) from point_events where user_id=? group by species', (u['id'],))}
+        events = [dict(r) for r in con.execute(
+            'select id, species, year, kind, points, note from point_events where user_id=? order by year desc, id desc',
+            (u['id'],))]
+        con.close()
+        self.send_json({'profile': prof, 'balances': balances, 'events': events})
+
+    def api_points_delete(self, body):
+        u = self.require_auth()
+        if not u:
+            return
+        try:
+            pid = int(body.get('id'))
+        except (TypeError, ValueError):
+            return self.send_json({'error': 'id required'}, 400)
+        con = sqlite3.connect(AUTHDB)
+        con.execute('delete from point_events where id=? and user_id=?', (pid, u['id']))
+        con.commit()
+        con.close()
+        self.send_json({'ok': True})
+
+    def api_drawodds(self, query):
+        """GET /api/drawodds?code=EM014O1R -> per-point-level applicant/drawn rows."""
+        code = (parse_qs(query).get('code') or [''])[0].strip().upper()
+        if not code:
+            return self.send_json({'error': 'code required'}, 400)
+        path = os.path.join(WEB, 'data', 'draw_odds.json')
+        try:
+            with open(path) as f:
+                data = json.load(f)
+        except Exception as e:
+            return self.send_json({'error': f'odds not built yet ({e})'}, 503)
+        row = data.get(code)
+        if not row:
+            return self.send_json({'error': 'no such code'}, 404)
+        self.send_json({'code': code, **row})
+
     def api_weather(self, query):
         """GET /api/weather?lat=&lon= — signed-in proxy to Open-Meteo."""
         qs = parse_qs(query)
