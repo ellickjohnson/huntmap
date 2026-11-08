@@ -97,8 +97,8 @@ function hmPlanPanel() {
     const mult = (c.success / (statePct / 100)).toFixed(1);
 
     const histLine = hist
-      ? `${hist.first}–${hist.last}: averaged <b>${pct(hist.avg)}%</b> success over ${hist.n} years ` +
-        `(range ${pct(hist.min)}–${pct(hist.max)}%)`
+      ? `Unit-wide ${hist.first}–${hist.last}: <b>${pct(hist.avg)}%</b> averaged over ${hist.n} years ` +
+        `(range ${pct(hist.min)}–${pct(hist.max)}%) — all seasons and weapons in this GMU`
       : 'no multi-year record for this unit';
 
     const trendLine = Math.abs(c.trend_pp) >= 0.25
@@ -108,7 +108,7 @@ function hmPlanPanel() {
     return `<div class="pl-why">
       <div class="pl-why-row"><span class="pl-k">DRAW</span><span>${drawLine}</span></div>
       <div class="pl-why-row"><span class="pl-k">CUTOFF</span><span>${cutoffRes || 'not published for this code'}</span></div>
-      <div class="pl-why-row"><span class="pl-k">SUCCESS</span><span><b>${succPct}%</b> in 2025 (${c.harvest} of ${c.hunters} hunters) — ` +
+      <div class="pl-why-row"><span class="pl-k">THIS TAG</span><span><b>${succPct}%</b> in 2025 (${c.harvest} of ${c.hunters} hunters) — ` +
         `<b>${mult}×</b> the statewide ${statePct}%</span></div>
       <div class="pl-why-row"><span class="pl-k">HISTORY</span><span>${histLine}</span></div>
       <div class="pl-why-row"><span class="pl-k">ACCESS</span><span>${Math.round(c.public_pct)}% public land · quota ${c.quota ?? '—'} · ${c.cls_label.toLowerCase()}</span></div>
