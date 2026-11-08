@@ -759,40 +759,52 @@ html.theming, html.theming *, html.theming *::before, html.theming *::after{ tra
 
 /* ---------- 16. RESPONSIVE ---------- */
 @media (max-width: 820px){
-  :root{ --rail-w: 0px; --detail-w: auto; }
+  /* --bar-h is the real height of the phone bottom bar; every floating panel
+     anchors to it, so the bar can grow without overlays sliding underneath. */
+  :root{ --rail-w: 0px; --detail-w: auto; --bar-h: 75px; }
 
+  /* position:fixed, not absolute — on iOS Safari an absolutely positioned bar
+     anchors to the layout viewport and hides behind the browser chrome. */
   #sidePanel{
-    top:auto; left:0; right:0; bottom:0; width:auto; height:auto;
-    flex-direction:row; align-items:stretch;
+    position:fixed; top:auto; left:0; right:0; bottom:0; width:auto; height:auto;
+    flex-direction:column; align-items:stretch; z-index:30;
     border-right:0; border-top:1px solid var(--line);
     padding-bottom:var(--safe-b);
     box-shadow:0 -8px 30px rgba(0,0,0,.5);
   }
   #sidePanel.hidden{ transform:translateY(115%); }
   .railBrand{ display:none; }
-  #railNav{
-    flex-direction:row; flex:1; padding:5px 4px; gap:0;
-    border-bottom:0; overflow-x:auto; overflow-y:hidden;
-  }
-  .railBtn{ min-width:50px; padding:6px 4px 5px; gap:3px; }
-  .railBtn .ic, .railBtn .ic svg{ width:18px; height:18px; }
-  .railBtn .lbl{ font-size:7.5px; }
-  .railBtn.active::before{ left:6px; right:6px; top:auto; bottom:-5px; width:auto; height:2px; border-radius:2px 2px 0 0; }
-  #panelFooter{ flex-direction:row; border-top:0; border-left:1px solid var(--line); padding:4px 2px; gap:0; }
-  .panelUser{ display:none !important; }
   .railSpacer{ display:none; }  /* desktop-only rubber band; on phones it steals nav width */
-  /* footer is icon-only on phones so the five tool buttons always fit */
-  #panelFooter .railBtn{ min-width:38px; padding:6px 2px; }
+
+  /* row 1 — the sections. flex:1 each means six of them always fit; the old
+     min-width:50px + overflow-x:auto clipped 'Markers' and 'Ask' off-screen. */
+  #railNav{
+    flex-direction:row; flex:0 0 auto; padding:2px 2px 0; gap:0;
+    border-bottom:0; overflow:visible;
+  }
+  #railNav .railBtn{ flex:1 1 0; min-width:0; width:auto; padding:6px 1px 5px; gap:3px; }
+  .railBtn .ic, .railBtn .ic svg{ width:19px; height:19px; }
+  .railBtn .lbl{ font-size:7px; letter-spacing:0; white-space:nowrap; }
+  #railNav .railBtn.active::before{ left:9px; right:9px; top:auto; bottom:-3px; width:auto; height:2px; border-radius:2px 2px 0 0; }
+
+  /* row 2 — account actions, icon-only, spread across the full width */
+  #panelFooter{
+    flex-direction:row; border-top:1px solid var(--line); border-left:0;
+    padding:1px 2px 3px; gap:0;
+  }
+  #panelFooter .railBtn{ flex:1 1 0; min-width:0; width:auto; padding:4px 1px 3px; }
+  #panelFooter .railBtn .ic, #panelFooter .railBtn .ic svg{ width:16px; height:16px; }
   #panelFooter .railBtn .lbl{ display:none; }
+  .panelUser{ display:none !important; }
 
   #panelToggle{
-    top:auto; bottom:calc(72px + var(--safe-b)); left:10px; width:34px; height:38px;
+    top:auto; bottom:calc(var(--bar-h) + 10px + var(--safe-b)); left:10px; width:34px; height:38px;
     border:1px solid var(--line); border-radius:var(--r-sm);
   }
   #panelToggle.show{ left:10px; }
 
   #railMenu{
-    position:fixed; left:8px; right:8px; bottom:calc(66px + var(--safe-b)); top:auto !important;
+    position:fixed; left:8px; right:8px; bottom:calc(var(--bar-h) + var(--safe-b)); top:auto !important;
     width:auto; max-width:none; max-height:min(66vh, 560px);
     border-radius:var(--r-lg); transform-origin:bottom center;
   }
@@ -804,15 +816,15 @@ html.theming, html.theming *, html.theming *::before, html.theming *::after{ tra
 
   .detail{
     left:8px; right:8px; top:auto; width:auto;
-    bottom:calc(66px + var(--safe-b)); max-height:56vh;
+    bottom:calc(var(--bar-h) + var(--safe-b)); max-height:56vh;
     border-radius:var(--r-lg); transform-origin:bottom center;
   }
   .detail-head{ cursor:default; }
   .unit-list{ max-height:26vh; }
   .gmu-hover-tip{ display:none !important; }
-  #measureBar{ left:8px; right:8px; bottom:calc(70px + var(--safe-b)); justify-content:space-between; flex-wrap:wrap; }
-  #measurePanel{ left:8px; right:8px; width:auto; top:auto; bottom:calc(66px + var(--safe-b)); }
-  #toastWrap{ bottom:calc(78px + var(--safe-b)); }
+  #measureBar{ left:8px; right:8px; bottom:calc(var(--bar-h) + 6px + var(--safe-b)); justify-content:space-between; flex-wrap:wrap; }
+  #measurePanel{ left:8px; right:8px; width:auto; top:auto; bottom:calc(var(--bar-h) + var(--safe-b)); }
+  #toastWrap{ bottom:calc(var(--bar-h) + 14px + var(--safe-b)); }
 }
 
 /* ---------- 18. MARKER ROWS + POPUP KIND ---------- */

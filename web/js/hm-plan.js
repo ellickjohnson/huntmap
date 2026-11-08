@@ -19,11 +19,17 @@ function hmPlanPanel() {
   el.className = 'pl-wrap';
   el.innerHTML = `
     <div class="pl-head">
+      <div class="pt-seg pl-wpn" id="plWeapon">
+        <button data-v="archery">Archery</button>
+        <button data-v="muzzleloader">Muzzle</button>
+        <button data-v="rifle">Rifle</button>
+      </div>
       <div class="pl-sum" id="plSum">Loading draw odds…</div>
       <div class="pl-filters">
         <div class="pt-seg" id="plSex">
           <button data-v="bull">Bull</button>
           <button data-v="cow">Cow</button>
+          <button data-v="either">Either</button>
         </div>
         <label class="pl-chk"><input type="checkbox" id="plPlo"/> private</label>
         <label class="pl-chk"><input type="checkbox" id="plOtc"/> OTC</label>
@@ -33,7 +39,12 @@ function hmPlanPanel() {
   `;
   const $ = s => el.querySelector(s);
   let DATA = null;
-  const me = { points: 0, residency: 'res', weapon: 'rifle' };
+  // Archery first: that is the household's weapon, and CO archery is mostly
+  // over-the-counter, so OTC codes must not be filtered out by default.
+  const me = { points: 0, residency: 'res', weapon: 'archery' };
+  // Most archery tags are either-sex (74 of 88 in the recap); defaulting the sex
+  // filter to bull would hide nearly every archery opportunity.
+  const WEAPON_SEX = { archery: 'either', muzzleloader: 'bull', rifle: 'bull' };
   const oddsCache = {};
 
   const odds = c => (me.residency === 'nr' ? c.odds_nr : c.odds_res);
@@ -118,6 +129,10 @@ function hmPlanPanel() {
     </div>`;
   }
 
+  function setSex(v) {
+    el.querySelectorAll('#plSex button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  }
+
   function render() {
     if (!DATA) return;
     const sex = el.querySelector('#plSex button.on')?.dataset.v || 'bull';
@@ -127,21 +142,28 @@ function hmPlanPanel() {
     const rows = DATA.codes.filter(c =>
       c.weapon === me.weapon && c.sex === sex &&
       (showPlo || c.cls !== 'plo') && (showOtc || !c.otc));
-    rows.forEach(c => { c._score = oddsAt(c) * c.success_lb; });
+    rows.forEach(c => {
+      c._score = oddsAt(c) * c.success_lb;                 // expected outcome
+      // Access is a rank multiplier only: a 40%-success unit that is 2% public
+      // is not a place you can hunt, so it must not lead the list. The number
+      // shown in the row stays the honest expected probability.
+      c._fit = c._score * Math.min(1, (c.public_pct || 0) / 40);
+    });
 
-    const now = rows.filter(c => oddsAt(c) >= 0.4).sort((a, b) => b._score - a._score);
+    const now = rows.filter(c => oddsAt(c) >= 0.4).sort((a, b) => b._fit - a._fit);
     const soon = rows.filter(c => oddsAt(c) < 0.4 && need(c) <= me.points + 2 && need(c) < 12)
-      .sort((a, b) => (need(a) - need(b)) || (b._score - a._score));
+      .sort((a, b) => (need(a) - need(b)) || (b._fit - a._fit));
     const later = rows.filter(c => need(c) > me.points + 2 && need(c) < 12 && oddsAt(c) < 0.4)
       .sort((a, b) => (need(a) - need(b)) || (b.success - a.success));
 
     const best = now[0];
     $('#plSum').innerHTML =
       `<b>${me.points}</b> elk point${me.points === 1 ? '' : 's'} · ` +
-      `${me.residency === 'nr' ? 'non-resident' : 'Colorado resident'} · ${me.weapon}<br>` +
+      `${me.residency === 'nr' ? 'non-resident' : 'Colorado resident'} · <b>${me.weapon === 'muzzleloader' ? 'muzzleloader' : me.weapon}</b><br>` +
       `<span>${now.length} ${sex} codes you can draw this year` +
-      (best ? `. Best expected: <b>${Math.round(best._score * 100)}%</b> — unit ${best.unit}, ` +
-        `${PL_SEASON[best.season]}, ${Math.round(best.success * 100)}% success on ${best.hunters} hunters</span>` : '') +
+      (best ? `. Best fit: <b>unit ${best.unit}</b>, ${PL_SEASON[best.season]} — ` +
+        `${Math.round(best.success * 100)}% success on ${best.hunters} hunters, ` +
+        `${Math.round(best.public_pct)}% public, ${Math.round(best._score * 100)}% expected</span>` : '') +
       `<br><span class="pl-hint">Tap any row for the evidence behind it.</span>`;
 
     const html = [];
@@ -199,14 +221,31 @@ function hmPlanPanel() {
       if (pts) {
         me.points = (pts.balances && pts.balances.elk) || 0;
         me.residency = pts.profile?.residency || 'res';
-        me.weapon = pts.profile?.weapon || 'rifle';
       }
+      me.weapon = localStorage.getItem('hm-plan-weapon') || 'archery';
+      $('#plWeapon').querySelectorAll('button').forEach(b =>
+        b.classList.toggle('on', b.dataset.v === me.weapon));
+      $('#plOtc').checked = me.weapon === 'archery';
+      setSex(WEAPON_SEX[me.weapon] || 'bull');
       render();
     } catch (e) {
       $('#plSum').textContent = 'Could not load draw odds.';
     }
   }
 
+  el.querySelectorAll('#plWeapon button').forEach(b => b.addEventListener('click', () => {
+    el.querySelectorAll('#plWeapon button').forEach(x => x.classList.toggle('on', x === b));
+    me.weapon = b.dataset.v;
+    localStorage.setItem('hm-plan-weapon', me.weapon);
+    $('#plOtc').checked = me.weapon === 'archery';   // OTC is the archery norm
+    setSex(WEAPON_SEX[me.weapon] || 'bull');
+    // keep the profile in step so the Setup card and the Plan agree
+    fetch('/api/profile/prefs', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weapon: me.weapon, residency: me.residency }),
+    }).catch(() => {});
+    render();
+  }));
   el.querySelectorAll('#plSex button').forEach(b => b.addEventListener('click', () => {
     el.querySelectorAll('#plSex button').forEach(x => x.classList.toggle('on', x === b));
     render();

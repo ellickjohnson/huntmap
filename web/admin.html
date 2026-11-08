@@ -83,6 +83,9 @@
   .msg.ok{ display:block; color:var(--ok); border-color:color-mix(in srgb, var(--ok) 40%, transparent); background:color-mix(in srgb, var(--ok) 9%, transparent); }
 
   /* ---------- table ---------- */
+  /* the users table is wider than a phone; scroll it rather than the page */
+  .tbl-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .tbl-scroll table{ min-width:560px; }
   table{ width:100%; border-collapse:collapse; font-size:12.5px; }
   thead th{
     text-align:left; font-family:var(--f-mono); font-size:8.5px; letter-spacing:.13em; text-transform:uppercase;
@@ -132,6 +135,7 @@
     thead th{ top:54px; }
     tbody td, thead th{ padding:8px 7px; }
     td:nth-child(2), th:nth-child(2){ display:none; }
+    td:nth-child(5), th:nth-child(5){ display:none; }
   }
 </style>
 </head>
@@ -215,10 +219,12 @@
       <h2>Users</h2>
       <span class="muted" id="userCount"></span>
     </div>
-    <table>
-      <thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead>
-      <tbody id="userRows"></tbody>
-    </table>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody id="userRows"></tbody>
+      </table>
+    </div>
     <div class="card-body" style="padding-top:0"><div class="msg" id="userMsg"></div></div>
   </section>
 </div>
