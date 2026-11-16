@@ -417,8 +417,21 @@ select{ appearance:none; cursor:pointer; padding-right:26px; }
   background:linear-gradient(90deg, var(--heat-1), var(--heat-2), var(--heat-3), var(--heat-4), var(--heat-5));
   border:1px solid var(--line);
 }
-#slopeLegend{ font-family:var(--f-mono); font-size:9px; color:var(--txt3); }
-#slopeLegend .sw{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:-1px; }
+/* slope + aspect legends: both are appended to <body> at runtime, so they need
+   to be positioned explicitly or they land in normal flow behind the map */
+#slopeLegend, #aspectLegend{
+  position:fixed; left:calc(var(--rail-w) + 14px); bottom:14px; z-index:9;
+  display:none; align-items:center; gap:6px 11px; flex-wrap:wrap;
+  max-width:min(420px, 60vw);
+  padding:7px 10px; border:1px solid var(--line); border-radius:var(--r-sm);
+  background:var(--panel); box-shadow:var(--shadow-pop);
+  font-family:var(--f-mono); font-size:9px; color:var(--txt3);
+  letter-spacing:.03em;
+}
+#slopeLegend .sw, #aspectLegend .sw{
+  display:inline-block; width:10px; height:10px; border-radius:2px;
+  margin-right:4px; vertical-align:-1px;
+}
 
 /* ---------- 9. DETAIL PANEL ---------- */
 .detail{
@@ -825,6 +838,10 @@ html.theming, html.theming *, html.theming *::before, html.theming *::after{ tra
   #measureBar{ left:8px; right:8px; bottom:calc(var(--bar-h) + 6px + var(--safe-b)); justify-content:space-between; flex-wrap:wrap; }
   #measurePanel{ left:8px; right:8px; width:auto; top:auto; bottom:calc(var(--bar-h) + var(--safe-b)); }
   #toastWrap{ bottom:calc(var(--bar-h) + 14px + var(--safe-b)); }
+  #slopeLegend, #aspectLegend{
+    left:10px; right:10px; max-width:none;
+    bottom:calc(var(--bar-h) + 8px + var(--safe-b));
+  }
 }
 
 /* ---------- 18. MARKER ROWS + POPUP KIND ---------- */

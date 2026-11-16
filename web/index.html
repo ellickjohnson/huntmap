@@ -141,6 +141,7 @@
       <div class="toggles">
         <span class="chip" id="terrainChip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-terrain"/></svg>3D terrain</span>
         <span class="chip" id="slopeChip" title="Slope-angle shading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-slope"/></svg>Slope</span>
+        <span class="chip" id="aspectChip" title="Aspect shading: which way the slope faces"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compass"/></svg>Aspect</span>
         <span class="chip" id="measureChip" title="Click-to-draw measuring line with distance + elevation profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-ruler"/></svg>Measure</span>
         <span class="chip" id="parcelChip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-parcels"/></svg>Parcels</span>
         <span class="chip" id="trailsChip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-trail"/></svg>Trails</span>
@@ -799,7 +800,7 @@ const BUILDERS = {
   },
   railLayers: body => {
     const row1 = document.createElement('div'); row1.className = 'toggles';
-    ['terrainChip','parcelChip','trailsChip','burnsChip','slopeChip','measureChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
+    ['terrainChip','parcelChip','trailsChip','burnsChip','slopeChip','aspectChip','measureChip'].forEach(id => { const el = document.getElementById(id); if (el) row1.appendChild(el); });
     const row2 = document.createElement('div'); row2.className = 'toggles';
     ['hotspotChip','landChip','contourChip'].forEach(id => { const el = document.getElementById(id); if (el) row2.appendChild(el); });
     body.appendChild(row1); body.appendChild(row2);
@@ -2437,6 +2438,219 @@ slopeChip.addEventListener('click', () => {
 // zoom gate + basemap switch survival: style.load hook below re-runs this after setStyle wipes
 map.on('moveend', applySlopeGate);
 applySlopeGate();
+
+// ---------------- aspect / north-facing shading ----------------
+/* Same terrain pipeline as slope: fetch the terrarium DEM tile, derive the
+   downslope azimuth per pixel, and paint a diverging blue (north-facing,
+   shaded, holds moisture and elk) to rust (south-facing, sun, early green-up).
+   Aspect answers a different question than slope: two benches at the same
+   angle are not the same place. */
+const ASPECT_MIN_ZOOM = 11;
+const ASPECT_FLAT_DEG = 3;          // flat ground has no aspect - leave it clear
+const ASPECT_STOPS = [              // azimuth (deg clockwise from N) -> rgba
+  [0,   [59, 130, 246, 255]],       // N   cold blue
+  [45,  [94, 164, 214, 150]],       // NE
+  [90,  [120, 160, 140, 55]],       // E   neutral
+  [135, [169, 138, 62, 150]],       // SE  ochre
+  [180, [206, 88, 48, 255]],        // S   rust
+  [225, [169, 138, 62, 150]],       // SW
+  [270, [120, 160, 140, 55]],       // W   neutral
+  [315, [94, 164, 214, 150]],       // NW
+  [360, [59, 130, 246, 255]],       // N
+];
+let aspectOn = localStorage.getItem('hm-aspect') === '1';
+let _aspProtoRegistered = false;
+let _aspWarned = false;
+const _aspCache = new Map();        // 'z/x/y' -> Uint8Array png, LRU cap 200
+
+const aspectChip = document.getElementById('aspectChip');
+const aspectLegend = document.createElement('div');
+aspectLegend.id = 'aspectLegend';
+aspectLegend.innerHTML =
+  '<span class="sw" style="background:#3b82f6"></span><span>north-facing</span>' +
+  '<span class="sw" style="background:#ce5830"></span><span>south-facing</span>' +
+  '<span class="sw" style="background:#78a08c"></span><span>east / west</span>';
+document.body.appendChild(aspectLegend);
+
+function aspectRgba(deg) {
+  for (let i = 0; i < ASPECT_STOPS.length - 1; i++) {
+    const a = ASPECT_STOPS[i], b = ASPECT_STOPS[i + 1];
+    if (deg >= a[0] && deg <= b[0]) {
+      const t = (deg - a[0]) / (b[0] - a[0] || 1);
+      return [0, 1, 2, 3].map(k => Math.round(a[1][k] + (b[1][k] - a[1][k]) * t));
+    }
+  }
+  return [0, 0, 0, 0];
+}
+function aspCacheGet(k) {
+  const v = _aspCache.get(k);
+  if (v !== undefined) { _aspCache.delete(k); _aspCache.set(k, v); }
+  return v;
+}
+function aspCachePut(k, bytes) {
+  _aspCache.set(k, bytes);
+  while (_aspCache.size > 200) _aspCache.delete(_aspCache.keys().next().value);
+}
+async function aspectTileHandler(params, abortArg) {
+  const key = params.url.slice('aspect://'.length);
+  const cached = aspCacheGet(key);
+  if (cached) return { data: cached.slice().buffer };
+  const [z, x, y] = key.split('/').map(Number);
+  /* Not wired to MapLibre's abort signal on purpose: the map cancels tiles the moment
+     the view shifts, and a cold DEM fetch loses that race — every tile came back
+     transparent with "The user aborted a request." Let it finish; MapLibre discards
+     the result if it no longer needs it, and the HTTP cache makes the retry free. */
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 15000);
+  try {
+    const url = 'https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/' + z + '/' + x + '/' + y + '.png';
+    const resp = await fetch(url, { signal: ctl.signal });
+    if (!resp.ok) throw new Error('terrain tile HTTP ' + resp.status);
+    const ctx = await slopeTileCtx(await resp.blob());
+    const n = Math.pow(2, z);
+    const latC = Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 0.5) / n))) * 180 / Math.PI;
+    const mpx = 156543.03392 * Math.cos(latC * Math.PI / 180) / n;
+    const src = ctx.getImageData(0, 0, 256, 256);
+    const elev = new Float32Array(256 * 256);
+    for (let i = 0; i < 256 * 256; i++) {
+      const p = i * 4;
+      elev[i] = src.data[p] * 256 + src.data[p + 1] + src.data[p + 2] / 256 - 32768;
+    }
+    const out = ctx.createImageData(256, 256);
+    for (let ty = 0; ty < 256; ty++) {
+      const yUp = ty > 0 ? ty - 1 : 0, yDn = ty < 255 ? ty + 1 : 255;
+      const tyO = ty * 256, yUO = yUp * 256, yDO = yDn * 256;
+      for (let tx = 0; tx < 256; tx++) {
+        const xL = tx > 0 ? tx - 1 : 0, xR = tx < 255 ? tx + 1 : 255;
+        const dzdx = (elev[tyO + xL] - elev[tyO + xR]) / (2 * mpx);
+        const dzdy = (elev[yUO + tx] - elev[yDO + tx]) / (2 * mpx);
+        const o = (tyO + tx) * 4;
+        const deg = Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy)) * 180 / Math.PI;
+        if (deg < ASPECT_FLAT_DEG) continue;          // flat: no aspect to show
+        // downslope vector is (dzdx, dzdy) in tile space (y up = north)
+        const az = (Math.atan2(dzdx, dzdy) * 180 / Math.PI + 360) % 360;
+        const c = aspectRgba(az);
+        out.data[o] = c[0]; out.data[o + 1] = c[1]; out.data[o + 2] = c[2]; out.data[o + 3] = c[3];
+      }
+    }
+    ctx.putImageData(out, 0, 0);
+    const cvv = ctx.canvas;
+    const blob = cvv.convertToBlob ? await cvv.convertToBlob({ type: 'image/png' })
+      : await new Promise(res => cvv.toBlob(res, 'image/png'));
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    aspCachePut(key, bytes);
+    return { data: bytes.slice().buffer };
+  } catch (err) {
+    if (!_aspWarned) { console.warn('aspect overlay: tile pipeline failed, further warnings suppressed', err); _aspWarned = true; }
+    try { return { data: await emptySlopeTile() }; } catch (e2) { throw err; }
+  } finally { clearTimeout(timer); }
+}
+function registerAspectProtocol() {
+  if (_aspProtoRegistered || typeof maplibregl.addProtocol !== 'function') return;
+  try { maplibregl.addProtocol('aspect', aspectTileHandler); _aspProtoRegistered = true; }
+  catch (err) { if (!_aspWarned) { console.warn('aspect overlay: protocol registration failed', err); _aspWarned = true; } }
+}
+registerAspectProtocol();
+function aspectGateOk() { return map.getZoom() >= ASPECT_MIN_ZOOM; }
+/* Terrain overlays must sit ABOVE the GMU fills, otherwise the unit colours paint
+   over them and both slope/aspect/relief look like they never loaded. Add on top,
+   then lift the things that belong above terrain back to the top. */
+function restackAboveTerrain() {
+  // moveLayer(id) sends a layer to the TOP, so apply in bottom-to-top order to end
+  // with: gmu-fill -> relief -> aspect -> outline -> tracks -> markers
+  ['gmu-fill', 'relief-hillshade', 'aspect-classes', 'gmu-outline',
+   'tracks-casing', 'tracks-line', 'markers-dots'].forEach(id => {
+    try { if (map.getLayer(id)) map.moveLayer(id); } catch (e) { /* style race */ }
+  });
+}
+function ensureAspectLayer() {
+  if (!aspectOn || !aspectGateOk()) return;
+  if (!map.isStyleLoaded()) { map.once('idle', ensureAspectLayer); return; }
+  if (!map.getSource('aspect-dem')) {
+    map.addSource('aspect-dem', { type: 'raster', tiles: ['aspect://{z}/{x}/{y}'], tileSize: 256, minzoom: 11, maxzoom: 15 });
+  }
+  if (!map.getLayer('aspect-classes')) {
+    map.addLayer({
+      id: 'aspect-classes', type: 'raster', source: 'aspect-dem', minzoom: 11,
+      paint: { 'raster-opacity': 0.55, 'raster-resampling': 'nearest' },
+    });
+    restackAboveTerrain();
+  }
+  updateAspectUI();
+}
+function applyAspectGate() {
+  const ok = aspectGateOk();
+  if (aspectOn && ok) ensureAspectLayer();
+  else if (map.getLayer('aspect-classes')) map.removeLayer('aspect-classes');
+  updateAspectUI();
+}
+function updateAspectUI() {
+  if (!aspectChip) return;
+  const ok = aspectGateOk();
+  aspectChip.classList.toggle('on', aspectOn);
+  aspectChip.classList.toggle('dim', aspectOn && !ok);
+  aspectChip.title = ok ? 'Aspect shading: which way the slope faces' : 'Zoom in to level 11+ for aspect shading';
+  aspectLegend.style.display = (aspectOn && ok && map.getLayer('aspect-classes')) ? 'flex' : 'none';
+  // slope and aspect share the same screen real estate - showing both is mush
+  if (aspectOn && ok && slopeOn) {
+    aspectChip.title = 'Aspect shading (turn Slope off to see this cleanly)';
+  }
+}
+if (aspectChip) {
+  aspectChip.addEventListener('click', () => {
+    aspectOn = !aspectOn;
+    localStorage.setItem('hm-aspect', aspectOn ? '1' : '0');
+    if (aspectOn && slopeOn) {
+      slopeOn = false;                                  // one terrain overlay at a time
+      document.getElementById('slopeChip').classList.remove('on');
+      localStorage.setItem('hm-slope', '0');
+      applySlopeGate();
+    }
+    applyAspectGate();
+  });
+}
+map.on('moveend', applyAspectGate);
+applyAspectGate();
+
+// ---------------- relief under the dark basemap ----------------
+/* The dark style ships flat - no hillshade at all - which is the one place the
+   default view loses terrain readability. Same terrarium DEM, drawn above the
+   GMU fills at low opacity so it adds form without dirtying the data colours. */
+function currentBase() {
+  const b = document.querySelector('#baseSeg button.active');
+  return b ? b.dataset.b : (localStorage.getItem('hm-base') || 'dark');
+}
+function ensureRelief() {
+  try {
+    const want = currentBase() === 'dark';
+    if (!want) {
+      if (map.getLayer('relief-hillshade')) map.removeLayer('relief-hillshade');
+      if (map.getSource('relief-dem')) map.removeSource('relief-dem');
+      return;
+    }
+    if (!map.getSource('relief-dem')) {
+      map.addSource('relief-dem', {
+        type: 'raster-dem', tileSize: 256, maxzoom: 15,
+        tiles: ['https://elevation-tiles-prod.s3.amazonaws.com/v2/terrarium/{z}/{x}/{y}.png'],
+      });
+    }
+    if (!map.getLayer('relief-hillshade')) {
+      map.addLayer({
+        id: 'relief-hillshade', type: 'hillshade', source: 'relief-dem', minzoom: 8,
+        paint: {
+          // measured A/B: 0.42 shadow dropped mean map brightness 59 -> 33, which reads
+          // as mud on a dark basemap. This keeps the relief but not the gloom.
+          'hillshade-exaggeration': 0.52,
+          'hillshade-shadow-color': 'rgba(0,0,0,0.28)',
+          'hillshade-highlight-color': 'rgba(255,255,255,0.12)',
+        },
+      });
+    }
+    restackAboveTerrain();
+  } catch (e) { /* style mid-swap: style.load re-runs this */ }
+}
+window.ensureRelief = ensureRelief;
+ensureRelief();
 // ---------------- search (OSM Nominatim, free) ----------------
 const searchBox = document.getElementById('searchBox');
 const searchResults = document.getElementById('searchResults');
@@ -2530,6 +2744,8 @@ map.on('style.load', () => {
   updateParcels(); if (trailsOn) refetchToggle('trails'); if (burnsOn) refetchToggle('burns');
   updateHotspotLayer();
   applySlopeGate(); // basemap switch wiped slope source/layer — re-add if toggle on + zoom gate ok
+  applyAspectGate();
+  ensureRelief();   // dark basemap relief
   if (window.applyMeasureVisibility) window.applyMeasureVisibility(); // same re-ensure for the measure source/layer
   updateTrackLayer();   // imported GPX polylines
 });
